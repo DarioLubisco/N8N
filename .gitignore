@@ -1,0 +1,6 @@
+# Ignore sensitive data
+synapse_credentials.md
+*.png
+tmp/
+scratch/
+omv_config.xml

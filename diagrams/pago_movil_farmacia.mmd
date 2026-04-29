@@ -1,0 +1,18 @@
+flowchart TD
+    %% Nodes
+    A(["Webhook Trigger\n(POST pago-movil)"])
+    B["Procesamiento JS\n(Extracción Regex)"]
+    C["Notificación Telegram\n(Markdown)"]
+
+    %% Connections
+    A --> B
+    B --> C
+
+    %% Styling
+    classDef trigger fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef process fill:#fff9c4,stroke:#fbc02d,stroke-width:1px;
+    classDef output fill:#c8e6c9,stroke:#2e7d32,stroke-width:1px;
+
+    class A trigger
+    class B process
+    class C output

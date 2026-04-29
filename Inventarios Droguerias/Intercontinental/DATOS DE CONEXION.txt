@@ -1,0 +1,74 @@
+*DATOS DE CONEXION*
+
+INVERSIONES GASANROD C.A
+
+Dirección FTP: *interca.proteoerp.org:58021*
+*Usuario*: C02753
+*Contraseña*: YMLZ>Lch
+
+NOTA: El Inventario muestra el precio con el descuento del cliente aplicado.
+
+RUTAS DE ACCESO
+
+Especificaciones:
+
+Directorios y rutas de acceso:
+
+/Inventario.txt
+Pedidos: /Pedidos
+Facturas: /Facturas
+
+--- ESTRUCTURA ---
+
+TABLE inventario
+(
+    Codigo       VARCHAR(15),
+    CodBarras    VARCHAR(15),
+    Descripcion  VARCHAR(45),
+    Vence        DATE,
+    Precio       DECIMAL(25,2),
+    Descuento    DECIMAL(33,2),
+    PrecioFinal  DECIMAL(25,2),
+    Existencia   DECIMAL(12,0),
+    Marca        VARCHAR(30),
+    montofactura VARCHAR(10)
+)
+
+TABLE factura
+(
+    Renglon (R)    VARCHAR(1), //
+    No_Factura  VARCHAR(9),
+    No_Fiscal   VARCHAR(9),
+    Codigo      CHAR(15),
+    Barras      VARCHAR(15),
+    Descripcion VARCHAR(40),
+    Cantidad    DECIMAL(12,3),
+    Neto        DECIMAL(19,2),
+    PrecioSD     DECIMAL(19,2), //precio unitario sin Descuento
+    Descuentos  DECIMAL(19,2),
+    PrecionCD   DECIMAL(19,2), //Precio unitario con Descuento
+    lote        VARCHAR(12),
+    fechalote   DATE,
+    TasaIVA     DECIMAL(6,2),
+
+    Renglon (E)    VARCHAR(1), //
+    No_Factura     VARCHAR(9),
+    No_Fiscal      VARCHAR(9),
+    FechaEmi       DATE,
+    tasabcv        DECIMAL(25,2),
+    Totalunidades  DECIMAL(25),
+    Neto           DECIMAL(19,2),
+    Des.Lineal     DECIMAL(19,2),
+    Mon.des        DECIMAL(19,2),
+    Desc.eso       DECIMAL(19,2),
+    SICM           DECIMAL(19,2),
+    totalIVA       DECIMAL(6,2)
+)
+
+TABLE pedido
+(
+    Codigo       VARCHAR(15),
+    Descripcion  VARCHAR(45),
+    Cantidad     DECIMAL(12,3),
+    Cod_cli      VARCHAR(15)
+)

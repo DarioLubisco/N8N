@@ -1,0 +1,144 @@
+{
+  "name": "Router AI Modificado (Etiquetas y Eventos)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "omnichannel-router",
+        "options": {}
+      },
+      "id": "wh-1",
+      "name": "Chatwoot Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.body.event}}",
+              "value2": "conversation_status_changed"
+            },
+            {
+              "value1": "={{$json.body.status}}",
+              "value2": "resolved"
+            }
+          ]
+        }
+      },
+      "id": "if-1",
+      "name": "Is Resolved Event?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "ID_DEL_ARCHIVADOR"
+      },
+      "id": "ex-1",
+      "name": "Call Archivador",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.messages[0].content }}",
+        "options": {
+          "systemMessage": "You are a helpful assistant for Farmacia Americana. RESPONDE y ASIGNA una urgencia. Tu respuesta debe ser un JSON: {\"reply\": \"...\", \"timeout_tag\": \"timeout:fast\" | \"timeout:medium\" | \"timeout:slow\" | \"timeout:pre_pedido\"}"
+        }
+      },
+      "id": "agent-1",
+      "name": "Omnichannel Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        400,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://10.147.18.204:3000/api/v1/accounts/1/conversations/{{$json.body.conversation.id}}/labels",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"labels\": [\"{{$json.output.timeout_tag}}\"]\n}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "YOUR_CHATWOOT_TOKEN"
+            }
+          ]
+        }
+      },
+      "id": "http-3",
+      "name": "Set Label in Chatwoot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        600,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Chatwoot Webhook": {
+      "main": [
+        [
+          {
+            "node": "Is Resolved Event?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Resolved Event?": {
+      "main": [
+        [
+          {
+            "node": "Call Archivador",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Omnichannel Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Omnichannel Agent": {
+      "main": [
+        [
+          {
+            "node": "Set Label in Chatwoot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

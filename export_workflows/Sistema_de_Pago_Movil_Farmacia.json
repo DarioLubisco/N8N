@@ -1,0 +1,108 @@
+{
+  "name": "Sistema de Pago Móvil - Farmacia",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pago-movil",
+        "options": {}
+      },
+      "id": "b2d10dd0-8a26-4c0e-a54d-0d65ea3ec702",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        304
+      ],
+      "webhookId": "db50e327-3ed4-4053-8fa3-d152ea6b54f8"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const text = item.json.body?.text || \"\";\n  \n  // Buscar monto: Ej \"Bs. 500,00\" o \"500.50\"\n  let monto = \"0.00\";\n  const montoMatch = text.match(/(?:Bs\\.?\\s*|monto\\s*|Bs\\.\\s*)?(\\d{1,3}(?:[.,]\\d{3})*(?:[.,]\\d{1,2})?)/i);\n  if (montoMatch) {\n    monto = montoMatch[1].replace(',', '.'); // Normalizar decimales a punto\n  }\n\n  // Buscar Referencia: Busca explícitamente \"Ref:\", \"Referencia:\" etc.\n  let referencia = \"Desconocida\";\n  const refMatch = text.match(/(?:Ref(?:erencia)?[:\\s]*)(\\d{6,12})/i);\n  if (refMatch) {\n    referencia = refMatch[1];\n  } else {\n    // Intentar buscar un conjunto de dígitos largos como respaldo al final o en algún lugar\n    const fallbackRef = text.match(/\\b\\d{6,12}\\b/g);\n    if(fallbackRef) {\n       // Buscar el primer número largo que no empiece con 04 (teléfono)\n       const nonPhone = fallbackRef.find(r => !r.startsWith('04'));\n       if(nonPhone) referencia = nonPhone;\n       else if(fallbackRef.length > 0) referencia = fallbackRef[fallbackRef.length - 1]; // ultimo numero largo\n    }\n  }\n  \n  // Identificar Banco\n  let banco = \"Desconocido\";\n  const textLower = text.toLowerCase();\n  if (textLower.includes(\"bdv\") || textLower.includes(\"venezuela\") || textLower.includes(\"pagomovilbdv\")) banco = \"BDV\";\n  else if (textLower.includes(\"banesco\")) banco = \"Banesco\";\n  else if (textLower.includes(\"mercantil\")) banco = \"Mercantil\";\n  else if (textLower.includes(\"provincial\") || textLower.includes(\"bbva\")) banco = \"Provincial\";\n  else if (textLower.includes(\"bnc\")) banco = \"BNC\";\n  else if (textLower.includes(\"bancamiga\")) banco = \"Bancamiga\";\n\n  // Retornar la estructura deseada\n  results.push({\n    json: {\n      banco: banco,\n      monto: parseFloat(monto) || 0,\n      referencia: referencia,\n      texto_original: text\n    }\n  });\n}\nreturn results;"},
+      "id": "bbc252e5-846e-483f-bff1-4347a64f37f5",
+      "name": "Procesamiento JS",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "table": "[Procurement].[CajaPagoMovil]",
+        "columns": "banco, monto, referencia, texto_original"
+      },
+      "id": "05d50d3a-3bd8-49e1-bfbd-610b6e49dc1d",
+      "name": "Microsoft SQL",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "-5130651596",
+        "text": "=✅ *PAGO MÓVIL CONFIRMADO* \n\n 🏛️ *Banco:* {{ $json.banco }} \n 💰 *Monto:* Bs. {{ $json.monto }} \n 🔢 *Ref:* {{ $json.referencia }} \n 📝 *Original:* {{ $json.texto_original }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "342a943b-9c0a-4157-89f4-024ffde74299",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        704,
+        304
+      ],
+      "webhookId": "986f99b7-1e7c-423a-a2b5-3982a6a6110d"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Procesamiento JS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesamiento JS": {
+      "main": [
+        [
+          {
+            "node": "Microsoft SQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Microsoft SQL": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  }
+}
