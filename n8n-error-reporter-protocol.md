@@ -38,6 +38,14 @@ Cuando diseñes o mantengas el flujo de Errores Global, asegúrate de implementa
   - Enviar notificaciones de infraestructura crítica al **Bot de Notificación de Errores** en Telegram (documentado en `synapse_credentials.md`).
   - Para errores de procesos de negocio menos críticos, considerar notificaciones agrupadas o correos electrónicos para no saturar los canales de mensería en tiempo real.
 
+## ⚖️ Protocolo de Prioridad de Herramientas (MANDATORIO)
+
+Cualquier interacción técnica con la instancia de n8n DEBE seguir estrictamente esta jerarquía:
+
+1.  **Prioridad 1: `n8n-arquitectura` (MCP)**: Uso mandatorio para leer, crear, buscar o actualizar flujos. Es la única vía que garantiza la coherencia con el SDK y la persistencia correcta.
+2.  **Prioridad 2: `n8n-mcp` (MCP)**: Fallback secundario.
+3.  **Prioridad 3: Navegador (Subagent/Manual)**: Únicamente para configuraciones visuales que el MCP no soporte (Tags, Global Error Workflow settings) o por petición expresa del usuario.
+
 ## Instrucciones Operativas
 
 Al desarrollar nuevos flujos o modificar los existentes:
