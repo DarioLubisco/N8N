@@ -1,0 +1,119 @@
+Token de autenticacion 
+
+**Headers:**
+
+http
+Authorization: Bearer xiRcZ3LKR8PAg4Zd4U0ALzVvkVPNch3KSMA5igcXy6qRCZN3sVwjoAI5bnshjSyTAnSSlGh43u1YVHcW
+Content-Type: application/json
+
+
+POST https://apienterprise.cristmedicals.com/api/v1/pedidos 
+
+```json
+{
+  "fact_num": 1001,
+  "nombre":   "Empresa Ejemplo C.A.",
+  "rif":      "J-12345678-9",
+  "co_cli":   "CLI001",
+  "co_ven":   "VEN01",
+  "fec_emis": "2026-04-24",
+  "fec_venc": "2026-05-24",
+  "tasa":     36.50,
+  "moneda":   "USD",
+  "tot_bruto": 100.00,
+  "tot_neto":  116.00,
+  "iva":       16.00,
+  "renglones": [
+    {
+      "reng_num":  1,
+      "co_art":    "ART001",
+      "co_alma":   "ALM01",
+      "total_art": 2,
+      "prec_vta":  50.00,
+      "reng_neto": 100.00
+    }
+  ]
+}
+
+GET https://apienterprise.cristmedicals.com/api/v1/articulos
+Authorization: Bearer TU_TOKEN
+
+Query Parameters
+
+co_cli =  FAR01159
+
+
+### Respuesta Exitosa (200 OK)
+
+```json
+{
+  "co_cli": "FAR01442",
+  "total_en_esta_pagina": 58,
+  "articulos": [
+    {
+      "co_art": "AMP00100C",
+      "des_art": "9 VIT INFUSION MULTIVITAMINICA AMP I.V (DPT) FV. 05/2027",
+      "codigo_barra": "646824105066",
+      "unidad": "UND",
+      "precio_base": 17.44444,
+      "porc_descuento": 0,
+      "precio_con_descuento": 17.44,
+      "stock_por_region": [
+        {
+          "co_alma": "01",
+          "nombre": "Táchira",
+          "disponible": 421
+        },
+        {
+          "co_alma": "04",
+          "nombre": "Lara",
+          "disponible": 514
+        }
+      ]
+    }
+  ]
+}
+```
+
+POST https://apienterprise.cristmedicals.com/api/v1/facturas
+
+Query Parameters
+
+co_cli =  FAR01159
+
+
+fec_desde = 
+
+fec_hasta =
+
+```json
+{
+  "factura_1": {
+    "fact_num": "321503",
+    "fec_emis": "2026-02-05",
+    "cliente": "XXXXXXXXXX",
+    "rif": "XXXXXXXXXXXX",
+    "sub_total": 2338.88,
+    "descuento": 327.44,
+    "base16": 0.00,
+    "iva16": 0.00,
+    "exento": 2011.44,
+    "total_bruto": 2338.88,
+    "total_neto": 2011.44,
+    "tasa": 378.4582,
+    "articulos": {
+      "renglon_1": {
+        "sku": "021281892214",
+        "descrip": "GLIBENCLAMIDA 5MG CJ X 30 TABL",
+        "cant": 2,
+        "precio": 1169.44,
+        "desc_monto": 0.00,
+        "neto_und": 1169.44,
+        "total": 2338.88
+      }
+    },
+    "fin_factura": true
+  }
+}
+```
+

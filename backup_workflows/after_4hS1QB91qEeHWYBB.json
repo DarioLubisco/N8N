@@ -1,0 +1,614 @@
+{
+  "updatedAt": "2026-05-05T23:56:02.817Z",
+  "createdAt": "2026-04-29T23:11:00.963Z",
+  "id": "4hS1QB91qEeHWYBB",
+  "name": "[PROD] Monitor de Infraestructura Global",
+  "description": "Monitor de conectividad MSSQL, APIs e Internet desde el servidor Debian. Alerta vía sistema centralizado de errores.",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "564f4318-2946-400f-986a-f9248c8ae948",
+      "name": "Every 30 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "mKIVzHJ0ZbePTJMt",
+        "options": {}
+      },
+      "id": "ab60fe1d-9e7e-49be-a66a-1e3bfc6a5162",
+      "name": "Get Network IPs",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        304,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 🛡️ Monitor Global de Infraestructura (Desde Debian)\n- **SQL Server**: Verifica conexión al motor de BBDD.\n- **Internet**: Valida salida HTTP externa.\n- **APIs Locales**: Hace ping a las APIs en la PC de Dario obteniendo la IP dinámicamente del `[UTILITY] Network Router`.\n- **Frecuencia**: Cada 30 minutos.\n- **Alertas**: Si alguno falla, el Error Handler global enviará Telegram.",
+        "height": 400,
+        "width": 950
+      },
+      "id": "44e538d6-0731-4850-ae87-ca3b183a5718",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        80,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1 as health_check"
+      },
+      "id": "2ab1e5be-a640-432d-a1f5-9add6f31abe6",
+      "name": "Check SQL Connection",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        160
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://8.8.8.8",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "7f3d5d73-920d-44e8-8fb6-693310d896de",
+      "name": "Check Internet (Google)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        560,
+        464
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst pc_ip = $input.item.json.PC_DARIO;\nreturn [\n  { json: { url: \"http://\" + pc_ip + \":8000/docs\", name: \"PedidoMoleculas PROD\" } },\n  { json: { url: \"http://\" + pc_ip + \":8080/docs\", name: \"CuentasPorPagar PROD\" } }\n];"
+      },
+      "id": "760ee96a-fd87-486f-a24a-a5e0bc608606",
+      "name": "Target APIs (PC Local)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "ec53de67-336b-49b9-8e4a-15487c9bc881",
+      "name": "Check Internal APIs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        752,
+        304
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3fb34e17-e265-4d7a-bb06-ca141b743fcc",
+              "leftValue": "=={{  $json.error }} }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        864,
+        352
+      ],
+      "id": "1dd1c332-8e7a-48a3-aadc-8ca3e1bb382d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "errorMessage": "=={{ `⚠️ ADVERTENCIA (2do Grado): API Interna Caída\n🖥️ Entidad Origen: Servidor Debian Webservices (IP ZeroTier: 10.147.18.204)\n🎯 Entidad Destino: PC de Dario (IP Dinámica)\n🔌 Servicio Afectado: ${$json.name}\n\n📝 Diagnóstico: No se pudo conectar a la API local de la estación de trabajo.\n🔍 Causas Probables: El servidor de desarrollo (FastAPI/Uvicorn) está detenido o la PC fue apagada.\n🛠️ Log Nativo (n8n): ${$json.error.message}` }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        256
+      ],
+      "id": "0650500f-ed10-4781-987e-ffe04d0dabb8",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f551c747-2844-4deb-9c22-b17dbca4ad97",
+              "leftValue": "=={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        688,
+        176
+      ],
+      "id": "a52ca67b-48f6-4967-8f3c-b846aae9824f",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "dff78da3-f336-4750-9b20-6eec7e453cb5",
+              "leftValue": "=={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        704,
+        480
+      ],
+      "id": "86425b5a-5920-4811-bf1c-f1597152a241",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "errorMessage": "=={{ `🚨 CRÍTICO (1er Grado): Fallo en la Base de Datos\n🖥️ Entidad Origen: Servidor Debian Webservices (IP ZeroTier: 10.147.18.204)\n🎯 Entidad Destino: Servidor Windows SRV-DC-AMC (IP LAN: 10.200.8.5)\n🔌 Servicio Afectado: MSSQL Server (Instancia: Saint)\n\n📝 Diagnóstico: El nodo falló al validar la conexión SQL.\n🔍 Causas Probables: El servicio MSSQL está detenido, la base de datos no acepta conexiones, o el túnel ZeroTier está caído.\n🛠️ Log Nativo (n8n): ${$json.error.message}` }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        800,
+        160
+      ],
+      "id": "ef640dc3-dea1-4156-8674-c2e340907425",
+      "name": "Stop and Error1"
+    },
+    {
+      "parameters": {
+        "errorMessage": "=={{ `🚨 CRÍTICO (1er Grado): Servicios Web (Internet) Caídos\n🖥️ Entidad Origen: Servidor Debian Webservices (IP ZeroTier: 10.147.18.204)\n🎯 Entidad Destino: Internet (Google DNS 8.8.8.8)\n🔌 Servicio Afectado: Conectividad Externa\n\n📝 Diagnóstico: El nodo no pudo hacer ping HTTP a Google.\n🔍 Causas Probables: El servidor Debian perdió conectividad a internet.\n🛠️ Log Nativo (n8n): ${$json.error.message}` }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        816,
+        464
+      ],
+      "id": "f11aa16b-242d-4a09-8f8e-c815cd67f47c",
+      "name": "Stop and Error2"
+    }
+  ],
+  "connections": {
+    "Every 30 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Get Network IPs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Network IPs": {
+      "main": [
+        [
+          {
+            "node": "Check SQL Connection",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Internet (Google)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Target APIs (PC Local)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Target APIs (PC Local)": {
+      "main": [
+        [
+          {
+            "node": "Check Internal APIs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check SQL Connection": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Internet (Google)": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Every 30 Minutes": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "d958a691-9db7-41b1-b1ca-c467fd06ea16",
+  "activeVersionId": "e60fd40a-559c-4282-9a63-cdd6fdbd8472",
+  "versionCounter": 56,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-04-29T23:11:00.963Z",
+      "createdAt": "2026-04-29T23:11:00.963Z",
+      "role": "workflow:owner",
+      "workflowId": "4hS1QB91qEeHWYBB",
+      "projectId": "229NyZp0afAhCtOe",
+      "project": {
+        "updatedAt": "2026-04-23T17:03:42.069Z",
+        "createdAt": "2026-04-23T15:48:09.202Z",
+        "id": "229NyZp0afAhCtOe",
+        "name": "Dario Lubisco <dario.lubisco@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "0826022f-c1e7-4bbb-9570-229133922b29"
+      }
+    }
+  ],
+  "tags": [],
+  "parentFolder": null,
+  "activeVersion": {
+    "updatedAt": "2026-04-29T23:50:09.577Z",
+    "createdAt": "2026-04-29T23:50:09.577Z",
+    "versionId": "e60fd40a-559c-4282-9a63-cdd6fdbd8472",
+    "workflowId": "4hS1QB91qEeHWYBB",
+    "nodes": [
+      {
+        "id": "564f4318-2946-400f-986a-f9248c8ae948",
+        "name": "Every 30 Minutes",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          100,
+          300
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 30
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "ab60fe1d-9e7e-49be-a66a-1e3bfc6a5162",
+        "name": "Get Network IPs",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1,
+        "position": [
+          300,
+          300
+        ],
+        "parameters": {
+          "workflowId": "mKIVzHJ0ZbePTJMt"
+        }
+      },
+      {
+        "id": "44e538d6-0731-4850-ae87-ca3b183a5718",
+        "name": "Sticky Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          80,
+          50
+        ],
+        "parameters": {
+          "content": "### 🛡️ Monitor Global de Infraestructura (Desde Debian)\n- **SQL Server**: Verifica conexión al motor de BBDD.\n- **Internet**: Valida salida HTTP externa.\n- **APIs Locales**: Hace ping a las APIs en la PC de Dario obteniendo la IP dinámicamente del `[UTILITY] Network Router`.\n- **Frecuencia**: Cada 30 minutos.\n- **Alertas**: Si alguno falla, el Error Handler global enviará Telegram.",
+          "height": 400,
+          "width": 950
+        }
+      },
+      {
+        "id": "2ab1e5be-a640-432d-a1f5-9add6f31abe6",
+        "name": "Check SQL Connection",
+        "type": "n8n-nodes-base.microsoftSql",
+        "typeVersion": 1.1,
+        "position": [
+          550,
+          150
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT 1 as health_check"
+        },
+        "credentials": {
+          "microsoftSql": {
+            "id": "oCKBzGZBl1xETeZa",
+            "name": "[PROD] MSSQL - Saint Enterprise"
+          }
+        }
+      },
+      {
+        "id": "7f3d5d73-920d-44e8-8fb6-693310d896de",
+        "name": "Check Internet (Google)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1,
+        "position": [
+          550,
+          450
+        ],
+        "parameters": {
+          "url": "https://8.8.8.8",
+          "options": {
+            "timeout": 5000
+          }
+        }
+      },
+      {
+        "id": "760ee96a-fd87-486f-a24a-a5e0bc608606",
+        "name": "Target APIs (PC Local)",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          550,
+          300
+        ],
+        "parameters": {
+          "jsCode": "\nconst pc_ip = $input.item.json.PC_DARIO;\nreturn [\n  { json: { url: \"http://\" + pc_ip + \":8000/docs\", name: \"PedidoMoleculas PROD\" } },\n  { json: { url: \"http://\" + pc_ip + \":8080/docs\", name: \"CuentasPorPagar PROD\" } }\n];"
+        }
+      },
+      {
+        "id": "ec53de67-336b-49b9-8e4a-15487c9bc881",
+        "name": "Check Internal APIs",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1,
+        "position": [
+          750,
+          300
+        ],
+        "parameters": {
+          "url": "={{ $json.url }}",
+          "options": {
+            "timeout": 5000
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Every 30 Minutes": {
+        "main": [
+          [
+            {
+              "node": "Get Network IPs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Network IPs": {
+        "main": [
+          [
+            {
+              "node": "Check SQL Connection",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Check Internet (Google)",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Target APIs (PC Local)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Target APIs (PC Local)": {
+        "main": [
+          [
+            {
+              "node": "Check Internal APIs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Dario Lubisco",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-04-29T23:50:13.962Z",
+        "id": 74,
+        "workflowId": "4hS1QB91qEeHWYBB",
+        "versionId": "e60fd40a-559c-4282-9a63-cdd6fdbd8472",
+        "event": "activated",
+        "userId": "0826022f-c1e7-4bbb-9570-229133922b29"
+      }
+    ]
+  },
+  "scopes": [
+    "workflow:create",
+    "workflow:delete",
+    "workflow:execute",
+    "workflow:execute-chat",
+    "workflow:list",
+    "workflow:move",
+    "workflow:publish",
+    "workflow:read",
+    "workflow:share",
+    "workflow:unpublish",
+    "workflow:unshare",
+    "workflow:update",
+    "workflow:updateRedactionSetting"
+  ],
+  "checksum": "07d1c10cc0bf4e22d87148941be7ef75400b282d5e4a6f364a07d07caf62c321"
+}

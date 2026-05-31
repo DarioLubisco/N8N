@@ -17,13 +17,19 @@ try:
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect('10.147.18.204', username='root', password='Twinc3pt.2')
     
-    print("--- Tailscale ---")
-    execute(ssh, "tailscale status")
-    execute(ssh, "tailscale ip -4")
+    print("--- Subiendo Archivos ---")
+    sftp = ssh.open_sftp()
+    local_dir = r"C:\source\N8N\Importar Inventario Dronena"
+    remote_dir = "/opt/scripts/Dronena"
     
-    print("\n--- ZeroTier ---")
-    execute(ssh, "zerotier-cli status")
-    execute(ssh, "zerotier-cli listnetworks")
+    files = ["Imp_Inv_Dronena.py", "Imp_Inv_Dronena.env"]
+    for f in files:
+        print(f"Uploading {f}...")
+        sftp.put(f"{local_dir}\\{f}", f"{remote_dir}/{f}")
+    sftp.close()
+    
+    print("--- Verificando ---")
+    execute(ssh, "ls -l /opt/scripts/Dronena")
     
 except Exception as e:
     print("Exception:", e)

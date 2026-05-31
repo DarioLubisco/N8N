@@ -1,0 +1,64 @@
+Droguería: INSUAMINCA
+Host: insuaminca.proteoerp.org:50021
+Usuario: C01297
+
+CONEXIÓN: OK
+
+ESTRUCTURA FTP:
+  /drwxrwxrwx    2 0        0            4096 Apr 30 20:46 Facturas
+    /Facturas/-rw-r--r--    1 0        0             218 Apr 30 20:45 F00581805.txt
+    /Facturas/-rw-r--r--    1 0        0             204 Apr 30 20:45 FB0304394.txt
+    /Facturas/-rw-r--r--    1 0        0            1573 Apr 30 20:45 FB0304786.txt
+    /Facturas/-rw-r--r--    1 0        0             514 Apr 30 20:45 FB0305201.txt
+    /Facturas/-rw-r--r--    1 0        0             321 Apr 30 20:45 FB0307818.txt
+    /Facturas/-rw-r--r--    1 0        0             610 Apr 30 20:45 FB0307820.txt
+    /Facturas/-rw-r--r--    1 0        0             225 Apr 30 20:45 FB0311553.txt
+    /Facturas/-rw-r--r--    1 0        0             892 Apr 30 20:45 FB0311832.txt
+    /Facturas/-rw-r--r--    1 0        0            1302 Apr 30 20:45 FB0311835.txt
+    /Facturas/-rw-r--r--    1 0        0             211 Apr 30 20:45 FB0311845.txt
+    /Facturas/-rw-r--r--    1 0        0             721 Apr 30 20:45 FB0314201.txt
+    /Facturas/-rw-r--r--    1 0        0            1239 Apr 30 20:45 FB0314221.txt
+    /Facturas/-rw-r--r--    1 0        0             493 Apr 30 20:45 FB0315369.txt
+    /Facturas/-rw-r--r--    1 0        0             213 Apr 30 20:45 FB0316035.txt
+    /Facturas/-rw-r--r--    1 0        0            1131 Apr 30 20:45 FB0318830.txt
+    /Facturas/-rw-r--r--    1 0        0            2592 Apr 30 20:45 FB0318831.txt
+    /Facturas/-rw-r--r--    1 0        0            2051 Apr 30 20:45 FB0324166.txt
+    /Facturas/-rw-r--r--    1 0        0             224 Apr 30 20:45 FB0324206.txt
+    /Facturas/-rw-r--r--    1 0        0            1057 Apr 30 20:45 FB0324692.txt
+    /Facturas/-rw-r--r--    1 0        0            1293 Apr 30 20:45 FB0324715.txt
+    /Facturas/-rw-r--r--    1 0        0             506 Apr 30 20:45 FB0324716.txt
+    /Facturas/-rw-r--r--    1 0        0             196 Apr 30 20:45 FB0329566.txt
+    /Facturas/-rw-r--r--    1 0        0             617 Apr 30 20:46 FB0329567.txt
+    /Facturas/-rw-r--r--    1 0        0            4175 Apr 30 20:46 FB0329568.txt
+    /Facturas/-rw-r--r--    1 0        0            2278 Apr 30 20:46 FB0329570.txt
+    /Facturas/-rw-r--r--    1 0        0             832 Apr 30 20:46 FB0331457.txt
+    /Facturas/-rw-r--r--    1 0        0            1173 Apr 30 20:46 FB0331602.txt
+    /Facturas/-rw-r--r--    1 0        0             315 Apr 30 20:46 FB0331629.txt
+    /Facturas/-rw-r--r--    1 0        0            1185 Apr 30 20:46 FB0333443.txt
+    /Facturas/-rw-r--r--    1 0        0             608 Apr 30 20:46 FB0333484.txt
+    /Facturas/-rw-r--r--    1 0        0            4241 Apr 30 20:46 FB0337124.txt
+    /Facturas/-rw-r--r--    1 0        0            1343 Apr 30 20:46 FB0337189.txt
+    /Facturas/-rw-r--r--    1 0        0             199 Apr 30 20:46 FB0340558.txt
+    /Facturas/-rw-r--r--    1 0        0            1976 Apr 30 20:46 FB0340603.txt
+    /Facturas/-rw-r--r--    1 0        0             225 Apr 30 20:46 FB0340610.txt
+    /Facturas/-rw-r--r--    1 0        0             195 Apr 30 20:46 FB0344111.txt
+    /Facturas/-rw-r--r--    1 0        0             627 Apr 30 20:46 FB0344137.txt
+    /Facturas/-rw-r--r--    1 0        0             355 Apr 30 20:46 FB0344138.txt
+    /Facturas/-rw-r--r--    1 0        0             771 Apr 30 20:46 FB0347106.txt
+    /Facturas/-rw-r--r--    1 0        0             196 Apr 30 20:46 FB0347133.txt
+    /Facturas/-rw-r--r--    1 0        0            1781 Apr 30 20:46 FB0347176.txt
+    /Facturas/-rw-r--r--    1 0        0             198 Apr 30 20:46 FB0350225.txt
+    /Facturas/-rw-r--r--    1 0        0            1769 Apr 30 20:46 FB0350232.txt
+    /Facturas/-rw-r--r--    1 0        0             765 Apr 30 20:46 FB0350234.txt
+    /Facturas/-rw-r--r--    1 0        0             882 Apr 30 20:46 FB0352313.txt
+    /Facturas/-rw-r--r--    1 0        0             321 Apr 30 20:46 FB0352441.txt
+    /Facturas/-rw-r--r--    1 0        0             196 Apr 30 20:46 FB0354600.txt
+    /Facturas/-rw-r--r--    1 0        0            1226 Apr 30 20:46 FB0354624.txt
+    /Facturas/-rw-r--r--    1 0        0            3467 Apr 30 20:46 FB0354834.txt
+    /Facturas/-rw-r--r--    1 0        0             213 Apr 30 20:46 FB0355893.txt
+    /Facturas/-rw-r--r--    1 0        0            1213 Apr 30 20:46 FB0355916.txt
+    /Facturas/-rw-r--r--    1 0        0             737 Apr 30 20:46 FB0358363.txt
+    /Facturas/-rw-r--r--    1 0        0            2553 Apr 30 20:46 FB0358436.txt
+  /drwxrwxrwx    2 0        0            4096 Apr 30 20:45 Pedidos
+  /-rw-r--r--    1 0        0          682843 Apr 30 21:00 inventario.txt
+  /-rw-r--r--    1 0        0          682843 Apr 30 21:00 inventarioGRN.txt

@@ -1,0 +1,5 @@
+Droguería: NENA
+Host: ftp.dronena.com:21
+Usuario: C344
+
+CONEXIÓN: ERROR — 530 User cannot log in.

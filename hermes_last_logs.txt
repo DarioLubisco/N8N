@@ -1,0 +1,41 @@
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+

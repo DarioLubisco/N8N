@@ -10,8 +10,8 @@
 |-------|-------|
 | **Servidor** | `drocerca.proteoerp.org` |
 | **Puerto** | `21` |
-| **Usuario FTP** | `C0005r` |
-| **Contraseña FTP** | `j008376238` |
+| **Usuario FTP** | `C0005R` |
+| **Contraseña FTP** | `008376238` |
 | **Usuario Web** | `W0005R` |
 | **Contraseña Web** | `J008376238` |
 | **Protocolo** | FTP |

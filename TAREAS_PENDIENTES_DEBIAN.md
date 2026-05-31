@@ -109,7 +109,7 @@ python3 /opt/scripts/droguerias/generic_inventario.py --proveedor BIOGENETICA --
 | Droguería | Error | Acción |
 |-----------|-------|--------|
 | **NENA** | `530 User cannot log in` | Confirmar clave con proveedor. Posible: usuario `C344` no activo |
-| **DROCERCA** | `530 Login incorrect` | Verificar si clave es `j008376238` o `J008376238` (mayúsculas) |
+| **DROCERCA** | `530 Login incorrect` | Verificar nueva clave: `008376238` (sin 'j') |
 | **ZAKIPHARMA** | Timeout puerto 21 | Verificar si usan otro puerto o IP `45.137.159.247` directamente |
 | **GAMA** | Conecta pero listing timeout | Modo pasivo FTP. Probar con `ftp_pasv=True` en script |
 | **ITS** | Archivo en `/0722_inventario.txt` (raíz) | No en `Existencia/` — actualizar ruta en workflow |

@@ -1,0 +1,8 @@
+Droguería: GAMA
+Host: ftp.electrodomotica.com.ve:21
+Usuario: GAMA@electrodomotica.com.ve
+
+CONEXIÓN: OK
+
+ESTRUCTURA FTP:
+  [Error listando /: timed out]

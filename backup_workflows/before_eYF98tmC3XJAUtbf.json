@@ -1,0 +1,783 @@
+{
+  "updatedAt": "2026-05-05T23:33:30.942Z",
+  "createdAt": "2026-04-30T15:25:48.782Z",
+  "id": "eYF98tmC3XJAUtbf",
+  "name": "[PROD] Telegram Mute Handler",
+  "description": "Handles Telegram callback queries to mute local service notifications.",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "id": "ff5c8cad-236f-4bd9-bc0b-ec94f026a122",
+      "name": "Telegram Callback",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        304
+      ],
+      "webhookId": "eaabcf54-d691-437e-8535-5ead5d851816",
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "76caf92a-447c-4b02-acda-aca3cb80cb52",
+              "name": "hours",
+              "value": "=={{ $json.data }}",
+              "type": "string"
+            },
+            {
+              "id": "a8572189-1060-4983-811c-30fed5ed659e",
+              "name": "callback_id",
+              "value": "=={{ $json.id || $('Telegram Callback').first()?.json?.id }}",
+              "type": "string"
+            },
+            {
+              "id": "2a244069-8eb8-4757-ace9-ed58270fbf9c",
+              "name": "chat_id",
+              "value": "=={{ $json.message?.chat?.id || $('Telegram Callback').first()?.json?.message?.chat?.id }}",
+              "type": "string"
+            },
+            {
+              "id": "2e855cbc-9cc5-4764-aae2-84178532f622",
+              "name": "message_id",
+              "value": "=={{ $json.message?.message_id || $('Telegram Callback').first()?.json?.message?.message_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "405dbb77-deed-4e2a-bd5f-1c896c317c6c",
+      "name": "Parse Mute Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        352,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SAv7NkTUX9oYd4v3"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "ServiceName",
+              "keyValue": "={{ $json.ServiceName }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "id": "b8da007b-f57a-4c27-9aae-cdd23c26a261",
+      "name": "Update Mutes Table",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c",
+              "leftValue": "={{ $('Parse Mute Info').first().json.ServiceName }}",
+              "rightValue": "WindowsMonitor",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "56e2a522-e255-46a1-a0cb-1f1ed0afbb15",
+      "name": "Is Windows Monitor?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=echo {{ $('Parse Mute Info').first().json.MuteUntil }} > C:\\source\\MonitorSystem\\mute.txt"
+      },
+      "id": "0f71c3e1-7956-423f-a4c2-65c420563ef7",
+      "name": "Update Mute File on Windows",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        208
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "callback",
+        "queryId": "={{ $('Parse Mute Info').first().json.callback_id }}",
+        "additionalFields": {
+          "show_alert": false,
+          "text": "={{ $('Parse Mute Info').first().json.hours === 0 ? \"Silencio desactivado.\" : \"Silenciado por \" + $('Parse Mute Info').first().json.hours + \" horas.\" }}"
+        }
+      },
+      "id": "d1b2d1c8-a12b-4fac-bc57-10295324fe7e",
+      "name": "Answer Callback (Win)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        208
+      ],
+      "webhookId": "19560896-d923-402c-8d47-8c8f09256065",
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "editMessageText",
+        "chatId": "={{ $('Parse Mute Info').first().json.chat_id }}",
+        "messageId": "={{ $('Parse Mute Info').first().json.message_id }}",
+        "text": "={{ $('Parse Mute Info').first().json.hours === 0 ? \"🔊 <b>NOTIFICACIONES REACTIVADAS</b> 🔊\\n\\nLas alertas de este servicio han sido reactivadas.\" : \"🔕 <b>NOTIFICACIONES SILENCIADAS</b> 🔕\\n\\nSe han desactivado las alertas de este servicio por \" + $('Parse Mute Info').first().json.hours + \" horas.\\nFinaliza: <code>\" + $('Parse Mute Info').first().json.MuteUntil + \"</code>\" }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "1ac84adc-2c61-43eb-ade9-2c4b8764195c",
+      "name": "Confirm Mute in Chat (Win)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1408,
+        208
+      ],
+      "webhookId": "3b8c84d2-5f30-44e3-9f9c-9a7e2f1f760e",
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "callback",
+        "queryId": "={{ $('Parse Mute Info').first().json.callback_id }}",
+        "additionalFields": {
+          "show_alert": false,
+          "text": "={{ $('Parse Mute Info').first().json.hours === 0 ? \"Silencio desactivado.\" : \"Silenciado por \" + $('Parse Mute Info').first().json.hours + \" horas.\" }}"
+        }
+      },
+      "id": "4756eebe-20fc-4599-8112-1d0a87aad107",
+      "name": "Answer Callback (Other)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1008,
+        512
+      ],
+      "webhookId": "5eca25b7-48cd-4ae6-9cc5-2e087549341c",
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "editMessageText",
+        "chatId": "={{ $('Parse Mute Info').first().json.chat_id }}",
+        "messageId": "={{ $('Parse Mute Info').first().json.message_id }}",
+        "text": "={{ $('Parse Mute Info').first().json.hours === 0 ? \"🔊 <b>NOTIFICACIONES REACTIVADAS</b> 🔊\\n\\nLas alertas de este servicio han sido reactivadas.\" : \"🔕 <b>NOTIFICACIONES SILENCIADAS</b> 🔕\\n\\nSe han desactivado las alertas de este servicio por \" + $('Parse Mute Info').first().json.hours + \" horas.\\nFinaliza: <code>\" + $('Parse Mute Info').first().json.MuteUntil + \"</code>\" }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "ffce07d2-6e8d-4973-923f-d3fe15901c4c",
+      "name": "Confirm Mute in Chat (Other)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        512
+      ],
+      "webhookId": "9189ef6f-d4ec-463e-bb74-4b1bab02248a",
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Callback": {
+      "main": [
+        [
+          {
+            "node": "Parse Mute Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Mute Info": {
+      "main": [
+        [
+          {
+            "node": "Update Mutes Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Mutes Table": {
+      "main": [
+        [
+          {
+            "node": "Is Windows Monitor?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Windows Monitor?": {
+      "main": [
+        [
+          {
+            "node": "Update Mute File on Windows",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Answer Callback (Other)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Mute File on Windows": {
+      "main": [
+        [
+          {
+            "node": "Answer Callback (Win)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer Callback (Win)": {
+      "main": [
+        [
+          {
+            "node": "Confirm Mute in Chat (Win)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer Callback (Other)": {
+      "main": [
+        [
+          {
+            "node": "Confirm Mute in Chat (Other)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "8e321bf5-6a19-431b-a581-074431220440",
+  "activeVersionId": "668b8509-1e8b-4a48-a721-6e5268abd993",
+  "versionCounter": 188,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-04-30T15:25:48.782Z",
+      "createdAt": "2026-04-30T15:25:48.782Z",
+      "role": "workflow:owner",
+      "workflowId": "eYF98tmC3XJAUtbf",
+      "projectId": "229NyZp0afAhCtOe",
+      "project": {
+        "updatedAt": "2026-04-23T17:03:42.069Z",
+        "createdAt": "2026-04-23T15:48:09.202Z",
+        "id": "229NyZp0afAhCtOe",
+        "name": "Dario Lubisco <dario.lubisco@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "0826022f-c1e7-4bbb-9570-229133922b29"
+      }
+    }
+  ],
+  "tags": [],
+  "parentFolder": null,
+  "activeVersion": {
+    "updatedAt": "2026-04-30T16:15:13.721Z",
+    "createdAt": "2026-04-30T16:15:13.721Z",
+    "versionId": "668b8509-1e8b-4a48-a721-6e5268abd993",
+    "workflowId": "eYF98tmC3XJAUtbf",
+    "nodes": [
+      {
+        "id": "ff5c8cad-236f-4bd9-bc0b-ec94f026a122",
+        "name": "Telegram Callback",
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          100,
+          300
+        ],
+        "parameters": {
+          "updates": [
+            "callback_query"
+          ]
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "RkijxthBpMtc1pDO",
+            "name": "[PROD] Telegram - Bot Pago Movil"
+          }
+        },
+        "webhookId": "eaabcf54-d691-437e-8535-5ead5d851816"
+      },
+      {
+        "id": "405dbb77-deed-4e2a-bd5f-1c896c317c6c",
+        "name": "Parse Mute Info",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          350,
+          300
+        ],
+        "parameters": {
+          "mode": "manual",
+          "fields": {
+            "values": [
+              {
+                "name": "hours",
+                "type": "number",
+                "value": "={{ (() => { const d = $json.callback_query?.data || $('Telegram Callback').first()?.json?.callback_query?.data; if(!d) return 1; if(d.startsWith(\"mute_0_\")) return 0; if(d.startsWith(\"mute_1_\")) return 1; if(d.startsWith(\"mute_4_\")) return 4; if(d.startsWith(\"mute_12_\")) return 12; if(d===\"mute_1h\") return 1; if(d===\"mute_4h\") return 4; if(d===\"mute_12h\") return 12; return 1; })() }}"
+              },
+              {
+                "name": "ServiceName",
+                "type": "string",
+                "value": "={{ (() => { const d = $json.callback_query?.data || $('Telegram Callback').first()?.json?.callback_query?.data; if(!d) return \"WindowsMonitor\"; if(d.startsWith(\"mute_0_\")) return d.replace(\"mute_0_\", \"\"); if(d.startsWith(\"mute_1_\")) return d.replace(\"mute_1_\", \"\"); if(d.startsWith(\"mute_4_\")) return d.replace(\"mute_4_\", \"\"); if(d.startsWith(\"mute_12_\")) return d.replace(\"mute_12_\", \"\"); return \"WindowsMonitor\"; })() }}"
+              },
+              {
+                "name": "MuteUntil",
+                "type": "string",
+                "value": "={{ (() => { const h = (() => { const d = $json.callback_query?.data || $('Telegram Callback').first()?.json?.callback_query?.data; if(!d) return 1; if(d.startsWith(\"mute_0_\")) return 0; if(d.startsWith(\"mute_1_\")) return 1; if(d.startsWith(\"mute_4_\")) return 4; if(d.startsWith(\"mute_12_\")) return 12; if(d===\"mute_1h\") return 1; if(d===\"mute_4h\") return 4; if(d===\"mute_12h\") return 12; return 1; })(); if(h === 0) return $now.minus({ hours: 1 }).toFormat(\"yyyy-MM-dd HH:mm:ss\"); return $now.plus({ hours: h }).toFormat(\"yyyy-MM-dd HH:mm:ss\"); })() }}"
+              },
+              {
+                "name": "callback_id",
+                "type": "string",
+                "value": "={{ $json.callback_query?.id || $('Telegram Callback').first()?.json?.callback_query?.id }}"
+              },
+              {
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $json.callback_query?.message?.chat?.id || $('Telegram Callback').first()?.json?.callback_query?.message?.chat?.id }}"
+              },
+              {
+                "name": "message_id",
+                "type": "string",
+                "value": "={{ $json.callback_query?.message?.message_id || $('Telegram Callback').first()?.json?.callback_query?.message?.message_id }}"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "b8da007b-f57a-4c27-9aae-cdd23c26a261",
+        "name": "Update Mutes Table",
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          550,
+          300
+        ],
+        "parameters": {
+          "resource": "row",
+          "operation": "upsert",
+          "dataTableId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "SAv7NkTUX9oYd4v3"
+          },
+          "matchType": "allConditions",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "ServiceName",
+                "condition": "eq",
+                "keyValue": "={{ $json.ServiceName }}"
+              }
+            ]
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {}
+          }
+        }
+      },
+      {
+        "id": "56e2a522-e255-46a1-a0cb-1f1ed0afbb15",
+        "name": "Is Windows Monitor?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          750,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "c",
+                "leftValue": "={{ $('Parse Mute Info').first().json.ServiceName }}",
+                "rightValue": "WindowsMonitor",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "0f71c3e1-7956-423f-a4c2-65c420563ef7",
+        "name": "Update Mute File on Windows",
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          200
+        ],
+        "parameters": {
+          "resource": "command",
+          "operation": "execute",
+          "command": "=echo {{ $('Parse Mute Info').first().json.MuteUntil }} > C:\\source\\MonitorSystem\\mute.txt"
+        },
+        "credentials": {
+          "sshPassword": {
+            "id": "q9XQyJD7Uu17tWSl",
+            "name": "[PROD] SSH - Debian WebServices"
+          }
+        }
+      },
+      {
+        "id": "d1b2d1c8-a12b-4fac-bc57-10295324fe7e",
+        "name": "Answer Callback (Win)",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1200,
+          200
+        ],
+        "parameters": {
+          "resource": "callback",
+          "operation": "answerQuery",
+          "queryId": "={{ $('Parse Mute Info').first().json.callback_id }}",
+          "additionalFields": {
+            "text": "={{ $('Parse Mute Info').first().json.hours === 0 ? \"Silencio desactivado.\" : \"Silenciado por \" + $('Parse Mute Info').first().json.hours + \" horas.\" }}",
+            "show_alert": false
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "RkijxthBpMtc1pDO",
+            "name": "[PROD] Telegram - Bot Pago Movil"
+          }
+        },
+        "webhookId": "19560896-d923-402c-8d47-8c8f09256065"
+      },
+      {
+        "id": "1ac84adc-2c61-43eb-ade9-2c4b8764195c",
+        "name": "Confirm Mute in Chat (Win)",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1400,
+          200
+        ],
+        "parameters": {
+          "resource": "message",
+          "operation": "editMessageText",
+          "chatId": "={{ $('Parse Mute Info').first().json.chat_id }}",
+          "messageId": "={{ $('Parse Mute Info').first().json.message_id }}",
+          "text": "={{ $('Parse Mute Info').first().json.hours === 0 ? \"🔊 <b>NOTIFICACIONES REACTIVADAS</b> 🔊\\n\\nLas alertas de este servicio han sido reactivadas.\" : \"🔕 <b>NOTIFICACIONES SILENCIADAS</b> 🔕\\n\\nSe han desactivado las alertas de este servicio por \" + $('Parse Mute Info').first().json.hours + \" horas.\\nFinaliza: <code>\" + $('Parse Mute Info').first().json.MuteUntil + \"</code>\" }}",
+          "additionalFields": {
+            "parse_mode": "HTML"
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "RkijxthBpMtc1pDO",
+            "name": "[PROD] Telegram - Bot Pago Movil"
+          }
+        },
+        "webhookId": "3b8c84d2-5f30-44e3-9f9c-9a7e2f1f760e"
+      },
+      {
+        "id": "4756eebe-20fc-4599-8112-1d0a87aad107",
+        "name": "Answer Callback (Other)",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1000,
+          500
+        ],
+        "parameters": {
+          "resource": "callback",
+          "operation": "answerQuery",
+          "queryId": "={{ $('Parse Mute Info').first().json.callback_id }}",
+          "additionalFields": {
+            "text": "={{ $('Parse Mute Info').first().json.hours === 0 ? \"Silencio desactivado.\" : \"Silenciado por \" + $('Parse Mute Info').first().json.hours + \" horas.\" }}",
+            "show_alert": false
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "RkijxthBpMtc1pDO",
+            "name": "[PROD] Telegram - Bot Pago Movil"
+          }
+        },
+        "webhookId": "5eca25b7-48cd-4ae6-9cc5-2e087549341c"
+      },
+      {
+        "id": "ffce07d2-6e8d-4973-923f-d3fe15901c4c",
+        "name": "Confirm Mute in Chat (Other)",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1200,
+          500
+        ],
+        "parameters": {
+          "resource": "message",
+          "operation": "editMessageText",
+          "chatId": "={{ $('Parse Mute Info').first().json.chat_id }}",
+          "messageId": "={{ $('Parse Mute Info').first().json.message_id }}",
+          "text": "={{ $('Parse Mute Info').first().json.hours === 0 ? \"🔊 <b>NOTIFICACIONES REACTIVADAS</b> 🔊\\n\\nLas alertas de este servicio han sido reactivadas.\" : \"🔕 <b>NOTIFICACIONES SILENCIADAS</b> 🔕\\n\\nSe han desactivado las alertas de este servicio por \" + $('Parse Mute Info').first().json.hours + \" horas.\\nFinaliza: <code>\" + $('Parse Mute Info').first().json.MuteUntil + \"</code>\" }}",
+          "additionalFields": {
+            "parse_mode": "HTML"
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "RkijxthBpMtc1pDO",
+            "name": "[PROD] Telegram - Bot Pago Movil"
+          }
+        },
+        "webhookId": "9189ef6f-d4ec-463e-bb74-4b1bab02248a"
+      }
+    ],
+    "connections": {
+      "Telegram Callback": {
+        "main": [
+          [
+            {
+              "node": "Parse Mute Info",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Mute Info": {
+        "main": [
+          [
+            {
+              "node": "Update Mutes Table",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update Mutes Table": {
+        "main": [
+          [
+            {
+              "node": "Is Windows Monitor?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is Windows Monitor?": {
+        "main": [
+          [
+            {
+              "node": "Update Mute File on Windows",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Answer Callback (Other)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update Mute File on Windows": {
+        "main": [
+          [
+            {
+              "node": "Answer Callback (Win)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Answer Callback (Win)": {
+        "main": [
+          [
+            {
+              "node": "Confirm Mute in Chat (Win)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Answer Callback (Other)": {
+        "main": [
+          [
+            {
+              "node": "Confirm Mute in Chat (Other)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Dario Lubisco",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-04-30T16:15:21.850Z",
+        "id": 95,
+        "workflowId": "eYF98tmC3XJAUtbf",
+        "versionId": "668b8509-1e8b-4a48-a721-6e5268abd993",
+        "event": "activated",
+        "userId": "0826022f-c1e7-4bbb-9570-229133922b29"
+      },
+      {
+        "createdAt": "2026-05-04T14:12:20.858Z",
+        "id": 115,
+        "workflowId": "eYF98tmC3XJAUtbf",
+        "versionId": "668b8509-1e8b-4a48-a721-6e5268abd993",
+        "event": "deactivated",
+        "userId": "0826022f-c1e7-4bbb-9570-229133922b29"
+      },
+      {
+        "createdAt": "2026-05-04T14:12:21.988Z",
+        "id": 116,
+        "workflowId": "eYF98tmC3XJAUtbf",
+        "versionId": "668b8509-1e8b-4a48-a721-6e5268abd993",
+        "event": "activated",
+        "userId": "0826022f-c1e7-4bbb-9570-229133922b29"
+      }
+    ]
+  },
+  "scopes": [
+    "workflow:create",
+    "workflow:delete",
+    "workflow:execute",
+    "workflow:execute-chat",
+    "workflow:list",
+    "workflow:move",
+    "workflow:publish",
+    "workflow:read",
+    "workflow:share",
+    "workflow:unpublish",
+    "workflow:unshare",
+    "workflow:update",
+    "workflow:updateRedactionSetting"
+  ],
+  "checksum": "7fe6192b56c82da8918ae4efb5a514af64405aad3a779a8c2dbf8e53e991210b"
+}

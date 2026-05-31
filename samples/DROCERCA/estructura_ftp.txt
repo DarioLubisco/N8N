@@ -1,0 +1,5 @@
+Droguería: DROCERCA
+Host: drocerca.proteoerp.org:21
+Usuario: C0005r
+
+CONEXIÓN: ERROR — 530 Login incorrect.

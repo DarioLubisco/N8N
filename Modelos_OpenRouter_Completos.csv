@@ -1,0 +1,331 @@
+ID_Modelo,Nombre,Uso_Sugerido,Context_Length,Costo_Input_1M,Costo_Output_1M,Score_LMSYS_Oficial,Ratio_Costo_Beneficio,Arquitectura,Estado
+meta-llama/llama-3.3-70b-instruct,Meta: Llama 3.3 70B Instruct,"CRM, Chatbots y Ruteo Rápido",131072,0.0999999999999999,0.32,1295.0,3083.33,text->text,Activo
+google/gemini-2.5-flash-lite-preview-09-2025,Google: Gemini 2.5 Flash Lite Preview 09-2025,"CRM, Chatbots y Ruteo Rápido",1048576,0.0999999999999999,0.3999999999999999,1280.0,2560.0,text+image+file+audio+video->text,Inactivo
+google/gemini-2.5-flash-lite,Google: Gemini 2.5 Flash Lite,"CRM, Chatbots y Ruteo Rápido",1048576,0.0999999999999999,0.3999999999999999,1280.0,2560.0,text+image+file+audio+video->text,Inactivo
+openai/gpt-4o-mini-search-preview,OpenAI: GPT-4o-mini Search Preview,"CRM, Chatbots y Ruteo Rápido",128000,0.15,0.6,1340.0,1786.67,text->text,Inactivo
+openai/gpt-4o-mini-2024-07-18,OpenAI: GPT-4o-mini (2024-07-18),"CRM, Chatbots y Ruteo Rápido",128000,0.15,0.6,1340.0,1786.67,text+image+file->text,Inactivo
+openai/gpt-4o-mini,OpenAI: GPT-4o-mini,"CRM, Chatbots y Ruteo Rápido",128000,0.15,0.6,1275.0,1700.0,text+image+file->text,Activo
+anthropic/claude-3-haiku,Anthropic: Claude 3 Haiku,"CRM, Chatbots y Ruteo Rápido",200000,0.25,1.25,1180.0,786.67,text+image->text,Inactivo
+google/gemini-3.1-flash-lite-preview,Google: Gemini 3.1 Flash Lite Preview,"CRM, Chatbots y Ruteo Rápido",1048576,0.25,1.5,1300.0,742.86,text+image+file+audio+video->text,Activo
+google/gemini-2.5-flash-image,Google: Nano Banana (Gemini 2.5 Flash Image),"CRM, Chatbots y Ruteo Rápido",32768,0.3,2.5,1280.0,457.14,text+image->text+image,Inactivo
+google/gemini-2.5-pro,Google: Gemini 2.5 Pro,"CRM, Chatbots y Ruteo Rápido",1048576,1.25,10.0,1335.0,118.67,text+image+file+audio+video->text,Inactivo
+google/gemini-2.5-pro-preview,Google: Gemini 2.5 Pro Preview 06-05,"CRM, Chatbots y Ruteo Rápido",1048576,1.25,10.0,1335.0,118.67,text+image+file+audio->text,Inactivo
+google/gemini-2.5-pro-preview-05-06,Google: Gemini 2.5 Pro Preview 05-06,"CRM, Chatbots y Ruteo Rápido",1048576,1.25,10.0,1335.0,118.67,text+image+file+audio+video->text,Inactivo
+google/gemini-3.1-pro-preview-customtools,Google: Gemini 3.1 Pro Preview Custom Tools,"CRM, Chatbots y Ruteo Rápido",1048576,2.0,12.0,1385.0,98.93,text+image+file+audio+video->text,Inactivo
+mistralai/mistral-small-24b-instruct-2501,Mistral: Mistral Small 3,"CRM, Chatbots y Ruteo Rápido",32768,0.0499999999999999,0.08,,,text->text,Inactivo
+arcee-ai/trinity-mini,Arcee AI: Trinity Mini,"CRM, Chatbots y Ruteo Rápido",131072,0.045,0.15,,,text->text,Inactivo
+rekaai/reka-edge,Reka Edge,"CRM, Chatbots y Ruteo Rápido",16384,0.0999999999999999,0.0999999999999999,,,text+image+video->text,Inactivo
+mistralai/ministral-3b-2512,Mistral: Ministral 3 3B 2512,"CRM, Chatbots y Ruteo Rápido",131072,0.0999999999999999,0.0999999999999999,,,text+image->text,Inactivo
+nvidia/nemotron-nano-9b-v2,NVIDIA: Nemotron Nano 9B V2,"CRM, Chatbots y Ruteo Rápido",131072,0.04,0.16,,,text->text,Inactivo
+nvidia/nemotron-3-nano-30b-a3b,NVIDIA: Nemotron 3 Nano 30B A3B,"CRM, Chatbots y Ruteo Rápido",262144,0.0499999999999999,0.1999999999999999,,,text->text,Inactivo
+mistralai/mistral-small-3.2-24b-instruct,Mistral: Mistral Small 3.2 24B,"CRM, Chatbots y Ruteo Rápido",128000,0.075,0.1999999999999999,,,text+image->text,Inactivo
+mistralai/ministral-8b-2512,Mistral: Ministral 3 8B 2512,"CRM, Chatbots y Ruteo Rápido",262144,0.15,0.15,,,text+image->text,Inactivo
+rekaai/reka-flash-3,Reka Flash 3,"CRM, Chatbots y Ruteo Rápido",65536,0.0999999999999999,0.1999999999999999,,,text->text,Inactivo
+amazon/nova-lite-v1,Amazon: Nova Lite 1.0,"CRM, Chatbots y Ruteo Rápido",300000,0.06,0.24,,,text+image->text,Inactivo
+inclusionai/ling-2.6-flash,inclusionAI: Ling-2.6-flash,"CRM, Chatbots y Ruteo Rápido",262144,0.08,0.24,,,text->text,Inactivo
+qwen/qwen3.5-flash-02-23,Qwen: Qwen3.5-Flash,"CRM, Chatbots y Ruteo Rápido",1000000,0.065,0.26,,,text+image+video->text,Inactivo
+bytedance-seed/seed-1.6-flash,ByteDance Seed: Seed 1.6 Flash,"CRM, Chatbots y Ruteo Rápido",262144,0.075,0.3,,,text+image+video->text,Inactivo
+google/gemini-2.0-flash-lite-001,Google: Gemini 2.0 Flash Lite,"CRM, Chatbots y Ruteo Rápido",1048576,0.075,0.3,,,text+image+file+audio+video->text,Inactivo
+xiaomi/mimo-v2-flash,Xiaomi: MiMo-V2-Flash,"CRM, Chatbots y Ruteo Rápido",262144,0.09,0.29,,,text->text,Inactivo
+stepfun/step-3.5-flash,StepFun: Step 3.5 Flash,"CRM, Chatbots y Ruteo Rápido",262144,0.0999999999999999,0.3,,,text->text,Inactivo
+mistralai/ministral-14b-2512,Mistral: Ministral 3 14B 2512,"CRM, Chatbots y Ruteo Rápido",262144,0.1999999999999999,0.1999999999999999,,,text+image->text,Inactivo
+mistralai/voxtral-small-24b-2507,Mistral: Voxtral Small 24B 2507,"CRM, Chatbots y Ruteo Rápido",32000,0.0999999999999999,0.3,,,text+audio->text,Inactivo
+openai/gpt-5-nano,OpenAI: GPT-5 Nano,"CRM, Chatbots y Ruteo Rápido",400000,0.0499999999999999,0.3999999999999999,,,text+image+file->text,Inactivo
+z-ai/glm-4.7-flash,Z.ai: GLM 4.7 Flash,"CRM, Chatbots y Ruteo Rápido",202752,0.06,0.3999999999999999,,,text->text,Inactivo
+bytedance-seed/seed-2.0-mini,ByteDance Seed: Seed-2.0-Mini,"CRM, Chatbots y Ruteo Rápido",262144,0.0999999999999999,0.3999999999999999,,,text+image+video->text,Inactivo
+openai/gpt-4.1-nano,OpenAI: GPT-4.1 Nano,"CRM, Chatbots y Ruteo Rápido",1047576,0.0999999999999999,0.3999999999999999,,,text+image+file->text,Inactivo
+google/gemini-2.0-flash-001,Google: Gemini 2.0 Flash,"CRM, Chatbots y Ruteo Rápido",1000000,0.0999999999999999,0.3999999999999999,,,text+image+file+audio+video->text,Inactivo
+x-ai/grok-4.1-fast,xAI: Grok 4.1 Fast,"CRM, Chatbots y Ruteo Rápido",2000000,0.1999999999999999,0.5,,,text+image+file->text,Inactivo
+x-ai/grok-4-fast,xAI: Grok 4 Fast,"CRM, Chatbots y Ruteo Rápido",2000000,0.1999999999999999,0.5,,,text+image+file->text,Inactivo
+mistralai/mistral-small-2603,Mistral: Mistral Small 4,"CRM, Chatbots y Ruteo Rápido",262144,0.15,0.6,,,text+image->text,Inactivo
+nvidia/nemotron-nano-12b-v2-vl,NVIDIA: Nemotron Nano 12B 2 VL,"CRM, Chatbots y Ruteo Rápido",131072,0.1999999999999999,0.6,,,text+image+video->text,Inactivo
+x-ai/grok-3-mini,xAI: Grok 3 Mini,"CRM, Chatbots y Ruteo Rápido",131072,0.3,0.5,,,text->text,Inactivo
+x-ai/grok-3-mini-beta,xAI: Grok 3 Mini Beta,"CRM, Chatbots y Ruteo Rápido",131072,0.3,0.5,,,text->text,Inactivo
+mistralai/mistral-small-3.1-24b-instruct,Mistral: Mistral Small 3.1 24B,"CRM, Chatbots y Ruteo Rápido",128000,0.35,0.56,,,text+image->text,Inactivo
+minimax/minimax-m2.1,MiniMax: MiniMax M2.1,"CRM, Chatbots y Ruteo Rápido",196608,0.29,0.95,,,text->text,Inactivo
+minimax/minimax-m2,MiniMax: MiniMax M2,"CRM, Chatbots y Ruteo Rápido",196608,0.255,1.0,,,text->text,Inactivo
+minimax/minimax-m2.5,MiniMax: MiniMax M2.5,"CRM, Chatbots y Ruteo Rápido",196608,0.15,1.15,,,text->text,Inactivo
+minimax/minimax-01,MiniMax: MiniMax-01,"CRM, Chatbots y Ruteo Rápido",1000192,0.1999999999999999,1.1,,,text+image->text,Inactivo
+openai/gpt-5.4-nano,OpenAI: GPT-5.4 Nano,"CRM, Chatbots y Ruteo Rápido",400000,0.1999999999999999,1.25,,,text+image+file->text,Inactivo
+minimax/minimax-m2.7,MiniMax: MiniMax M2.7,"CRM, Chatbots y Ruteo Rápido",196608,0.3,1.2,,,text->text,Inactivo
+minimax/minimax-m2-her,MiniMax: MiniMax M2-her,"CRM, Chatbots y Ruteo Rápido",65536,0.3,1.2,,,text->text,Inactivo
+qwen/qwen3.6-flash,Qwen: Qwen3.6 Flash,"CRM, Chatbots y Ruteo Rápido",1000000,0.25,1.5,,,text+image+video->text,Inactivo
+morph/morph-v3-fast,Morph: Morph V3 Fast,"CRM, Chatbots y Ruteo Rápido",81920,0.7999999999999999,1.2,,,text->text,Inactivo
+openai/gpt-4.1-mini,OpenAI: GPT-4.1 Mini,"CRM, Chatbots y Ruteo Rápido",1047576,0.3999999999999999,1.6,,,text+image+file->text,Inactivo
+aion-labs/aion-1.0-mini,AionLabs: Aion-1.0-Mini,"CRM, Chatbots y Ruteo Rápido",131072,0.7,1.4,,,text->text,Inactivo
+bytedance-seed/seed-2.0-lite,ByteDance Seed: Seed-2.0-Lite,"CRM, Chatbots y Ruteo Rápido",262144,0.25,2.0,,,text+image+video->text,Inactivo
+openai/gpt-5-mini,OpenAI: GPT-5 Mini,"CRM, Chatbots y Ruteo Rápido",400000,0.25,2.0,,,text+image+file->text,Inactivo
+minimax/minimax-m1,MiniMax: MiniMax M1,"CRM, Chatbots y Ruteo Rápido",1000000,0.3999999999999999,2.2,,,text->text,Inactivo
+amazon/nova-2-lite-v1,Amazon: Nova 2 Lite,"CRM, Chatbots y Ruteo Rápido",1000000,0.3,2.5,,,text+image+file+video->text,Inactivo
+openai/gpt-audio-mini,OpenAI: GPT Audio Mini,"CRM, Chatbots y Ruteo Rápido",128000,0.6,2.4,,,text+audio->text+audio,Inactivo
+google/gemini-3.1-flash-image-preview,Google: Nano Banana 2 (Gemini 3.1 Flash Image Preview),"CRM, Chatbots y Ruteo Rápido",65536,0.5,3.0,,,text+image->text+image,Inactivo
+~google/gemini-flash-latest,Google Gemini Flash Latest,"CRM, Chatbots y Ruteo Rápido",1048576,0.5,3.0,,,text+image+file+audio+video->text,Inactivo
+google/gemini-3-flash-preview,Google: Gemini 3 Flash Preview,"CRM, Chatbots y Ruteo Rápido",1048576,0.5,3.0,,,text+image+file+audio+video->text,Inactivo
+openai/gpt-5-image-mini,OpenAI: GPT-5 Image Mini,"CRM, Chatbots y Ruteo Rápido",400000,2.5,2.0,,,text+image+file->text+image,Inactivo
+anthropic/claude-3.5-haiku,Anthropic: Claude 3.5 Haiku,"CRM, Chatbots y Ruteo Rápido",200000,0.7999999999999999,4.0,,,text+image->text,Inactivo
+~openai/gpt-mini-latest,OpenAI GPT Mini Latest,"CRM, Chatbots y Ruteo Rápido",400000,0.75,4.5,,,text+image+file->text,Inactivo
+openai/gpt-5.4-mini,OpenAI: GPT-5.4 Mini,"CRM, Chatbots y Ruteo Rápido",400000,0.75,4.5,,,text+image+file->text,Inactivo
+openai/o4-mini-high,OpenAI: o4 Mini High,"CRM, Chatbots y Ruteo Rápido",200000,1.1,4.4,,,text+image+file->text,Inactivo
+openai/o4-mini,OpenAI: o4 Mini,"CRM, Chatbots y Ruteo Rápido",200000,1.1,4.4,,,text+image+file->text,Inactivo
+~anthropic/claude-haiku-latest,Anthropic Claude Haiku Latest,"CRM, Chatbots y Ruteo Rápido",200000,1.0,5.0,,,text+image->text,Inactivo
+anthropic/claude-haiku-4.5,Anthropic: Claude Haiku 4.5,"CRM, Chatbots y Ruteo Rápido",200000,1.0,5.0,,,text+image->text,Inactivo
+openai/o4-mini-deep-research,OpenAI: o4 Mini Deep Research,"CRM, Chatbots y Ruteo Rápido",200000,2.0,8.0,,,text+image+file->text,Inactivo
+~google/gemini-pro-latest,Google Gemini Pro Latest,"CRM, Chatbots y Ruteo Rápido",1048576,2.0,12.0,,,text+image+file+audio+video->text,Inactivo
+google/gemini-3-pro-image-preview,Google: Nano Banana Pro (Gemini 3 Pro Image Preview),"CRM, Chatbots y Ruteo Rápido",65536,2.0,12.0,,,text+image->text+image,Inactivo
+nousresearch/hermes-2-pro-llama-3-8b,NousResearch: Hermes 2 Pro - Llama-3 8B,Creativo / Roleplay / Sin Censura,8192,0.14,0.14,,,text->text,Inactivo
+nousresearch/hermes-4-70b,Nous: Hermes 4 70B,Creativo / Roleplay / Sin Censura,131072,0.13,0.3999999999999999,,,text->text,Inactivo
+nousresearch/hermes-3-llama-3.1-70b,Nous: Hermes 3 70B Instruct,Creativo / Roleplay / Sin Censura,131072,0.3,0.3,,,text->text,Inactivo
+thedrummer/cydonia-24b-v4.1,TheDrummer: Cydonia 24B V4.1,Creativo / Roleplay / Sin Censura,131072,0.3,0.5,,,text->text,Inactivo
+mancer/weaver,Mancer: Weaver (alpha),Creativo / Roleplay / Sin Censura,8000,0.75,1.0,,,text->text,Inactivo
+nousresearch/hermes-3-llama-3.1-405b,Nous: Hermes 3 405B Instruct,Creativo / Roleplay / Sin Censura,131072,1.0,1.0,,,text->text,Inactivo
+nousresearch/hermes-4-405b,Nous: Hermes 4 405B,Creativo / Roleplay / Sin Censura,131072,1.0,3.0,,,text->text,Inactivo
+anthracite-org/magnum-v4-72b,Magnum v4 72B,Creativo / Roleplay / Sin Censura,16384,3.0,5.0,,,text->text,Inactivo
+openai/gpt-3.5-turbo,OpenAI: GPT-3.5 Turbo,Modelos Antiguos (Legacy),16385,0.5,1.5,,,text->text,Inactivo
+openai/gpt-3.5-turbo-0613,OpenAI: GPT-3.5 Turbo (older v0613),Modelos Antiguos (Legacy),4095,1.0,2.0,,,text->text,Inactivo
+openai/gpt-3.5-turbo-instruct,OpenAI: GPT-3.5 Turbo Instruct,Modelos Antiguos (Legacy),4095,1.5,2.0,,,text->text,Inactivo
+openai/gpt-3.5-turbo-16k,OpenAI: GPT-3.5 Turbo 16k,Modelos Antiguos (Legacy),16385,3.0,4.0,,,text->text,Inactivo
+google/gemini-2.5-flash,Google: Gemini 2.5 Flash,Multimodal (Vision/Audio),1048576,0.3,2.5,1280.0,457.14,text+image+file+audio+video->text,Activo
+openai/gpt-4o-audio-preview,OpenAI: GPT-4o Audio,Multimodal (Vision/Audio),128000,2.5,10.0,1340.0,107.2,text+audio->text+audio,Inactivo
+qwen/qwen3-vl-32b-instruct,Qwen: Qwen3 VL 32B Instruct,Multimodal (Vision/Audio),131072,0.104,0.416,,,text+image->text,Inactivo
+meta-llama/llama-3.2-11b-vision-instruct,Meta: Llama 3.2 11B Vision Instruct,Multimodal (Vision/Audio),131072,0.245,0.245,,,text+image->text,Inactivo
+qwen/qwen-vl-plus,Qwen: Qwen VL Plus,Multimodal (Vision/Audio),131072,0.1365,0.4095,,,text+image->text,Inactivo
+qwen/qwen3-vl-8b-instruct,Qwen: Qwen3 VL 8B Instruct,Multimodal (Vision/Audio),131072,0.08,0.5,,,text+image->text,Inactivo
+qwen/qwen3-vl-30b-a3b-instruct,Qwen: Qwen3 VL 30B A3B Instruct,Multimodal (Vision/Audio),131072,0.13,0.52,,,text+image->text,Inactivo
+baidu/ernie-4.5-vl-28b-a3b,Baidu: ERNIE 4.5 VL 28B A3B,Multimodal (Vision/Audio),30000,0.14,0.56,,,text+image->text,Inactivo
+qwen/qwen2.5-vl-72b-instruct,Qwen: Qwen2.5 VL 72B Instruct,Multimodal (Vision/Audio),32000,0.25,0.75,,,text+image->text,Inactivo
+qwen/qwen3-vl-235b-a22b-instruct,Qwen: Qwen3 VL 235B A22B Instruct,Multimodal (Vision/Audio),262144,0.1999999999999999,0.88,,,text+image->text,Inactivo
+baidu/ernie-4.5-vl-424b-a47b,Baidu: ERNIE 4.5 VL 424B A47B ,Multimodal (Vision/Audio),123000,0.42,1.25,,,text+image->text,Inactivo
+qwen/qwen-vl-max,Qwen: Qwen VL Max,Multimodal (Vision/Audio),131072,0.52,2.08,,,text+image->text,Inactivo
+openai/gpt-audio,OpenAI: GPT Audio,Multimodal (Vision/Audio),128000,2.5,10.0,,,text+audio->text+audio,Inactivo
+openai/gpt-5-image,OpenAI: GPT-5 Image,Multimodal (Vision/Audio),400000,10.0,10.0,,,text+image+file->text+image,Inactivo
+openai/gpt-5.4-image-2,OpenAI: GPT-5.4 Image 2,Multimodal (Vision/Audio),272000,8.0,15.0,,,text+image+file->text+image,Inactivo
+deepseek/deepseek-v4-flash,DeepSeek: DeepSeek V4 Flash,Programación y SysAdmin,1048576,0.14,0.28,1320.0,3142.86,text->text,Inactivo
+qwen/qwen-2.5-72b-instruct,Qwen2.5 72B Instruct,Programación y SysAdmin,32768,0.36,0.3999999999999999,1290.0,1697.37,text->text,Activo
+deepseek/deepseek-v4-pro,DeepSeek: DeepSeek V4 Pro,Programación y SysAdmin,1048576,0.435,0.87,1390.0,1065.13,text->text,Inactivo
+qwen/qwen-2.5-coder-32b-instruct,Qwen2.5 Coder 32B Instruct,Programación y SysAdmin,32768,0.66,1.0,1285.0,774.1,text->text,Inactivo
+anthropic/claude-sonnet-4.6,Anthropic: Claude Sonnet 4.6,Programación y SysAdmin,1000000,3.0,15.0,1400.0,77.78,text+image->text,Activo
+qwen/qwen3-coder-30b-a3b-instruct,Qwen: Qwen3 Coder 30B A3B Instruct,Programación y SysAdmin,160000,0.07,0.27,,,text->text,Inactivo
+mistralai/devstral-small,Mistral: Devstral Small 1.1,Programación y SysAdmin,131072,0.0999999999999999,0.3,,,text->text,Inactivo
+qwen/qwen3-coder-next,Qwen: Qwen3 Coder Next,Programación y SysAdmin,262144,0.12,0.7999999999999999,,,text->text,Inactivo
+qwen/qwen3-coder-flash,Qwen: Qwen3 Coder Flash,Programación y SysAdmin,1000000,0.195,0.975,,,text->text,Inactivo
+mistralai/codestral-2508,Mistral: Codestral 2508,Programación y SysAdmin,256000,0.3,0.8999999999999999,,,text->text,Inactivo
+arcee-ai/coder-large,Arcee AI: Coder Large,Programación y SysAdmin,32768,0.5,0.7999999999999999,,,text->text,Inactivo
+kwaipilot/kat-coder-pro-v2,Kwaipilot: KAT-Coder-Pro V2,Programación y SysAdmin,256000,0.3,1.2,,,text->text,Inactivo
+x-ai/grok-code-fast-1,xAI: Grok Code Fast 1,Programación y SysAdmin,256000,0.1999999999999999,1.5,,,text->text,Inactivo
+alfredpros/codellama-7b-instruct-solidity,AlfredPros: CodeLLaMa 7B Instruct Solidity,Programación y SysAdmin,4096,0.7999999999999999,1.2,,,text->text,Inactivo
+qwen/qwen3-coder,Qwen: Qwen3 Coder 480B A35B,Programación y SysAdmin,262144,0.22,1.7999999999999998,,,text->text,Inactivo
+openai/gpt-5.1-codex-mini,OpenAI: GPT-5.1-Codex-Mini,Programación y SysAdmin,400000,0.25,2.0,,,text+image->text,Inactivo
+mistralai/devstral-2512,Mistral: Devstral 2 2512,Programación y SysAdmin,262144,0.3999999999999999,2.0,,,text->text,Inactivo
+mistralai/devstral-medium,Mistral: Devstral Medium,Programación y SysAdmin,131072,0.3999999999999999,2.0,,,text->text,Inactivo
+qwen/qwen3-coder-plus,Qwen: Qwen3 Coder Plus,Programación y SysAdmin,1000000,0.65,3.25,,,text->text,Inactivo
+qwen/qwen3.6-max-preview,Qwen: Qwen3.6 Max Preview,Programación y SysAdmin,262144,1.04,6.24,,,text->text,Inactivo
+openai/gpt-5.1-codex-max,OpenAI: GPT-5.1-Codex-Max,Programación y SysAdmin,400000,1.25,10.0,,,text+image->text,Inactivo
+openai/gpt-5.1-codex,OpenAI: GPT-5.1-Codex,Programación y SysAdmin,400000,1.25,10.0,,,text+image->text,Inactivo
+openai/gpt-5-codex,OpenAI: GPT-5 Codex,Programación y SysAdmin,400000,1.25,10.0,,,text+image->text,Inactivo
+openai/gpt-5.3-codex,OpenAI: GPT-5.3-Codex,Programación y SysAdmin,400000,1.75,14.0,,,text+image+file->text,Inactivo
+openai/gpt-5.2-codex,OpenAI: GPT-5.2-Codex,Programación y SysAdmin,400000,1.75,14.0,,,text+image->text,Inactivo
+deepseek/deepseek-r1-distill-qwen-32b,DeepSeek: R1 Distill Qwen 32B,Razonamiento Profundo,32768,0.29,0.29,1361.0,2346.55,text->text,Inactivo
+deepseek/deepseek-r1-distill-llama-70b,DeepSeek: R1 Distill Llama 70B,Razonamiento Profundo,131072,0.7,0.7999999999999999,1361.0,907.33,text->text,Inactivo
+deepseek/deepseek-r1-0528,DeepSeek: R1 0528,Razonamiento Profundo,163840,0.5,2.1500000000000004,1361.0,513.58,text->text,Inactivo
+deepseek/deepseek-r1,DeepSeek: R1,Razonamiento Profundo,64000,0.7,2.5,1361.0,425.31,text->text,Inactivo
+openai/o3-mini-high,OpenAI: o3 Mini High,Razonamiento Profundo,200000,1.1,4.4,1350.0,245.45,text+file->text,Inactivo
+openai/o3-mini,OpenAI: o3 Mini,Razonamiento Profundo,200000,1.1,4.4,1350.0,245.45,text+file->text,Inactivo
+anthropic/claude-3.7-sonnet:thinking,Anthropic: Claude 3.7 Sonnet (thinking),Razonamiento Profundo,200000,3.0,15.0,1380.0,76.67,text+image+file->text,Inactivo
+anthropic/claude-opus-4.7,Anthropic: Claude Opus 4.7,Razonamiento Profundo,1000000,5.0,25.0,1395.0,46.5,text+image->text,Activo
+baidu/ernie-4.5-21b-a3b-thinking,Baidu: ERNIE 4.5 21B A3B Thinking,Razonamiento Profundo,131072,0.07,0.28,,,text->text,Inactivo
+qwen/qwen3-30b-a3b-thinking-2507,Qwen: Qwen3 30B A3B Thinking 2507,Razonamiento Profundo,131072,0.08,0.3999999999999999,,,text->text,Inactivo
+qwen/qwen3-next-80b-a3b-thinking,Qwen: Qwen3 Next 80B A3B Thinking,Razonamiento Profundo,131072,0.0975,0.78,,,text->text,Inactivo
+qwen/qwen-plus-2025-07-28:thinking,Qwen: Qwen Plus 0728 (thinking),Razonamiento Profundo,1000000,0.26,0.78,,,text->text,Inactivo
+arcee-ai/trinity-large-thinking,Arcee AI: Trinity Large Thinking,Razonamiento Profundo,262144,0.22,0.85,,,text->text,Inactivo
+tngtech/deepseek-r1t2-chimera,TNG: DeepSeek R1T2 Chimera,Razonamiento Profundo,163840,0.3,1.1,,,text->text,Inactivo
+qwen/qwen3-vl-8b-thinking,Qwen: Qwen3 VL 8B Thinking,Razonamiento Profundo,131072,0.117,1.365,,,text+image->text,Inactivo
+qwen/qwen3-235b-a22b-thinking-2507,Qwen: Qwen3 235B A22B Thinking 2507,Razonamiento Profundo,131072,0.1495,1.495,,,text->text,Inactivo
+qwen/qwen3-vl-30b-a3b-thinking,Qwen: Qwen3 VL 30B A3B Thinking,Razonamiento Profundo,131072,0.13,1.56,,,text+image->text,Inactivo
+deepcogito/cogito-v2.1-671b,Deep Cogito: Cogito v2.1 671B,Razonamiento Profundo,128000,1.25,1.25,,,text->text,Inactivo
+qwen/qwen3-vl-235b-a22b-thinking,Qwen: Qwen3 VL 235B A22B Thinking,Razonamiento Profundo,131072,0.26,2.6,,,text+image->text,Inactivo
+moonshotai/kimi-k2-thinking,MoonshotAI: Kimi K2 Thinking,Razonamiento Profundo,262144,0.6,2.5,,,text->text,Inactivo
+arcee-ai/maestro-reasoning,Arcee AI: Maestro Reasoning,Razonamiento Profundo,131072,0.8999999999999999,3.3000000000000003,,,text->text,Inactivo
+qwen/qwen3-max-thinking,Qwen: Qwen3 Max Thinking,Razonamiento Profundo,262144,0.78,3.9,,,text->text,Inactivo
+openai/o3,OpenAI: o3,Razonamiento Profundo,200000,2.0,8.0,,,text+image+file->text,Inactivo
+perplexity/sonar-reasoning-pro,Perplexity: Sonar Reasoning Pro,Razonamiento Profundo,128000,2.0,8.0,,,text+image->text,Inactivo
+openai/o3-deep-research,OpenAI: o3 Deep Research,Razonamiento Profundo,200000,10.0,40.0,,,text+image+file->text,Inactivo
+deepseek/deepseek-v3.2,DeepSeek: DeepSeek V3.2,Uso General (Frontier & Multipropósito),131072,0.252,0.378,1335.0,2119.05,text->text,Inactivo
+deepseek/deepseek-v3.2-exp,DeepSeek: DeepSeek V3.2 Exp,Uso General (Frontier & Multipropósito),163840,0.27,0.41,1335.0,1963.24,text->text,Inactivo
+meta-llama/llama-3.1-70b-instruct,Meta: Llama 3.1 70B Instruct,Uso General (Frontier & Multipropósito),131072,0.3999999999999999,0.3999999999999999,1270.0,1587.5,text->text,Inactivo
+deepseek/deepseek-chat-v3.1,DeepSeek: DeepSeek V3.1,Uso General (Frontier & Multipropósito),32768,0.15,0.75,1335.0,1483.33,text->text,Inactivo
+deepseek/deepseek-chat-v3-0324,DeepSeek: DeepSeek V3 0324,Uso General (Frontier & Multipropósito),163840,0.1999999999999999,0.77,1335.0,1376.29,text->text,Inactivo
+deepseek/deepseek-chat,DeepSeek: DeepSeek V3,Uso General (Frontier & Multipropósito),163840,0.32,0.8899999999999999,1335.0,1103.31,text->text,Inactivo
+deepseek/deepseek-v3.1-terminus,DeepSeek: DeepSeek V3.1 Terminus,Uso General (Frontier & Multipropósito),163840,0.27,0.95,1335.0,1094.26,text->text,Inactivo
+deepseek/deepseek-v3.2-speciale,DeepSeek: DeepSeek V3.2 Speciale,Uso General (Frontier & Multipropósito),163840,0.3999999999999999,1.2,1335.0,834.38,text->text,Inactivo
+qwen/qwen-max,Qwen: Qwen-Max ,Uso General (Frontier & Multipropósito),32768,1.04,4.16,1310.0,251.92,text->text,Inactivo
+mistralai/mistral-large-2411,Mistral Large 2411,Uso General (Frontier & Multipropósito),131072,2.0,6.0,1315.0,164.38,text->text,Inactivo
+mistralai/mistral-large-2407,Mistral Large 2407,Uso General (Frontier & Multipropósito),131072,2.0,6.0,1310.0,163.75,text->text,Inactivo
+mistralai/mixtral-8x22b-instruct,Mistral: Mixtral 8x22B Instruct,Uso General (Frontier & Multipropósito),65536,2.0,6.0,1240.0,155.0,text->text,Inactivo
+openai/gpt-4o-2024-11-20,OpenAI: GPT-4o (2024-11-20),Uso General (Frontier & Multipropósito),128000,2.5,10.0,1345.0,107.6,text+image+file->text,Inactivo
+openai/gpt-4o-search-preview,OpenAI: GPT-4o Search Preview,Uso General (Frontier & Multipropósito),128000,2.5,10.0,1340.0,107.2,text->text,Inactivo
+openai/gpt-4o-2024-08-06,OpenAI: GPT-4o (2024-08-06),Uso General (Frontier & Multipropósito),128000,2.5,10.0,1340.0,107.2,text+image+file->text,Inactivo
+openai/gpt-4o,OpenAI: GPT-4o,Uso General (Frontier & Multipropósito),128000,2.5,10.0,1340.0,107.2,text+image+file->text,Inactivo
+google/gemini-3.1-pro-preview,Google: Gemini 3.1 Pro Preview,Uso General (Frontier & Multipropósito),1048576,2.0,12.0,1385.0,98.93,text+image+file+audio+video->text,Activo
+anthropic/claude-3.7-sonnet,Anthropic: Claude 3.7 Sonnet,Uso General (Frontier & Multipropósito),200000,3.0,15.0,1380.0,76.67,text+image+file->text,Inactivo
+openai/gpt-4o-2024-05-13,OpenAI: GPT-4o (2024-05-13),Uso General (Frontier & Multipropósito),128000,5.0,15.0,1340.0,67.0,text+image+file->text,Inactivo
+openai/gpt-4-turbo,OpenAI: GPT-4 Turbo,Uso General (Frontier & Multipropósito),128000,10.0,30.0,1260.0,31.5,text+image->text,Inactivo
+openai/gpt-4-turbo-preview,OpenAI: GPT-4 Turbo Preview,Uso General (Frontier & Multipropósito),128000,10.0,30.0,1260.0,31.5,text->text,Inactivo
+openai/o1,OpenAI: o1,Uso General (Frontier & Multipropósito),200000,15.0,60.0,1370.0,18.27,text+image+file->text,Inactivo
+openai/o1-pro,OpenAI: o1-pro,Uso General (Frontier & Multipropósito),200000,150.0,600.0,1370.0,1.83,text+image+file->text,Inactivo
+google/gemma-3-4b-it,Google: Gemma 3 4B,Uso General (Frontier & Multipropósito),131072,0.04,0.08,,,text+image->text,Inactivo
+ibm-granite/granite-4.0-h-micro,IBM: Granite 4.0 Micro,Uso General (Frontier & Multipropósito),131000,0.017,0.11,,,text->text,Inactivo
+qwen/qwen-2.5-7b-instruct,Qwen: Qwen2.5 7B Instruct,Uso General (Frontier & Multipropósito),32768,0.04,0.0999999999999999,,,text->text,Inactivo
+ibm-granite/granite-4.1-8b,IBM: Granite 4.1 8B,Uso General (Frontier & Multipropósito),131072,0.0499999999999999,0.0999999999999999,,,text->text,Inactivo
+liquid/lfm-2-24b-a2b,LiquidAI: LFM2-24B-A2B,Uso General (Frontier & Multipropósito),32768,0.03,0.12,,,text->text,Inactivo
+qwen/qwen-turbo,Qwen: Qwen-Turbo,Uso General (Frontier & Multipropósito),131072,0.0325,0.13,,,text->text,Inactivo
+openai/gpt-oss-20b,OpenAI: gpt-oss-20b,Uso General (Frontier & Multipropósito),131072,0.03,0.14,,,text->text,Inactivo
+google/gemma-3-12b-it,Google: Gemma 3 12B,Uso General (Frontier & Multipropósito),131072,0.04,0.13,,,text+image->text,Inactivo
+qwen/qwen3-235b-a22b-2507,Qwen: Qwen3 235B A22B Instruct 2507,Uso General (Frontier & Multipropósito),262144,0.071,0.0999999999999999,,,text->text,Inactivo
+amazon/nova-micro-v1,Amazon: Nova Micro 1.0,Uso General (Frontier & Multipropósito),128000,0.035,0.14,,,text->text,Inactivo
+google/gemma-3n-e4b-it,Google: Gemma 3n 4B,Uso General (Frontier & Multipropósito),32768,0.06,0.12,,,text->text,Inactivo
+cohere/command-r7b-12-2024,Cohere: Command R7B (12-2024),Uso General (Frontier & Multipropósito),128000,0.0375,0.15,,,text->text,Inactivo
+z-ai/glm-4-32b,Z.ai: GLM 4 32B ,Uso General (Frontier & Multipropósito),128000,0.0999999999999999,0.0999999999999999,,,text->text,Inactivo
+microsoft/phi-4,Microsoft: Phi 4,Uso General (Frontier & Multipropósito),16384,0.065,0.14,,,text->text,Inactivo
+openai/gpt-oss-120b,OpenAI: gpt-oss-120b,Uso General (Frontier & Multipropósito),131072,0.039,0.18,,,text->text,Inactivo
+meta-llama/llama-3.2-1b-instruct,Meta: Llama 3.2 1B Instruct,Uso General (Frontier & Multipropósito),60000,0.027,0.1999999999999999,,,text->text,Inactivo
+google/gemma-3-27b-it,Google: Gemma 3 27B,Uso General (Frontier & Multipropósito),131072,0.08,0.16,,,text+image->text,Inactivo
+qwen/qwen3.5-9b,Qwen: Qwen3.5-9B,Uso General (Frontier & Multipropósito),262144,0.0999999999999999,0.15,,,text+image+video->text,Inactivo
+bytedance/ui-tars-1.5-7b,ByteDance: UI-TARS 7B ,Uso General (Frontier & Multipropósito),128000,0.0999999999999999,0.1999999999999999,,,text+image->text,Inactivo
+mistralai/mistral-7b-instruct-v0.1,Mistral: Mistral 7B Instruct v0.1,Uso General (Frontier & Multipropósito),2824,0.11,0.19,,,text->text,Inactivo
+qwen/qwen3-32b,Qwen: Qwen3 32B,Uso General (Frontier & Multipropósito),40960,0.08,0.24,,,text->text,Inactivo
+essentialai/rnj-1-instruct,EssentialAI: Rnj 1 Instruct,Uso General (Frontier & Multipropósito),32768,0.15,0.15,,,text->text,Inactivo
+qwen/qwen3-14b,Qwen: Qwen3 14B,Uso General (Frontier & Multipropósito),40960,0.06,0.24,,,text->text,Inactivo
+baidu/ernie-4.5-21b-a3b,Baidu: ERNIE 4.5 21B A3B,Uso General (Frontier & Multipropósito),120000,0.07,0.28,,,text->text,Inactivo
+arcee-ai/spotlight,Arcee AI: Spotlight,Uso General (Frontier & Multipropósito),131072,0.18,0.18,,,text+image->text,Inactivo
+meta-llama/llama-guard-4-12b,Meta: Llama Guard 4 12B,Uso General (Frontier & Multipropósito),163840,0.18,0.18,,,text+image->text,Inactivo
+qwen/qwen3-30b-a3b-instruct-2507,Qwen: Qwen3 30B A3B Instruct 2507,Uso General (Frontier & Multipropósito),262144,0.09,0.3,,,text->text,Inactivo
+openai/gpt-oss-safeguard-20b,OpenAI: gpt-oss-safeguard-20b,Uso General (Frontier & Multipropósito),131072,0.075,0.3,,,text->text,Inactivo
+meta-llama/llama-4-scout,Meta: Llama 4 Scout,Uso General (Frontier & Multipropósito),327680,0.08,0.3,,,text+image->text,Inactivo
+google/gemma-4-26b-a4b-it,Google: Gemma 4 26B A4B ,Uso General (Frontier & Multipropósito),262144,0.06,0.33,,,text+image+video->text,Inactivo
+meta-llama/llama-3.2-3b-instruct,Meta: Llama 3.2 3B Instruct,Uso General (Frontier & Multipropósito),80000,0.051,0.3399999999999999,,,text->text,Inactivo
+qwen/qwen3-8b,Qwen: Qwen3 8B,Uso General (Frontier & Multipropósito),40960,0.0499999999999999,0.3999999999999999,,,text->text,Inactivo
+meta-llama/llama-guard-3-8b,Llama Guard 3 8B,Uso General (Frontier & Multipropósito),131072,0.48,0.03,,,text->text,Inactivo
+nvidia/llama-3.3-nemotron-super-49b-v1.5,NVIDIA: Llama 3.3 Nemotron Super 49B V1.5,Uso General (Frontier & Multipropósito),131072,0.0999999999999999,0.3999999999999999,,,text->text,Inactivo
+alibaba/tongyi-deepresearch-30b-a3b,Tongyi DeepResearch 30B A3B,Uso General (Frontier & Multipropósito),131072,0.09,0.4499999999999999,,,text->text,Inactivo
+qwen/qwen3-30b-a3b,Qwen: Qwen3 30B A3B,Uso General (Frontier & Multipropósito),40960,0.09,0.4499999999999999,,,text->text,Inactivo
+google/gemma-4-31b-it,Google: Gemma 4 31B,Uso General (Frontier & Multipropósito),262144,0.13,0.38,,,text+image+video->text,Inactivo
+arcee-ai/trinity-large-preview,Arcee AI: Trinity Large Preview,Uso General (Frontier & Multipropósito),131000,0.15,0.4499999999999999,,,text->text,Inactivo
+nvidia/nemotron-3-super-120b-a12b,NVIDIA: Nemotron 3 Super,Uso General (Frontier & Multipropósito),262144,0.09,0.4499999999999999,,,text->text,Inactivo
+thedrummer/rocinante-12b,TheDrummer: Rocinante 12B,Uso General (Frontier & Multipropósito),32768,0.1699999999999999,0.43,,,text->text,Inactivo
+allenai/olmo-3-32b-think,AllenAI: Olmo 3 32B Think,Uso General (Frontier & Multipropósito),65536,0.15,0.5,,,text->text,Inactivo
+nex-agi/deepseek-v3.1-nex-n1,Nex AGI: DeepSeek V3.1 Nex N1,Uso General (Frontier & Multipropósito),131072,0.135,0.5,,,text->text,Inactivo
+upstage/solar-pro-3,Upstage: Solar Pro 3,Uso General (Frontier & Multipropósito),128000,0.15,0.6,,,text->text,Inactivo
+tencent/hunyuan-a13b-instruct,Tencent: Hunyuan A13B Instruct,Uso General (Frontier & Multipropósito),131072,0.14,0.5700000000000001,,,text->text,Inactivo
+allenai/olmo-3.1-32b-instruct,AllenAI: Olmo 3.1 32B Instruct,Uso General (Frontier & Multipropósito),65536,0.1999999999999999,0.6,,,text->text,Inactivo
+meta-llama/llama-4-maverick,Meta: Llama 4 Maverick,Uso General (Frontier & Multipropósito),1048576,0.15,0.6,,,text+image->text,Inactivo
+cohere/command-r-08-2024,Cohere: Command R (08-2024),Uso General (Frontier & Multipropósito),128000,0.15,0.6,,,text->text,Inactivo
+mistralai/mistral-saba,Mistral: Saba,Uso General (Frontier & Multipropósito),32768,0.1999999999999999,0.6,,,text->text,Inactivo
+thedrummer/unslopnemo-12b,TheDrummer: UnslopNemo 12B,Uso General (Frontier & Multipropósito),32768,0.3999999999999999,0.3999999999999999,,,text->text,Inactivo
+qwen/qwen-plus-2025-07-28,Qwen: Qwen Plus 0728,Uso General (Frontier & Multipropósito),1000000,0.26,0.78,,,text->text,Inactivo
+qwen/qwen-plus,Qwen: Qwen-Plus,Uso General (Frontier & Multipropósito),1000000,0.26,0.78,,,text->text,Inactivo
+z-ai/glm-4.5-air,Z.ai: GLM 4.5 Air,Uso General (Frontier & Multipropósito),131072,0.13,0.85,,,text->text,Inactivo
+inception/mercury-2,Inception: Mercury 2,Uso General (Frontier & Multipropósito),128000,0.25,0.75,,,text->text,Inactivo
+mistralai/mixtral-8x7b-instruct,Mistral: Mixtral 8x7B Instruct,Uso General (Frontier & Multipropósito),32768,0.54,0.54,,,text->text,Inactivo
+undi95/remm-slerp-l2-13b,ReMM SLERP 13B,Uso General (Frontier & Multipropósito),6144,0.4499999999999999,0.65,,,text->text,Inactivo
+meta-llama/llama-3-70b-instruct,Meta: Llama 3 70B Instruct,Uso General (Frontier & Multipropósito),8192,0.51,0.74,,,text->text,Inactivo
+qwen/qwen3.6-35b-a3b,Qwen: Qwen3.6 35B A3B,Uso General (Frontier & Multipropósito),262144,0.1611999999999999,0.96525,,,text+image+video->text,Inactivo
+qwen/qwen3-next-80b-a3b-instruct,Qwen: Qwen3 Next 80B A3B Instruct,Uso General (Frontier & Multipropósito),262144,0.09,1.1,,,text->text,Inactivo
+z-ai/glm-4.6v,Z.ai: GLM 4.6V,Uso General (Frontier & Multipropósito),131072,0.3,0.8999999999999999,,,text+image+video->text,Inactivo
+microsoft/wizardlm-2-8x22b,WizardLM-2 8x22B,Uso General (Frontier & Multipropósito),65535,0.62,0.62,,,text->text,Inactivo
+sao10k/l3.3-euryale-70b,Sao10K: Llama 3.3 Euryale 70B,Uso General (Frontier & Multipropósito),131072,0.65,0.75,,,text->text,Inactivo
+google/gemma-2-27b-it,Google: Gemma 2 27B,Uso General (Frontier & Multipropósito),8192,0.65,0.65,,,text->text,Inactivo
+prime-intellect/intellect-3,Prime Intellect: INTELLECT-3,Uso General (Frontier & Multipropósito),131072,0.1999999999999999,1.1,,,text->text,Inactivo
+baidu/ernie-4.5-300b-a47b,Baidu: ERNIE 4.5 300B A47B ,Uso General (Frontier & Multipropósito),123000,0.28,1.1,,,text->text,Inactivo
+thedrummer/skyfall-36b-v2,TheDrummer: Skyfall 36B V2,Uso General (Frontier & Multipropósito),32768,0.55,0.7999999999999999,,,text->text,Inactivo
+qwen/qwen3.5-35b-a3b,Qwen: Qwen3.5-35B-A3B,Uso General (Frontier & Multipropósito),262144,0.1625,1.3,,,text+image+video->text,Inactivo
+sao10k/l3.1-euryale-70b,Sao10K: Llama 3.1 Euryale 70B v2.2,Uso General (Frontier & Multipropósito),131072,0.85,0.85,,,text->text,Inactivo
+qwen/qwen3.5-plus-02-15,Qwen: Qwen3.5 Plus 2026-02-15,Uso General (Frontier & Multipropósito),1000000,0.26,1.56,,,text+image+video->text,Inactivo
+qwen/qwen3.5-27b,Qwen: Qwen3.5-27B,Uso General (Frontier & Multipropósito),262144,0.195,1.56,,,text+image+video->text,Inactivo
+arcee-ai/virtuoso-large,Arcee AI: Virtuoso Large,Uso General (Frontier & Multipropósito),131072,0.75,1.2,,,text->text,Inactivo
+mistralai/mistral-large-2512,Mistral: Mistral Large 3 2512,Uso General (Frontier & Multipropósito),262144,0.5,1.5,,,text+image->text,Inactivo
+perplexity/sonar,Perplexity: Sonar,Uso General (Frontier & Multipropósito),127072,1.0,1.0,,,text+image->text,Inactivo
+qwen/qwen3.6-plus,Qwen: Qwen3.6 Plus,Uso General (Frontier & Multipropósito),1000000,0.325,1.95,,,text+image+video->text,Inactivo
+relace/relace-apply-3,Relace: Relace Apply 3,Uso General (Frontier & Multipropósito),256000,0.85,1.25,,,text->text,Inactivo
+z-ai/glm-4.7,Z.ai: GLM 4.7,Uso General (Frontier & Multipropósito),202752,0.38,1.74,,,text->text,Inactivo
+nvidia/llama-3.1-nemotron-70b-instruct,NVIDIA: Llama 3.1 Nemotron 70B Instruct,Uso General (Frontier & Multipropósito),131072,1.2,1.2,,,text->text,Inactivo
+bytedance-seed/seed-1.6,ByteDance Seed: Seed 1.6,Uso General (Frontier & Multipropósito),262144,0.25,2.0,,,text+image+video->text,Inactivo
+qwen/qwen3-235b-a22b,Qwen: Qwen3 235B A22B,Uso General (Frontier & Multipropósito),131072,0.4549999999999999,1.82,,,text->text,Inactivo
+z-ai/glm-4.6,Z.ai: GLM 4.6,Uso General (Frontier & Multipropósito),204800,0.39,1.9,,,text->text,Inactivo
+aion-labs/aion-rp-llama-3.1-8b,AionLabs: Aion-RP 1.0 (8B),Uso General (Frontier & Multipropósito),32768,0.7999999999999999,1.6,,,text->text,Inactivo
+qwen/qwen3.5-122b-a10b,Qwen: Qwen3.5-122B-A10B,Uso General (Frontier & Multipropósito),262144,0.26,2.08,,,text+image+video->text,Inactivo
+xiaomi/mimo-v2.5,Xiaomi: MiMo-V2.5,Uso General (Frontier & Multipropósito),1048576,0.3999999999999999,2.0,,,text+image+audio+video->text,Inactivo
+xiaomi/mimo-v2-omni,Xiaomi: MiMo-V2-Omni,Uso General (Frontier & Multipropósito),262144,0.3999999999999999,2.0,,,text+image+audio+video->text,Inactivo
+aion-labs/aion-2.0,AionLabs: Aion-2.0,Uso General (Frontier & Multipropósito),131072,0.7999999999999999,1.6,,,text->text,Inactivo
+moonshotai/kimi-k2-0905,MoonshotAI: Kimi K2 0905,Uso General (Frontier & Multipropósito),262144,0.3999999999999999,2.0,,,text->text,Inactivo
+mistralai/mistral-medium-3.1,Mistral: Mistral Medium 3.1,Uso General (Frontier & Multipropósito),131072,0.3999999999999999,2.0,,,text+image->text,Inactivo
+z-ai/glm-4.5v,Z.ai: GLM 4.5V,Uso General (Frontier & Multipropósito),65536,0.6,1.7999999999999998,,,text+image->text,Inactivo
+mistralai/mistral-medium-3,Mistral: Mistral Medium 3,Uso General (Frontier & Multipropósito),131072,0.3999999999999999,2.0,,,text+image->text,Inactivo
+moonshotai/kimi-k2.5,MoonshotAI: Kimi K2.5,Uso General (Frontier & Multipropósito),262144,0.44,2.0,,,text+image->text,Inactivo
+qwen/qwen3.5-plus-20260420,Qwen: Qwen3.5 Plus 2026-04-20,Uso General (Frontier & Multipropósito),1000000,0.3999999999999999,2.4,,,text+image+video->text,Inactivo
+morph/morph-v3-large,Morph: Morph V3 Large,Uso General (Frontier & Multipropósito),262144,0.8999999999999999,1.9,,,text->text,Inactivo
+sao10k/l3-euryale-70b,Sao10k: Llama 3 Euryale 70B v2.1,Uso General (Frontier & Multipropósito),8192,1.48,1.48,,,text->text,Inactivo
+qwen/qwen3.5-397b-a17b,Qwen: Qwen3.5 397B A17B,Uso General (Frontier & Multipropósito),262144,0.39,2.34,,,text+image+video->text,Inactivo
+z-ai/glm-5,Z.ai: GLM 5,Uso General (Frontier & Multipropósito),202752,0.6,2.08,,,text->text,Inactivo
+z-ai/glm-4.5,Z.ai: GLM 4.5,Uso General (Frontier & Multipropósito),131072,0.6,2.2,,,text->text,Inactivo
+moonshotai/kimi-k2,MoonshotAI: Kimi K2 0711,Uso General (Frontier & Multipropósito),131072,0.5700000000000001,2.3,,,text->text,Inactivo
+qwen/qwen3.6-27b,Qwen: Qwen3.6 27B,Uso General (Frontier & Multipropósito),262144,0.32,3.2,,,text+image+video->text,Inactivo
+xiaomi/mimo-v2.5-pro,Xiaomi: MiMo-V2.5-Pro,Uso General (Frontier & Multipropósito),1048576,1.0,3.0,,,text->text,Inactivo
+xiaomi/mimo-v2-pro,Xiaomi: MiMo-V2-Pro,Uso General (Frontier & Multipropósito),1048576,1.0,3.0,,,text->text,Inactivo
+amazon/nova-pro-v1,Amazon: Nova Pro 1.0,Uso General (Frontier & Multipropósito),300000,0.7999999999999999,3.2,,,text+image->text,Inactivo
+x-ai/grok-4.3,xAI: Grok 4.3,Uso General (Frontier & Multipropósito),1000000,1.25,2.5,,,text+image->text,Inactivo
+x-ai/grok-4.20,xAI: Grok 4.20,Uso General (Frontier & Multipropósito),2000000,1.25,2.5,,,text+image+file->text,Inactivo
+relace/relace-search,Relace: Relace Search,Uso General (Frontier & Multipropósito),256000,1.0,3.0,,,text->text,Inactivo
+qwen/qwen3-max,Qwen: Qwen3 Max,Uso General (Frontier & Multipropósito),262144,0.78,3.9,,,text->text,Inactivo
+~moonshotai/kimi-latest,MoonshotAI Kimi Latest,Uso General (Frontier & Multipropósito),262142,0.74,3.49,,,text+image->text,Inactivo
+moonshotai/kimi-k2.6,MoonshotAI: Kimi K2.6,Uso General (Frontier & Multipropósito),262142,0.74,3.49,,,text+image->text,Inactivo
+switchpoint/router,Switchpoint Router,Uso General (Frontier & Multipropósito),131072,0.85,3.4,,,text->text,Inactivo
+z-ai/glm-5.1,Z.ai: GLM 5.1,Uso General (Frontier & Multipropósito),202752,1.0499999999999998,3.5,,,text->text,Inactivo
+z-ai/glm-5v-turbo,Z.ai: GLM 5V Turbo,Uso General (Frontier & Multipropósito),202752,1.2,4.0,,,text+image+video->text,Inactivo
+z-ai/glm-5-turbo,Z.ai: GLM 5 Turbo,Uso General (Frontier & Multipropósito),202752,1.2,4.0,,,text->text,Inactivo
+sao10k/l3.1-70b-hanami-x1,Sao10K: Llama 3.1 70B Hanami x1,Uso General (Frontier & Multipropósito),16000,3.0,3.0,,,text->text,Inactivo
+writer/palmyra-x5,Writer: Palmyra X5,Uso General (Frontier & Multipropósito),1040000,0.6,6.0,,,text->text,Inactivo
+mistralai/pixtral-large-2411,Mistral: Pixtral Large 2411,Uso General (Frontier & Multipropósito),131072,2.0,6.0,,,text+image->text,Inactivo
+mistralai/mistral-large,Mistral Large,Uso General (Frontier & Multipropósito),128000,2.0,6.0,,,text->text,Inactivo
+x-ai/grok-4.20-multi-agent,xAI: Grok 4.20 Multi-Agent,Uso General (Frontier & Multipropósito),2000000,2.0,6.0,,,text+image+file->text,Inactivo
+ai21/jamba-large-1.7,AI21: Jamba Large 1.7,Uso General (Frontier & Multipropósito),256000,2.0,8.0,,,text->text,Inactivo
+openai/gpt-4.1,OpenAI: GPT-4.1,Uso General (Frontier & Multipropósito),1047576,2.0,8.0,,,text+image+file->text,Inactivo
+perplexity/sonar-deep-research,Perplexity: Sonar Deep Research,Uso General (Frontier & Multipropósito),128000,2.0,8.0,,,text->text,Inactivo
+inflection/inflection-3-productivity,Inflection: Inflection 3 Productivity,Uso General (Frontier & Multipropósito),8000,2.5,10.0,,,text->text,Inactivo
+cohere/command-r-plus-08-2024,Cohere: Command R+ (08-2024),Uso General (Frontier & Multipropósito),128000,2.5,10.0,,,text->text,Inactivo
+openai/gpt-5.1,OpenAI: GPT-5.1,Uso General (Frontier & Multipropósito),400000,1.25,10.0,,,text+image+file->text,Inactivo
+openai/gpt-5.1-chat,OpenAI: GPT-5.1 Chat,Uso General (Frontier & Multipropósito),128000,1.25,10.0,,,text+image+file->text,Inactivo
+openai/gpt-5-chat,OpenAI: GPT-5 Chat,Uso General (Frontier & Multipropósito),128000,1.25,10.0,,,text+image+file->text,Inactivo
+openai/gpt-5,OpenAI: GPT-5,Uso General (Frontier & Multipropósito),400000,1.25,10.0,,,text+image+file->text,Inactivo
+alpindale/goliath-120b,Goliath 120B,Uso General (Frontier & Multipropósito),6144,3.75,7.5,,,text->text,Inactivo
+aion-labs/aion-1.0,AionLabs: Aion-1.0,Uso General (Frontier & Multipropósito),131072,4.0,8.0,,,text->text,Inactivo
+cohere/command-a,Cohere: Command A,Uso General (Frontier & Multipropósito),256000,2.5,10.0,,,text->text,Inactivo
+inflection/inflection-3-pi,Inflection: Inflection 3 Pi,Uso General (Frontier & Multipropósito),8000,2.5,10.0,,,text->text,Inactivo
+amazon/nova-premier-v1,Amazon: Nova Premier 1.0,Uso General (Frontier & Multipropósito),1000000,2.5,12.5,,,text+image->text,Inactivo
+openai/gpt-5.3-chat,OpenAI: GPT-5.3 Chat,Uso General (Frontier & Multipropósito),128000,1.75,14.0,,,text+image+file->text,Inactivo
+openai/gpt-5.2-chat,OpenAI: GPT-5.2 Chat,Uso General (Frontier & Multipropósito),128000,1.75,14.0,,,text+image+file->text,Inactivo
+openai/gpt-5.2,OpenAI: GPT-5.2,Uso General (Frontier & Multipropósito),400000,1.75,14.0,,,text+image+file->text,Inactivo
+~anthropic/claude-sonnet-latest,Anthropic Claude Sonnet Latest,Uso General (Frontier & Multipropósito),1000000,3.0,15.0,,,text+image->text,Inactivo
+perplexity/sonar-pro-search,Perplexity: Sonar Pro Search,Uso General (Frontier & Multipropósito),200000,3.0,15.0,,,text+image->text,Inactivo
+anthropic/claude-sonnet-4.5,Anthropic: Claude Sonnet 4.5,Uso General (Frontier & Multipropósito),1000000,3.0,15.0,,,text+image+file->text,Inactivo
+anthropic/claude-sonnet-4,Anthropic: Claude Sonnet 4,Uso General (Frontier & Multipropósito),1000000,3.0,15.0,,,text+image+file->text,Inactivo
+perplexity/sonar-pro,Perplexity: Sonar Pro,Uso General (Frontier & Multipropósito),200000,3.0,15.0,,,text+image->text,Inactivo
+openai/gpt-5.4,OpenAI: GPT-5.4,Uso General (Frontier & Multipropósito),1050000,2.5,15.0,,,text+image+file->text,Inactivo
+x-ai/grok-4,xAI: Grok 4,Uso General (Frontier & Multipropósito),256000,3.0,15.0,,,text+image+file->text,Inactivo
+x-ai/grok-3,xAI: Grok 3,Uso General (Frontier & Multipropósito),131072,3.0,15.0,,,text->text,Inactivo
+x-ai/grok-3-beta,xAI: Grok 3 Beta,Uso General (Frontier & Multipropósito),131072,3.0,15.0,,,text->text,Inactivo
+~anthropic/claude-opus-latest,Anthropic: Claude Opus Latest,Uso General (Frontier & Multipropósito),1000000,5.0,25.0,,,text+image->text,Inactivo
+anthropic/claude-opus-4.6,Anthropic: Claude Opus 4.6,Uso General (Frontier & Multipropósito),1000000,5.0,25.0,,,text+image->text,Inactivo
+anthropic/claude-opus-4.5,Anthropic: Claude Opus 4.5,Uso General (Frontier & Multipropósito),200000,5.0,25.0,,,text+image+file->text,Inactivo
+~openai/gpt-latest,OpenAI GPT Latest,Uso General (Frontier & Multipropósito),1050000,5.0,30.0,,,text+image+file->text,Inactivo
+openai/gpt-5.5,OpenAI: GPT-5.5,Uso General (Frontier & Multipropósito),1050000,5.0,30.0,,,text+image+file->text,Inactivo
+openai/gpt-4-1106-preview,OpenAI: GPT-4 Turbo (older v1106),Uso General (Frontier & Multipropósito),128000,10.0,30.0,,,text->text,Inactivo
+anthropic/claude-opus-4.1,Anthropic: Claude Opus 4.1,Uso General (Frontier & Multipropósito),200000,15.0,75.0,,,text+image+file->text,Inactivo
+anthropic/claude-opus-4,Anthropic: Claude Opus 4,Uso General (Frontier & Multipropósito),200000,15.0,75.0,,,text+image+file->text,Inactivo
+openai/gpt-4,OpenAI: GPT-4,Uso General (Frontier & Multipropósito),8191,30.0,60.0,,,text->text,Inactivo
+openai/gpt-4-0314,OpenAI: GPT-4 (older v0314),Uso General (Frontier & Multipropósito),8191,30.0,60.0,,,text->text,Inactivo
+openai/o3-pro,OpenAI: o3 Pro,Uso General (Frontier & Multipropósito),200000,20.0,80.0,,,text+image+file->text,Inactivo
+openai/gpt-5-pro,OpenAI: GPT-5 Pro,Uso General (Frontier & Multipropósito),400000,15.0,120.0,,,text+image+file->text,Inactivo
+anthropic/claude-opus-4.6-fast,Anthropic: Claude Opus 4.6 (Fast),Uso General (Frontier & Multipropósito),1000000,30.0,150.0,,,text+image->text,Inactivo
+openai/gpt-5.2-pro,OpenAI: GPT-5.2 Pro,Uso General (Frontier & Multipropósito),400000,21.0,168.0,,,text+image+file->text,Inactivo
+openai/gpt-5.5-pro,OpenAI: GPT-5.5 Pro,Uso General (Frontier & Multipropósito),1050000,30.0,180.0,,,text+image+file->text,Inactivo
+openai/gpt-5.4-pro,OpenAI: GPT-5.4 Pro,Uso General (Frontier & Multipropósito),1050000,30.0,180.0,,,text+image+file->text,Inactivo

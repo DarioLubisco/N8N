@@ -1,0 +1,82 @@
+{
+  "nodes": [
+    {
+      "id": "e6a0d0a5-1111-4b11-a888-1234567890ab",
+      "name": "Recibir Pedido",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [100, 300],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            { "name": "items", "type": "string" },
+            { "name": "cod_cliente", "type": "string" },
+            { "name": "cod_cliente_len", "type": "number" },
+            { "name": "carpeta_pedidos", "type": "string" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e6a0d0a5-2222-4b11-a888-1234567890ab",
+      "name": "Obtener Correlativo",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [300, 300],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE Proveedores.Pedidos_FTP_Secuencia SET UltimoCorrelativo = UltimoCorrelativo + 1, UpdatedAt = SYSDATETIME() WHERE DrogueriaCode = 'COBECA13'; SELECT UltimoCorrelativo AS correlativo FROM Proveedores.Pedidos_FTP_Secuencia WHERE DrogueriaCode = 'COBECA13';"
+      }
+    },
+    {
+      "id": "e6a0d0a5-3333-4b11-a888-1234567890ab",
+      "name": "Generar Archivo TXT",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const triggerData = $('Recibir Pedido').first().json;\nconst corrData = $('Obtener Correlativo').first().json;\n\nconst items = triggerData.items || [];\nconst codCliente = triggerData.cod_cliente || '0';\nconst carpeta = triggerData.carpeta_pedidos || '/';\nconst correlativo = corrData.correlativo || 1;\n\n// Formato para Cobeca\nconst fileName = 'cobeca_pedido_' + correlativo + '.txt';\n\nconst lines = items.map(item => {\n  return `${item.codigo_producto};${item.cantidad}`;\n});\nconst fileContent = lines.join('\\n');\n\nreturn [{\n  json: {\n    fileName,\n    fileContent,\n    fullPath: `${carpeta}${fileName}`,\n    correlativo,\n    drogueria_code: 'COBECA13'\n  }\n}];"
+      }
+    },
+    {
+      "id": "e6a0d0a5-4444-4b11-a888-1234567890ab",
+      "name": "Subir Pedido FTP",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [700, 300],
+      "parameters": {
+        "protocol": "ftp",
+        "operation": "upload",
+        "path": "={{ $json.fullPath }}",
+        "binaryData": false,
+        "fileContent": "={{ $json.fileContent }}"
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Pedido": {
+      "main": [
+        [
+          { "node": "Obtener Correlativo", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Obtener Correlativo": {
+      "main": [
+        [
+          { "node": "Generar Archivo TXT", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Generar Archivo TXT": {
+      "main": [
+        [
+          { "node": "Subir Pedido FTP", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+Droguería: ITS
+Host: ftp.knc.dsp.mybluehost.me:21
+Usuario: clienteits0722@drogueriaits2015.com.ve
+
+CONEXIÓN: OK
+
+ESTRUCTURA FTP:
+  /drwxrwxrwx    3 kncdspmy   kncdspmy         4096 Mar 10 08:37 .
+  /drwxrwxrwx    3 kncdspmy   kncdspmy         4096 Mar 10 08:37 ..
+  /-rw-------    1 kncdspmy   kncdspmy            9 Apr 10 02:13 .ftpquota
+  /-rw-r--r--    1 kncdspmy   kncdspmy       154986 Apr 30 15:00 0722_inventario.txt
+  /drwxr-xr-x    2 kncdspmy   kncdspmy         4096 Mar 10 08:37 Pedido
+    /Pedido/drwxr-xr-x    2 kncdspmy   kncdspmy         4096 Mar 10 08:37 .
+    /Pedido/drwxrwxrwx    3 kncdspmy   kncdspmy         4096 Mar 10 08:37 ..

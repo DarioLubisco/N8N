@@ -1,0 +1,102 @@
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+⚡ Interrupted during API call.
+⚡ Interrupted during API call.
+  💾 Self-improvement review: Skill 'enterprise-database-bridge' created. · Memory updated
+⚠️ Connection to provider dropped (APIError). Reconnecting… (attempt 2/3)
+🔄 Reconnected — resuming…
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+
+STDERR:
+WARNING gateway.run: Shutdown diagnostic — other hermes processes running:
+  root           1  0.0  0.0   2564  1408 ?        Ss   07:21   0:00 /usr/bin/tini -g -- /opt/hermes/docker/entrypoint.sh gateway run
+  hermes       398  0.0  0.0   6792  3820 ?        R    07:30   0:00 ps aux
+WARNING gateway.run: Shutdown diagnostic — other hermes processes running:
+  root           1  0.0  0.0   2564  1408 ?        Ss   07:30   0:00 /usr/bin/tini -g -- /opt/hermes/docker/entrypoint.sh gateway run
+  hermes       135  0.3  0.0   4444  3252 ?        Ss   07:37   0:00 /usr/bin/bash -c source /tmp/hermes-snap-d5bbbf081bf2.sh >/dev/null 2>&1 || true builtin cd /opt/data || exit 126 eval 'find / -maxdepth 6 -iname "*efficacis*" 2>/dev/null' __hermes_ec=$? export -p > /tmp/hermes-snap-d5bbbf081bf2.sh 2>/dev/null || true pwd -P > /tmp/hermes-cwd-d5bbbf081bf2.txt 2>/dev/null || true printf '\n__HERMES_CWD_d5bbbf081bf2__%s__HERMES_CWD_d5bbbf081bf2__\n' "$(pwd -P)" exit $__hermes_ec
+  hermes       137 26.0  0.0   5140  2824 ?        D    07:37   0:02 find / -maxdepth 6 -iname *efficacis*
+  hermes       138 50.0  0.0   6792  3824 ?        R    07:37   0:00 ps aux
+ERROR root: API call failed after 3 retries. HTTP 404: No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection | provider=openrouter model=nousresearch/hermes-4-405b msgs=222 tokens=~44,504
+ERROR root: API call failed after 3 retries. HTTP 404: No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection | provider=openrouter model=nousresearch/hermes-4-405b msgs=223 tokens=~44,539
+WARNING gateway.run: Shutdown diagnostic — other hermes processes running:
+  root           1  0.0  0.0   2564  1396 ?        Ss   07:38   0:00 /usr/bin/tini -g -- /opt/hermes/docker/entrypoint.sh gateway run
+  hermes       954 40.0  0.0   6792  3900 ?        R    08:38   0:00 ps aux
+WARNING gateway.run: Shutdown diagnostic — other hermes processes running:
+  root           1  0.0  0.0   2564  1384 ?        Ss   08:39   0:00 /usr/bin/tini -g -- /opt/hermes/docker/entrypoint.sh gateway run
+  hermes        29  0.0  0.0   6792  3832 ?        R    08:46   0:00 ps aux
+WARNING gateway.run: Shutdown diagnostic — other hermes processes running:
+  root           1  0.0  0.0   2564  1416 ?        Ss   08:47   0:00 /usr/bin/tini -g -- /opt/hermes/docker/entrypoint.sh gateway run
+  hermes        28  100  0.0   6792  3868 ?        R    08:53   0:00 ps aux
+WARNING gateway.run: Shutdown diagnostic — other hermes processes running:
+  root           1  0.0  0.0   2564  1396 ?        Ss   08:53   0:00 /usr/bin/tini -g -- /opt/hermes/docker/entrypoint.sh gateway run
+  hermes        29  100  0.0   6792  3816 ?        R    08:56   0:00 ps aux

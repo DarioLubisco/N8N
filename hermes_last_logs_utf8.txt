@@ -1,0 +1,170 @@
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+⚠️  API call failed (attempt 1/3): NotFoundError [HTTP 404]
+   🔌 Provider: openrouter  Model: nousresearch/hermes-4-405b
+   🌐 Endpoint: https://openrouter.ai/api/v1
+   📝 Error: HTTP 404: No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection
+   📋 Details: {'message': 'No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection', 'code': 404}
+   ⏱️  Elapsed: 0.33s  Context: 5 msgs, ~5,618 tokens
+   💡 No OpenRouter providers for nousresearch/hermes-4-405b support tool calling with your current settings.
+      Check which providers support tools: https://openrouter.ai/models/nousresearch/hermes-4-405b
+⏳ Retrying in 2.6s (attempt 1/3)...
+⚠️  API call failed (attempt 2/3): NotFoundError [HTTP 404]
+   🔌 Provider: openrouter  Model: nousresearch/hermes-4-405b
+   🌐 Endpoint: https://openrouter.ai/api/v1
+   📝 Error: HTTP 404: No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection
+   📋 Details: {'message': 'No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection', 'code': 404}
+   ⏱️  Elapsed: 3.44s  Context: 5 msgs, ~5,618 tokens
+   💡 No OpenRouter providers for nousresearch/hermes-4-405b support tool calling with your current settings.
+      Check which providers support tools: https://openrouter.ai/models/nousresearch/hermes-4-405b
+⏳ Retrying in 5.5s (attempt 2/3)...
+⚠️  API call failed (attempt 3/3): NotFoundError [HTTP 404]
+   🔌 Provider: openrouter  Model: nousresearch/hermes-4-405b
+   🌐 Endpoint: https://openrouter.ai/api/v1
+   📝 Error: HTTP 404: No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection
+   📋 Details: {'message': 'No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection', 'code': 404}
+   ⏱️  Elapsed: 9.37s  Context: 5 msgs, ~5,618 tokens
+   💡 No OpenRouter providers for nousresearch/hermes-4-405b support tool calling with your current settings.
+      Check which providers support tools: https://openrouter.ai/models/nousresearch/hermes-4-405b
+⚠️ Max retries (3) exhausted — trying fallback...
+❌ API failed after 3 retries — HTTP 404: No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection
+   💀 Final error: HTTP 404: No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection
+🧾 Request debug dump written to: /opt/data/sessions/request_dump_20260506_053207_cdd82a8c_20260506_055936_205408.json
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+⚠️  API call failed (attempt 1/3): NotFoundError [HTTP 404]
+   🔌 Provider: openrouter  Model: nousresearch/hermes-4-405b
+   🌐 Endpoint: https://openrouter.ai/api/v1
+   📝 Error: HTTP 404: No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection
+   📋 Details: {'message': 'No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection', 'code': 404}
+   ⏱️  Elapsed: 1.51s  Context: 6 msgs, ~5,640 tokens
+   💡 No OpenRouter providers for nousresearch/hermes-4-405b support tool calling with your current settings.
+      Check which providers support tools: https://openrouter.ai/models/nousresearch/hermes-4-405b
+⏳ Retrying in 2.5s (attempt 1/3)...
+⚠️  API call failed (attempt 2/3): NotFoundError [HTTP 404]
+   🔌 Provider: openrouter  Model: nousresearch/hermes-4-405b
+   🌐 Endpoint: https://openrouter.ai/api/v1
+   📝 Error: HTTP 404: No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection
+   📋 Details: {'message': 'No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection', 'code': 404}
+   ⏱️  Elapsed: 4.45s  Context: 6 msgs, ~5,640 tokens
+   💡 No OpenRouter providers for nousresearch/hermes-4-405b support tool calling with your current settings.
+      Check which providers support tools: https://openrouter.ai/models/nousresearch/hermes-4-405b
+⏳ Retrying in 5.0s (attempt 2/3)...
+⚠️  API call failed (attempt 3/3): NotFoundError [HTTP 404]
+   🔌 Provider: openrouter  Model: nousresearch/hermes-4-405b
+   🌐 Endpoint: https://openrouter.ai/api/v1
+   📝 Error: HTTP 404: No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection
+   📋 Details: {'message': 'No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection', 'code': 404}
+   ⏱️  Elapsed: 9.99s  Context: 6 msgs, ~5,640 tokens
+   💡 No OpenRouter providers for nousresearch/hermes-4-405b support tool calling with your current settings.
+      Check which providers support tools: https://openrouter.ai/models/nousresearch/hermes-4-405b
+⚠️ Max retries (3) exhausted — trying fallback...
+❌ API failed after 3 retries — HTTP 404: No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection
+   💀 Final error: HTTP 404: No endpoints found that support tool use. Try disabling "patch". To learn more about provider routing, visit: https://openrouter.ai/docs/guides/routing/provider-selection
+🧾 Request debug dump written to: /opt/data/sessions/request_dump_20260506_053207_cdd82a8c_20260506_061535_398515.json
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+
+Dropping root privileges
+Syncing bundled skills into ~/.hermes/skills/ ...
+
+Done: 0 new, 0 updated, 89 unchanged. 89 total bundled.
+┌─────────────────────────────────────────────────────────┐
+│           ⚕ Hermes Gateway Starting...                 │
+├─────────────────────────────────────────────────────────┤
+│  Messaging platforms + cron scheduler                    │
+│  Press Ctrl+C to stop                                   │
+└─────────────────────────────────────────────────────────┘
+

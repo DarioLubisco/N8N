@@ -1,0 +1,540 @@
+{
+  "updatedAt": "2026-04-30T16:09:13.228Z",
+  "createdAt": "2026-04-23T23:31:35.943Z",
+  "id": "zLtMDgsc7OSXyXrp",
+  "name": "[PROD] Error Notification System",
+  "description": "Workflow de notificación de errores por email y Telegram.",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "5d6b9ea3-4741-492f-9cc0-f8c020e82ffa",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "id": "10b4a759-915a-4bef-841c-50d400ed407b",
+      "name": "Format Alert Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "alert_title",
+              "type": "string",
+              "value": "={{ \"⚠️ ERROR: \" + ($json.workflow?.name || \"Workflow Desconocido\") }}"
+            },
+            {
+              "id": "2",
+              "name": "alert_body",
+              "type": "string",
+              "value": "={{ \"<b>Nodo:</b> \" + ($json.execution?.error?.node?.name || \"Desconocido\") + \"\\n<b>Mensaje:</b> \" + ($json.execution?.error?.message || \"Sin mensaje\") }}"
+            },
+            {
+              "id": "3",
+              "name": "execution_url",
+              "type": "string",
+              "value": "={{ $json.execution?.url }}"
+            },
+            {
+              "id": "4",
+              "name": "workflow_id",
+              "type": "string",
+              "value": "={{ $json.workflow?.id }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ed57e2dc-21f5-4b77-99c4-5d368714c243",
+      "name": "Check Mute Status",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        600,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SAv7NkTUX9oYd4v3"
+        },
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "ServiceName",
+              "condition": "eq",
+              "keyValue": "={{ $json.workflow_id }}"
+            }
+          ]
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "5048a721-af5e-456f-951b-ba1dd916ef6e",
+      "name": "Is Muted?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "d9b350f5-3006-44b4-ad0c-b26a6dbb01ab",
+              "leftValue": "={{ $json.MuteUntil ? (DateTime.fromISO($json.MuteUntil) > DateTime.now()) : false }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "df42f65a-b8db-48cb-b94d-5320a891ec7f",
+      "name": "Send Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1100,
+        400
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "-1003531406167",
+        "text": "={{ $(\"Format Alert Data\").item.json.alert_title }}\n\n{{ $(\"Format Alert Data\").item.json.alert_body }}\n\n<a href=\"{{ $(\"Format Alert Data\").item.json.execution_url }}\">Ver detalles en n8n</a>",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "appendAttribution": false
+        },
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "🔕 1h",
+                    "additionalFields": {
+                      "callback_data": "={{ \"mute_1_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
+                    }
+                  },
+                  {
+                    "text": "🔕 4h",
+                    "additionalFields": {
+                      "callback_data": "={{ \"mute_4_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
+                    }
+                  },
+                  {
+                    "text": "🔕 12h",
+                    "additionalFields": {
+                      "callback_data": "={{ \"mute_12_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "🔊 Desilenciar",
+                    "additionalFields": {
+                      "callback_data": "={{ \"mute_0_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      },
+      "webhookId": "efdfb8a8-1101-4bef-b52a-159c7462e230"
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Alert Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Alert Data": {
+      "main": [
+        [
+          {
+            "node": "Check Mute Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Mute Status": {
+      "main": [
+        [
+          {
+            "node": "Is Muted?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Muted?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "2daafda2-fb10-4cce-b7c1-de603061f58d",
+  "activeVersionId": "2daafda2-fb10-4cce-b7c1-de603061f58d",
+  "versionCounter": 72,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-23T23:31:35.943Z",
+      "createdAt": "2026-04-23T23:31:35.943Z",
+      "role": "workflow:owner",
+      "workflowId": "zLtMDgsc7OSXyXrp",
+      "projectId": "229NyZp0afAhCtOe",
+      "project": {
+        "updatedAt": "2026-04-23T17:03:42.069Z",
+        "createdAt": "2026-04-23T15:48:09.202Z",
+        "id": "229NyZp0afAhCtOe",
+        "name": "Dario Lubisco <dario.lubisco@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "0826022f-c1e7-4bbb-9570-229133922b29"
+      }
+    }
+  ],
+  "tags": [],
+  "parentFolder": null,
+  "activeVersion": {
+    "updatedAt": "2026-04-30T16:09:13.230Z",
+    "createdAt": "2026-04-30T16:09:13.230Z",
+    "versionId": "2daafda2-fb10-4cce-b7c1-de603061f58d",
+    "workflowId": "zLtMDgsc7OSXyXrp",
+    "nodes": [
+      {
+        "id": "5d6b9ea3-4741-492f-9cc0-f8c020e82ffa",
+        "name": "Error Trigger",
+        "type": "n8n-nodes-base.errorTrigger",
+        "typeVersion": 1,
+        "position": [
+          200,
+          300
+        ]
+      },
+      {
+        "id": "10b4a759-915a-4bef-841c-50d400ed407b",
+        "name": "Format Alert Data",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          400,
+          300
+        ],
+        "parameters": {
+          "mode": "manual",
+          "assignments": {
+            "assignments": [
+              {
+                "id": "1",
+                "name": "alert_title",
+                "type": "string",
+                "value": "={{ \"⚠️ ERROR: \" + ($json.workflow?.name || \"Workflow Desconocido\") }}"
+              },
+              {
+                "id": "2",
+                "name": "alert_body",
+                "type": "string",
+                "value": "={{ \"<b>Nodo:</b> \" + ($json.execution?.error?.node?.name || \"Desconocido\") + \"\\n<b>Mensaje:</b> \" + ($json.execution?.error?.message || \"Sin mensaje\") }}"
+              },
+              {
+                "id": "3",
+                "name": "execution_url",
+                "type": "string",
+                "value": "={{ $json.execution?.url }}"
+              },
+              {
+                "id": "4",
+                "name": "workflow_id",
+                "type": "string",
+                "value": "={{ $json.workflow?.id }}"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "ed57e2dc-21f5-4b77-99c4-5d368714c243",
+        "name": "Check Mute Status",
+        "type": "n8n-nodes-base.dataTable",
+        "typeVersion": 1.1,
+        "position": [
+          600,
+          300
+        ],
+        "parameters": {
+          "resource": "row",
+          "operation": "get",
+          "dataTableId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "SAv7NkTUX9oYd4v3"
+          },
+          "returnAll": true,
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "ServiceName",
+                "condition": "eq",
+                "keyValue": "={{ $json.workflow_id }}"
+              }
+            ]
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "id": "5048a721-af5e-456f-951b-ba1dd916ef6e",
+        "name": "Is Muted?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          800,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "d9b350f5-3006-44b4-ad0c-b26a6dbb01ab",
+                "leftValue": "={{ $json.MuteUntil ? (DateTime.fromISO($json.MuteUntil) > DateTime.now()) : false }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "df42f65a-b8db-48cb-b94d-5320a891ec7f",
+        "name": "Send Telegram Alert",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1100,
+          400
+        ],
+        "parameters": {
+          "resource": "message",
+          "operation": "sendMessage",
+          "chatId": "-1003531406167",
+          "text": "={{ $(\"Format Alert Data\").item.json.alert_title }}\n\n{{ $(\"Format Alert Data\").item.json.alert_body }}\n\n<a href=\"{{ $(\"Format Alert Data\").item.json.execution_url }}\">Ver detalles en n8n</a>",
+          "additionalFields": {
+            "parse_mode": "HTML",
+            "appendAttribution": false
+          },
+          "replyMarkup": "inlineKeyboard",
+          "inlineKeyboard": {
+            "rows": [
+              {
+                "row": {
+                  "buttons": [
+                    {
+                      "text": "🔕 1h",
+                      "additionalFields": {
+                        "callback_data": "={{ \"mute_1_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
+                      }
+                    },
+                    {
+                      "text": "🔕 4h",
+                      "additionalFields": {
+                        "callback_data": "={{ \"mute_4_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
+                      }
+                    },
+                    {
+                      "text": "🔕 12h",
+                      "additionalFields": {
+                        "callback_data": "={{ \"mute_12_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "row": {
+                  "buttons": [
+                    {
+                      "text": "🔊 Desilenciar",
+                      "additionalFields": {
+                        "callback_data": "={{ \"mute_0_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "RkijxthBpMtc1pDO",
+            "name": "[PROD] Telegram - Bot Pago Movil"
+          }
+        },
+        "webhookId": "efdfb8a8-1101-4bef-b52a-159c7462e230"
+      }
+    ],
+    "connections": {
+      "Error Trigger": {
+        "main": [
+          [
+            {
+              "node": "Format Alert Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Alert Data": {
+        "main": [
+          [
+            {
+              "node": "Check Mute Status",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Mute Status": {
+        "main": [
+          [
+            {
+              "node": "Is Muted?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is Muted?": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Send Telegram Alert",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Dario Lubisco",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-04-30T16:09:22.304Z",
+        "id": 91,
+        "workflowId": "zLtMDgsc7OSXyXrp",
+        "versionId": "2daafda2-fb10-4cce-b7c1-de603061f58d",
+        "event": "activated",
+        "userId": "0826022f-c1e7-4bbb-9570-229133922b29"
+      }
+    ]
+  },
+  "scopes": [
+    "workflow:create",
+    "workflow:delete",
+    "workflow:execute",
+    "workflow:execute-chat",
+    "workflow:list",
+    "workflow:move",
+    "workflow:publish",
+    "workflow:read",
+    "workflow:share",
+    "workflow:unpublish",
+    "workflow:unshare",
+    "workflow:update",
+    "workflow:updateRedactionSetting"
+  ],
+  "checksum": "462406d014e878f2a2e6edfe61a3a491fa74919d67636ed6a5908ebce48af765"
+}

@@ -1,0 +1,5 @@
+Droguería: ZAKIPHARMA
+Host: zakipharma.com:21
+Usuario: u840108517.clientes30
+
+CONEXIÓN: TIMEOUT — zakipharma.com:21
