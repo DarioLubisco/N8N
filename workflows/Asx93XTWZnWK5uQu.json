@@ -1,0 +1,167 @@
+{
+  "createdAt": "2026-04-23T01:51:00.401Z",
+  "updatedAt": "2026-05-28T05:53:37.283Z",
+  "id": "Asx93XTWZnWK5uQu",
+  "name": "[PROD] [Ventas] - Predecir Ventas (Python)",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "8daaf9c3-3b04-4ee3-90bd-8b7a0554edf4",
+      "name": "Lunes a las 6am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "command": "python3 /opt/scripts/sales_forecaster.py"
+      },
+      "id": "2b461663-c71d-46bb-82ee-aecb88e021c0",
+      "name": "Ejecutar sales_forecaster.py",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        304,
+        304
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DECLARE @latest_date DATE = (SELECT TOP 1 CAST(fecha_calculo AS DATE) FROM EnterpriseAdmin_AMC.Procurement.sales_forecast ORDER BY fecha_calculo DESC);\nIF @latest_date < CAST(GETDATE() AS DATE)\nBEGIN\n    RAISERROR('El pronóstico de ventas no se actualizó hoy.', 16, 1);\nEND\nELSE\nBEGIN\n    SELECT TOP 1 * FROM EnterpriseAdmin_AMC.Procurement.sales_forecast ORDER BY fecha_calculo DESC;\nEND"
+      },
+      "id": "95dfae4c-3d04-43ec-baea-102e70eb4edd",
+      "name": "Verificar Actualizacion",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        304
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "-1003531406167",
+        "text": "=Feedback del Sales Forecaster:\nÚltima fecha de cálculo: {{ $json.fecha_calculo }}\nProyectado USD: {{ $json.monto_proyectado_usd }}",
+        "additionalFields": {}
+      },
+      "id": "45275959-e61b-48e6-ad13-c76405733ca3",
+      "name": "Enviar Feedback",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        704,
+        304
+      ],
+      "webhookId": "df2f2a73-15bf-437c-a08f-de04dc9fa8de",
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### 📈 Sales Forecaster\n- **Host**: Debian (10.147.18.204)\n- **Script**: sales_forecaster.py\n- **DB**: EnterpriseAdmin_AMC",
+        "width": 300
+      },
+      "id": "aead3d65-e19c-4410-8d6b-3c8d8e9dc023",
+      "name": "Nota de Infraestructura",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        112,
+        112
+      ]
+    }
+  ],
+  "connections": {
+    "Lunes a las 6am": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar sales_forecaster.py",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejecutar sales_forecaster.py": {
+      "main": [
+        [
+          {
+            "node": "Verificar Actualizacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Actualizacion": {
+      "main": [
+        [
+          {
+            "node": "Enviar Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Lunes a las 6am": {
+      "recurrenceRules": [],
+      "recurrencyRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "ab50fe5a-5b26-4efe-b2fc-1daf3389ff7e",
+  "triggerCount": 1,
+  "tags": [
+    {
+      "createdAt": "2026-04-29T15:41:30.813Z",
+      "updatedAt": "2026-04-29T15:41:30.813Z",
+      "id": "ar7VkyPtRJkNlcoi",
+      "name": "Produccion"
+    }
+  ]
+}

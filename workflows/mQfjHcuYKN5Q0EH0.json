@@ -1,0 +1,65 @@
+{
+  "createdAt": "2026-05-15T21:35:39.282Z",
+  "updatedAt": "2026-05-16T00:43:25.322Z",
+  "id": "mQfjHcuYKN5Q0EH0",
+  "name": "[DIAG] Check Debian Docker Status",
+  "active": false,
+  "nodes": [
+    {
+      "id": "ba953c7c-971a-4f3b-a2b6-ca078b9e9672",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "id": "8732b205-96ac-49e0-954c-11ff8988ccc3",
+      "name": "Get Evolution Base64 QR",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        540,
+        300
+      ],
+      "parameters": {
+        "resource": "command",
+        "operation": "execute",
+        "command": "curl -s -X GET \"http://localhost:8088/instance/connect/Whatsapp_AMC\" -H \"apikey: a8efc554faaf4b52ca1e3b7d05523903\" | grep -oP '\"base64\":\"\\K[^\"]+'"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Evolution Base64 QR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "440aae0a-d096-40b0-a3db-db11b777f98e",
+  "triggerCount": 0,
+  "tags": []
+}

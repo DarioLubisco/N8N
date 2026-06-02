@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-04-30T22:32:22.337Z",
+  "updatedAt": "2026-05-04T01:45:05.725Z",
+  "id": "MRai4klXRfAZmOii",
+  "name": "[ARCHIVE] [Mercado] - Market Statistical Closing",
+  "active": false,
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "46bce72d-87b9-4f40-bd22-c93cf275fbac",
+  "triggerCount": 0,
+  "tags": []
+}

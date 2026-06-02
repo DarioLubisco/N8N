@@ -1,0 +1,297 @@
+{
+  "createdAt": "2026-05-06T03:01:00.631Z",
+  "updatedAt": "2026-05-06T03:07:04.164Z",
+  "id": "bevtwW3SXF0y3d4f",
+  "name": "[PROD] Flujo Maestro de Pedidos (Orquestador)",
+  "active": false,
+  "nodes": [
+    {
+      "id": "d6cedc77-6668-47f4-af88-3468ef11b9ce",
+      "name": "Recepción Pedido (Synapse)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pedidos-orchestrator",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "cf808643-4051-4fb2-b3c3-55a92f796621"
+    },
+    {
+      "id": "48a02035-0c89-447c-bed3-133ec84ee7bb",
+      "name": "Enrutador por Droguería / Método",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        400,
+        300
+      ],
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "output": 0,
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "c1",
+                    "leftValue": "={{ $json.body.drogueria_code }}",
+                    "rightValue": "VITAL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "id": "c2",
+                    "leftValue": "={{ $json.body.metodo_envio || 'FTP' }}",
+                    "rightValue": "FTP",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "output": 1,
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "c3",
+                    "leftValue": "={{ $json.body.drogueria_code }}",
+                    "rightValue": "INTERCONTINENTAL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "id": "c4",
+                    "leftValue": "={{ $json.body.metodo_envio || 'FTP' }}",
+                    "rightValue": "FTP",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "output": 2,
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "c5",
+                    "leftValue": "={{ $json.body.metodo_envio || 'FTP' }}",
+                    "rightValue": "FTP",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "269096d8-1366-4d47-a084-12d6f60f9869",
+      "name": "Sub-Flujo Vital Clinic",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {
+        "workflowId": "B4YiA5FjkNlsLygm",
+        "mode": "once",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "values": {
+            "items": "={{ $json.body.items }}",
+            "drogueria_code": "={{ $json.body.drogueria_code }}",
+            "cod_cliente": "={{ $json.body.cod_cliente }}",
+            "carpeta_pedidos": "={{ $json.body.carpeta_pedidos || '/Pedidos/' }}",
+            "ftp_credential_name": "={{ $json.body.ftp_credential_name || '[PROD] FTP - Vital Clinic' }}"
+          }
+        }
+      }
+    },
+    {
+      "id": "316ab881-e011-469a-9b7e-37026071b929",
+      "name": "Responder a Synapse",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1000,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"success\", \"message\": \"Pedido enrutado correctamente\"}"
+      }
+    },
+    {
+      "id": "4f7e8e20-535b-4cbf-b7b9-b6fe5b8f8b9e",
+      "name": "Sub-Flujo Intercontinental",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "workflowId": "TUDesLm3edSD85RG",
+        "mode": "once",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "values": {
+            "items": "={{ $json.body.items }}",
+            "drogueria_code": "={{ $json.body.drogueria_code }}",
+            "cod_cliente": "={{ $json.body.cod_cliente }}",
+            "carpeta_pedidos": "={{ $json.body.carpeta_pedidos || '/Pedidos/' }}",
+            "ftp_credential_name": "={{ $json.body.ftp_credential_name || '[PROD] FTP - Intercontinental' }}"
+          }
+        }
+      }
+    },
+    {
+      "id": "5dc1aa19-a730-41c3-9879-74c81c8dfa27",
+      "name": "Sub-Flujo Fallback Excel",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        500
+      ],
+      "parameters": {
+        "workflowId": "LBsAiZgImguxMWtk",
+        "mode": "once",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "values": {
+            "items": "={{ $json.body.items }}",
+            "drogueria_code": "={{ $json.body.drogueria_code }}",
+            "cod_cliente": "={{ $json.body.cod_cliente }}",
+            "metodo_envio": "={{ $json.body.metodo_envio }}"
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Recepción Pedido (Synapse)": {
+      "main": [
+        [
+          {
+            "node": "Enrutador por Droguería / Método",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrutador por Droguería / Método": {
+      "main": [
+        [
+          {
+            "node": "Sub-Flujo Vital Clinic",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sub-Flujo Intercontinental",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sub-Flujo Fallback Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sub-Flujo Vital Clinic": {
+      "main": [
+        [
+          {
+            "node": "Responder a Synapse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sub-Flujo Intercontinental": {
+      "main": [
+        [
+          {
+            "node": "Responder a Synapse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sub-Flujo Fallback Excel": {
+      "main": [
+        [
+          {
+            "node": "Responder a Synapse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "162c6ab5-bbe5-44bc-bf4b-0f16acea98ad",
+  "triggerCount": 0,
+  "tags": []
+}

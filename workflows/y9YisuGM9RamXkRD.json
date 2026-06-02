@@ -1,0 +1,120 @@
+{
+  "createdAt": "2026-05-01T01:43:14.434Z",
+  "updatedAt": "2026-05-04T03:36:36.514Z",
+  "id": "y9YisuGM9RamXkRD",
+  "name": "[PROD] [Inventario] - ETL Inventario Coface",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "Logica"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        352,
+        304
+      ],
+      "typeVersion": 1,
+      "id": "c9713a45-a01e-4d04-b867-99f68a51e96d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "id": "72206be5-83c3-4153-a3b2-8f91020921b2",
+      "name": "Recibir Correo",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        112,
+        304
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jUZwJXwdxrmRlajr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "d8a97ef6-d167-45ca-96f9-b5566dcfafd3",
+      "name": "Guardar Adjunto",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        304,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "command": "python3 /opt/scripts/droguerias/email_parser.py --legacy-mode --file \"/tmp/attachments/inventario.xlsx\""
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        512,
+        304
+      ],
+      "id": "f2b4afa7-23f2-4530-aedc-4af8dcc53217",
+      "name": "Cargar Datos",
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Correo": {
+      "main": [
+        [
+          {
+            "node": "Guardar Adjunto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar Adjunto": {
+      "main": [
+        [
+          {
+            "node": "Cargar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "4f3dcb8b-7061-4b9e-b526-f001ce29928e",
+  "triggerCount": 0,
+  "tags": []
+}

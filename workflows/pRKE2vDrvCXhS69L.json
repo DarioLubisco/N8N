@@ -1,0 +1,179 @@
+{
+  "createdAt": "2026-05-05T23:22:32.758Z",
+  "updatedAt": "2026-05-05T23:22:32.758Z",
+  "id": "pRKE2vDrvCXhS69L",
+  "name": "[PROD] [Proveedores-Híbridos] - Ingesta Dronena",
+  "active": false,
+  "nodes": [
+    {
+      "id": "7dd04e3f-5791-4418-a97c-30edbdfd84ab",
+      "name": "⏱️ Trigger — Cada 2 Horas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "087b803f-7fc2-4b89-883e-16ab81bfadf0",
+      "name": "🐍 SSH — Ejecutar ETL Dronena",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {
+        "command": "python3 \"/opt/scripts/Dronena/Imp_Inv_Dronena.py\""
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "id": "b9753220-7c69-44f7-9179-d8dfc783219c",
+      "name": "✅ ¿Éxito?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.stdout }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              },
+              "rightValue": "Éxito"
+            }
+          ]
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      }
+    },
+    {
+      "id": "8403a3b8-cc99-4d9c-a650-ae5d054f860e",
+      "name": "📊 Formatear Éxito",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        750,
+        150
+      ],
+      "parameters": {
+        "jsCode": "const output = $input.first().json.stdout || \"\";\nconst match = output.match(/insertado\\/actualizado (\\d+)/);\nconst rows = match ? parseInt(match[1]) : 0;\n\nreturn [{\n  json: {\n    status: \"success\",\n    proveedor: \"Dronena\",\n    registros: rows,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      }
+    },
+    {
+      "id": "41995f04-d68a-4dce-949f-ed4818407b1a",
+      "name": "❌ Preparar Detalles Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        750,
+        450
+      ],
+      "parameters": {
+        "jsCode": "const stderr = $input.first().json.stderr || \"\";\nconst stdout = $input.first().json.stdout || \"\";\n\nreturn [{\n  json: {\n    error_detail: stderr || stdout || \"Error desconocido en la ejecución del script.\",\n    timestamp: new Date().toISOString()\n  }\n}];"
+      }
+    },
+    {
+      "id": "270da33d-da8c-4de0-90d9-df73b63cea68",
+      "name": "🔴 Lanzar Error Estructurado",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        450
+      ],
+      "parameters": {
+        "errorMessage": "=🚨 CRÍTICO (Primer Grado): Fallo en Ingesta Dronena\n🖥️ Entidad Origen: Servidor Debian Webservices (IP: 10.147.18.204)\n🎯 Entidad Destino: Servidor Windows SRV-DC-AMC (IP: 10.200.8.5)\n🔌 Servicio Afectado: ETL Python / MSSQL (Dronena)\n\n📝 Diagnóstico: El script de ingesta falló durante la ejecución SSH.\n🔍 Detalles: {{ $json.error_detail }}"
+      }
+    }
+  ],
+  "connections": {
+    "⏱️ Trigger — Cada 2 Horas": {
+      "main": [
+        [
+          {
+            "node": "🐍 SSH — Ejecutar ETL Dronena",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🐍 SSH — Ejecutar ETL Dronena": {
+      "main": [
+        [
+          {
+            "node": "✅ ¿Éxito?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ ¿Éxito?": {
+      "main": [
+        [
+          {
+            "node": "📊 Formatear Éxito",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Preparar Detalles Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "❌ Preparar Detalles Error": {
+      "main": [
+        [
+          {
+            "node": "🔴 Lanzar Error Estructurado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "600e35cb-0d42-4151-ac07-fa98cdc4ffcc",
+  "triggerCount": 0,
+  "tags": []
+}

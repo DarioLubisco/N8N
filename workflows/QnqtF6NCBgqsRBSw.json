@@ -1,0 +1,214 @@
+{
+  "createdAt": "2026-04-28T03:10:13.631Z",
+  "updatedAt": "2026-05-04T00:15:40.683Z",
+  "id": "QnqtF6NCBgqsRBSw",
+  "name": "[PROD] [Finanzas] - Reporte de Compras Diarias",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### 📦 iCompras360 Sync\n- **Logic**: Native n8n SQL + API\n- **DB**: EnterpriseAdmin_AMC\n- **Freq**: Cada 20 min (8am-7pm)",
+        "width": 300
+      },
+      "id": "90fc0978-8c90-4996-a847-0bfc8c67366d",
+      "name": "Nota de Infraestructura",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        112,
+        112
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "a812d86c-2b8e-447a-89e2-194382fe0953",
+      "name": "Disparador Manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        208,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 */20 8-18 * * *"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 0 19 * * *"
+            }
+          ]
+        }
+      },
+      "id": "e0784952-ccb1-4127-aa92-64697a997ca3",
+      "name": "Disparador (Cada 20m)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://admin.icompras360.online/api/get_catalogo/008376238?licencia=VEISACO0000100100845&serial=NG5626W1019110S390&codisb=008376238",
+        "options": {}
+      },
+      "id": "68e5d756-09f3-45e0-9206-0ce122c615ec",
+      "name": "Obtener Catalogo iCompras",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        464,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT LineaInventario FROM EnterpriseAdmin_AMC.dbo.Custom_Inventario_i360"
+      },
+      "id": "604ef1fe-227f-4556-8360-bd7d7d2ee9f3",
+      "name": "Consultar Inventario SQL",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        304
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function limpiar_numero(valor) {\n    try {\n        if (valor === undefined || valor === null || valor.trim() === '') return 0.0;\n        let num = parseFloat(String(valor).replace(',', '.'));\n        return isNaN(num) ? 0.0 : num;\n    } catch(e) {\n        return 0.0;\n    }\n}\n\nlet items = $input.all();\nlet inventario = [];\n\nfor (let item of items) {\n    let linea = item.json.LineaInventario;\n    if (!linea) continue;\n    let cols = linea.split('|');\n    if (cols.length < 33) continue;\n\n    inventario.push({\n        \"codprod\": String(cols[1]).trim(),\n        \"barra\": String(cols[0]).trim(),\n        \"desprod\": String(cols[2]).trim(),\n        \"tipo\": String(cols[3]).trim(),\n        \"costo\": limpiar_numero(cols[25]),\n        \"regulado\": String(cols[5]).trim(),\n        \"precio1\": limpiar_numero(cols[7]),\n        \"iva\": limpiar_numero(cols[4]),\n        \"oferta\": limpiar_numero(cols[11]),\n        \"bulto\": parseInt(limpiar_numero(cols[9])),\n        \"dctoneto\": limpiar_numero(cols[20]),\n        \"psugerido\": limpiar_numero(cols[14]),\n        \"ubicacion\": String(cols[26]).trim(),\n        \"fechafalla\": String(cols[17]).trim(),\n        \"fecvence\": String(cols[22]).trim(),\n        \"pactivo\": String(cols[24]).trim(),\n        \"pgris\": limpiar_numero(cols[15]),\n        \"marca\": String(cols[23]).trim(),\n        \"subgrupo\": String(cols[31]).trim(),\n        \"categoria\": String(cols[30]).trim(),\n        \"molecula\": String(cols[32]).trim(),\n        \"codprov\": String(cols[6]).trim(),\n        \"upre\": String(cols[12]).trim(),\n        \"ppre\": limpiar_numero(cols[13]),\n        \"cantidad\": parseInt(limpiar_numero(cols[8]))\n    });\n}\n\n// Split into batches of 1000\nlet batches = [];\nlet batchSize = 1000;\nlet totalBatches = Math.ceil(inventario.length / batchSize);\n\nfor (let i = 0; i < inventario.length; i += batchSize) {\n    let chunk = inventario.slice(i, i + batchSize);\n    \n    batches.push({\n        json: {\n            licencia: \"VEISACO0000100100845\",\n            serial: \"NG5626W1019110S390\",\n            codisb: \"008376238\",\n            datos: JSON.stringify(chunk),\n            _batchInfo: {\n                number: (i / batchSize) + 1,\n                total: totalBatches,\n                size: chunk.length\n            }\n        }\n    });\n}\n\nreturn batches;"
+      },
+      "id": "259bb513-f157-45cf-b1a5-984f5c8a0f18",
+      "name": "Formatear y Agrupar Lotes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://admin.icompras360.online/api/cargarinvindividualV2/008376238",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "2bffdf54-50ba-4437-932d-e7054dc41aba",
+      "name": "Subir Lotes a iCompras",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1184,
+        304
+      ]
+    }
+  ],
+  "connections": {
+    "Disparador Manual": {
+      "main": [
+        [
+          {
+            "node": "Obtener Catalogo iCompras",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Disparador (Cada 20m)": {
+      "main": [
+        [
+          {
+            "node": "Obtener Catalogo iCompras",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Catalogo iCompras": {
+      "main": [
+        [
+          {
+            "node": "Consultar Inventario SQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar Inventario SQL": {
+      "main": [
+        [
+          {
+            "node": "Formatear y Agrupar Lotes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear y Agrupar Lotes": {
+      "main": [
+        [
+          {
+            "node": "Subir Lotes a iCompras",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "callerPolicy": "workflowsFromSameOwner",
+    "timezone": "America/Caracas"
+  },
+  "staticData": {
+    "node:Schedule (8am-7pm)": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "66ae16fb-70d8-4715-a44b-2b95ef6d8b6e",
+  "triggerCount": 1,
+  "tags": [
+    {
+      "createdAt": "2026-04-29T18:47:49.915Z",
+      "updatedAt": "2026-04-29T18:47:49.915Z",
+      "id": "zfDPQy3ToLGJHzFZ",
+      "name": "Proveedores-Híbridos"
+    },
+    {
+      "createdAt": "2026-04-29T15:41:30.813Z",
+      "updatedAt": "2026-04-29T15:41:30.813Z",
+      "id": "ar7VkyPtRJkNlcoi",
+      "name": "Produccion"
+    }
+  ]
+}

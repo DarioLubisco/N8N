@@ -1,0 +1,281 @@
+{
+  "createdAt": "2026-04-27T01:43:07.941Z",
+  "updatedAt": "2026-05-03T22:51:00.959Z",
+  "id": "uk3bDYeg916QaWc3",
+  "name": "Antigravity Telegram Bridge + Voz",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "id": "7b09dff9-8eae-4a67-a97d-e91a8f35dd86",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        304
+      ],
+      "webhookId": "5533c596-4beb-4b43-8db8-6197ef11ba7f",
+      "credentials": {
+        "telegramApi": {
+          "id": "uTJp1jQRzzB0MrtK",
+          "name": "[PROD] Telegram - AMC_Notificacion_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "type": "string"
+          },
+          "conditions": [
+            {
+              "id": "check-voice",
+              "leftValue": "=$json.message.voice",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              },
+              "rightValue": "",
+              "type": "string"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "01531162-58cd-440f-a523-ee3f0133df30",
+      "name": "¿Es Voz?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "6ecb1e85-25d5-4e8c-9a6e-6a10f44f9d78",
+      "name": "Prepare Audio",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googlePalmApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [\n      {\"text\": \"Por favor transcribe exactamente lo que se dice en este audio. Solo devuelve el texto transcrito, sin añadir ningún comentario extra.\"},\n      {\n        \"inline_data\": {\n          \"mime_type\": \"audio/ogg\",\n          \"data\": \"{{ $binary.data.data }}\"\n        }\n      }\n    ]\n  }]\n}",
+        "options": {}
+      },
+      "id": "32333d1b-82cc-425a-910e-12f27860544f",
+      "name": "Gemini Audio to Text",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        560,
+        160
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ahqBbPI8ffeaZECJ",
+          "name": "[PROD] Google Gemini - Synapse AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $node[\"¿Es Voz?\"].json.message.voice ? $node[\"Gemini Audio to Text\"].json.candidates[0].content.parts[0].text : $json.message.text }}",
+        "options": {
+          "systemMessage": "Eres Antigravity, un asistente experto en programación y automatización. Respondes de forma clara y técnica. El usuario puede comunicarse contigo por voz o texto."
+        }
+      },
+      "id": "a2b7f96d-063e-4b30-9fe2-602083cdc40d",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        800,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "id": "baab22ba-b01c-4dc9-9096-f715318caac4",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        800,
+        512
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ahqBbPI8ffeaZECJ",
+          "name": "[PROD] Google Gemini - Synapse AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=$node[\"Telegram Trigger\"].json[\"message\"][\"chat\"][\"id\"]"
+      },
+      "id": "5966ac81-8a29-4d87-8fb2-e71c3fff50d5",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        960,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "=$node[\"Telegram Trigger\"].json[\"message\"][\"chat\"][\"id\"]",
+        "text": "=$json.output",
+        "additionalFields": {}
+      },
+      "id": "6cd7762d-eefc-4fd9-9c15-9269eff8e8e2",
+      "name": "Telegram Send Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1056,
+        304
+      ],
+      "webhookId": "e498d017-372d-4623-beca-ac8991eed9f4",
+      "credentials": {
+        "telegramApi": {
+          "id": "uTJp1jQRzzB0MrtK",
+          "name": "[PROD] Telegram - AMC_Notificacion_bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "¿Es Voz?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es Voz?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Audio",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Audio": {
+      "main": [
+        [
+          {
+            "node": "Gemini Audio to Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Audio to Text": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "29979904-eb71-49b3-966b-1728bb473158",
+  "triggerCount": 1,
+  "tags": []
+}

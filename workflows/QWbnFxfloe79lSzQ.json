@@ -1,0 +1,61 @@
+{
+  "createdAt": "2026-04-29T17:32:58.361Z",
+  "updatedAt": "2026-04-29T17:56:18.852Z",
+  "id": "QWbnFxfloe79lSzQ",
+  "name": "[QA] Error Trigger Test",
+  "active": false,
+  "nodes": [
+    {
+      "id": "047eab10-2eeb-4b1d-ae49-f698a4af96eb",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "id": "fffb4fdd-886c-49df-ac2e-74646bacef66",
+      "name": "Failing Node",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        300
+      ],
+      "parameters": {
+        "jsCode": "throw new Error(\"Simulated QA Error for Centralized Reporter\");"
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Failing Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "5cfb0360-471d-4df0-a085-7b540802f9aa",
+  "triggerCount": 0,
+  "tags": []
+}

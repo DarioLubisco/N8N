@@ -1,0 +1,54 @@
+{
+  "createdAt": "2026-04-25T23:08:28.817Z",
+  "updatedAt": "2026-04-29T18:00:13.428Z",
+  "id": "2SDL463AGNG8cSdB",
+  "name": "Diagnostic: Connectivity Check建设",
+  "active": false,
+  "nodes": [
+    {
+      "id": "9bfb8db8-eae8-47d6-998e-ec52a9d5f1d1",
+      "name": "Check Connectivity",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "id": "97c024ac-8951-46e5-8b5e-abfe6a2aa614",
+      "name": "Execute Command",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Check Connectivity": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "3cd25c35-1a0c-4456-8d56-6463c1903a4f",
+  "triggerCount": 0,
+  "tags": []
+}

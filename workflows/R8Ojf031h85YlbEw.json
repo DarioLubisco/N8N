@@ -1,0 +1,63 @@
+{
+  "createdAt": "2026-05-07T00:42:43.258Z",
+  "updatedAt": "2026-05-07T00:42:43.258Z",
+  "id": "R8Ojf031h85YlbEw",
+  "name": "[TEST] SRE ITS Error Trigger",
+  "active": false,
+  "nodes": [
+    {
+      "id": "b6fb21f3-edec-4513-9d42-1d650040459d",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "id": "3f5f88cb-fa02-4b8c-bd2b-c5591fa3bc6a",
+      "name": "Trigger ITS Error",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        540,
+        300
+      ],
+      "parameters": {
+        "command": "python3 /opt/scripts/droguerias/its.py"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Trigger ITS Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "33807c76-9c93-437d-8a69-e96e9a09bbad",
+  "triggerCount": 0,
+  "tags": []
+}

@@ -1,0 +1,63 @@
+{
+  "createdAt": "2026-05-07T01:17:38.451Z",
+  "updatedAt": "2026-05-07T01:17:38.451Z",
+  "id": "l4dZ96g0IuclsNlg",
+  "name": "Setup Credentials",
+  "active": false,
+  "nodes": [
+    {
+      "id": "948c09a8-ccfb-4327-8bf2-568c61d6573b",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "id": "e6a7ec3f-4911-457f-ade8-3ad656c0cc51",
+      "name": "Create Hermes Credential",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/api/v1/credentials",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"name\":\"[PROD] Telegram - Mi Agente Inteligente (Hermes)\",\"type\":\"telegramApi\",\"data\":{\"accessToken\":\"8322313955:AAHwniwWZssrVuQBQGb1excjHKyZ2VQkkdE\"}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "n8nApi"
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create Hermes Credential",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "f3c83995-fc79-41a4-a651-ae8340ecfebe",
+  "triggerCount": 0,
+  "tags": []
+}

@@ -1,0 +1,63 @@
+{
+  "createdAt": "2026-05-06T01:12:11.201Z",
+  "updatedAt": "2026-05-06T01:12:46.916Z",
+  "id": "Vapv6ZPKo6U0k2IH",
+  "name": "[ADMIN] Leer Insuaminca",
+  "active": false,
+  "nodes": [
+    {
+      "id": "c96bc375-f19c-4325-b8cf-29be6637e6c2",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "id": "57210785-a01c-48da-8be5-fed37ac1f7d2",
+      "name": "Leer Insuaminca",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "command": "cat /opt/scripts/droguerias/insuaminca.py"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Leer Insuaminca",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "bdbd9bee-8f19-4a60-a967-aac2a8bf6164",
+  "triggerCount": 0,
+  "tags": []
+}

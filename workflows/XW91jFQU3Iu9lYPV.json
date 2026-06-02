@@ -1,0 +1,406 @@
+{
+  "createdAt": "2026-05-04T22:56:14.306Z",
+  "updatedAt": "2026-05-05T03:39:50.862Z",
+  "id": "XW91jFQU3Iu9lYPV",
+  "name": "[PROD] Copiloto Ventas Farmacia",
+  "active": false,
+  "nodes": [
+    {
+      "id": "98413d90-c8fe-4bde-b62a-b713c1fa7d46",
+      "name": "Recibir Mensaje Cliente",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "copiloto-ventas",
+        "responseMode": "lastNode",
+        "responseData": "firstEntryJson"
+      },
+      "webhookId": "72dc336b-b3fa-4da3-9e53-b0212aea609a"
+    },
+    {
+      "id": "43877f27-c515-4469-a5bf-a4ac54bf7f83",
+      "name": "Responder Consulta Farmacia",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        600,
+        300
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.mensaje }}",
+        "options": {
+          "systemMessage": "Eres el asistente virtual de Farmacia Americana, una farmacia de Venezuela.\nTu objetivo es ayudar a los clientes de forma amable, profesional y eficiente.\n\nHERRAMIENTAS DISPONIBLES:\n- \"Buscar Stock Producto\" o \"Buscar Stock Emergencia\": busca disponibilidad por nombre.\n- \"Buscar Alternativas Genericas\" o \"Buscar Alternativas Emergencia\": busca por principio activo.\n- \"Consultar Precios USD\": muestra precios en Bolivares y Dolares.\n- \"Alertar Vencimientos Proximos\": lista productos proximos a vencer.\n\nREGLAS:\n1. SIEMPRE busca en la base de datos antes de responder sobre disponibilidad.\n2. Si no hay stock, busca alternativas con el principio activo.\n3. Si piden precio en dolares, usa la herramienta de precios USD.\n4. Muestra precios en Bs. y tambien en USD si estan disponibles.\n5. Maximo 5 opciones si hay varios similares.\n6. NUNCA inventes precios. Si no encuentras datos di: \"No encontre ese producto en inventario\".\n7. Responde en espanol, conciso y amigable.\n8. Si preguntan algo NO farmaceutico, indica amablemente que solo atendes medicamentos.",
+          "maxIterations": 6,
+          "returnIntermediateSteps": false
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "37cb94ff-fa2b-400e-bc33-4955814da399",
+      "name": "Modelo Principal Llama 3.3",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        520,
+        600
+      ],
+      "parameters": {
+        "model": "meta-llama/llama-3.3-70b-instruct",
+        "options": {
+          "temperature": 0.4,
+          "maxTokens": 1024,
+          "timeout": 60000,
+          "maxRetries": 2
+        }
+      },
+      "credentials": {}
+    },
+    {
+      "id": "24d2d493-0171-4cc3-af40-ab6f0593d4b7",
+      "name": "Modelo Escalada V4 Flash",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        700,
+        600
+      ],
+      "parameters": {
+        "model": "deepseek/deepseek-v4-flash",
+        "options": {
+          "temperature": 0.3,
+          "maxTokens": 1024,
+          "timeout": 60000,
+          "maxRetries": 2
+        }
+      },
+      "credentials": {}
+    },
+    {
+      "id": "95ed388c-6ba4-4211-a8a8-2c8ffbe7d61b",
+      "name": "Recordar Conversacion",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        860,
+        600
+      ],
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.sessionId ?? $json.body.telefono ?? \"default\" }}",
+        "contextWindowLength": 10
+      }
+    },
+    {
+      "id": "87a0b522-0927-4992-88d7-713563a9feee",
+      "name": "Buscar Stock Producto",
+      "type": "n8n-nodes-base.microsoftSqlTool",
+      "typeVersion": 1.1,
+      "position": [
+        1020,
+        460
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT TOP 10 sp.CodProd AS Codigo, sp.Descrip AS Producto, SUM(cl.Cantidad) AS Stock_Total, MIN(cl.Precio1) AS Precio_Desde_Bs, MAX(cl.Precio1) AS Precio_Hasta_Bs, COUNT(cl.NroLote) AS Cantidad_Lotes FROM dbo.CUSTOM_LOTES cl INNER JOIN dbo.SAPROD sp ON cl.CodProd = sp.CodProd WHERE sp.Descrip LIKE '%' + '{{ $fromAi(\"nombre_producto\", \"Nombre del producto o medicamento a buscar\") }}' + '%' AND cl.Cantidad > 0 AND sp.Activo = 1 GROUP BY sp.CodProd, sp.Descrip ORDER BY Stock_Total DESC"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "ca6143eb-d3b7-4b72-9b64-6410b068780c",
+      "name": "Buscar Alternativas Genericas",
+      "type": "n8n-nodes-base.microsoftSqlTool",
+      "typeVersion": 1.1,
+      "position": [
+        1180,
+        460
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT TOP 10 sp.CodProd AS Codigo, sp.Descrip AS Producto, sp.Marca, SUM(cl.Cantidad) AS Stock_Total, MIN(cl.Precio1) AS Precio_Desde_Bs FROM dbo.SAPROD sp INNER JOIN dbo.CUSTOM_LOTES cl ON sp.CodProd = cl.CodProd WHERE sp.Descrip LIKE '%' + '{{ $fromAi(\"principio_activo\", \"Principio activo o componente generico del medicamento\") }}' + '%' AND cl.Cantidad > 0 AND sp.Activo = 1 GROUP BY sp.CodProd, sp.Descrip, sp.Marca ORDER BY Stock_Total DESC"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "757765ee-df75-4ff2-b961-c73e8971df8e",
+      "name": "Consultar Precios USD",
+      "type": "n8n-nodes-base.microsoftSqlTool",
+      "typeVersion": 1.1,
+      "position": [
+        1340,
+        460
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT TOP 10 sp.CodProd AS Codigo, sp.Descrip AS Producto, SUM(cl.Cantidad) AS Stock, MIN(cl.Precio1) AS Precio_Bs, MIN(cl.[Precio$ (per unit)]) AS Precio_USD, MIN(cl.ExchangeRate) AS Tasa_Cambio FROM dbo.CUSTOM_LOTES cl INNER JOIN dbo.SAPROD sp ON cl.CodProd = sp.CodProd WHERE sp.Descrip LIKE '%' + '{{ $fromAi(\"producto_precio\", \"Nombre del producto para consultar precio en dolares\") }}' + '%' AND cl.Cantidad > 0 AND sp.Activo = 1 GROUP BY sp.CodProd, sp.Descrip ORDER BY Precio_USD ASC"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "2c760736-f844-45df-ab8d-51ba2fe6024d",
+      "name": "Alertar Vencimientos Proximos",
+      "type": "n8n-nodes-base.microsoftSqlTool",
+      "typeVersion": 1.1,
+      "position": [
+        1500,
+        460
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT TOP 20 sp.CodProd AS Codigo, sp.Descrip AS Producto, cl.NroLote AS Lote, cl.Cantidad AS Stock_Remanente, cl.FechaE AS Fecha_Vencimiento, cl.Precio1 AS Precio_Actual, DATEDIFF(DAY, GETDATE(), cl.FechaE) AS Dias_Para_Vencer FROM dbo.CUSTOM_LOTES cl INNER JOIN dbo.SAPROD sp ON cl.CodProd = sp.CodProd WHERE cl.Cantidad > 0 AND sp.Activo = 1 AND cl.FechaE <= DATEADD(MONTH, 3, GETDATE()) AND cl.FechaE > GETDATE() ORDER BY cl.FechaE ASC"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "55318ce5-57d4-49c1-8568-4d4542655dbf",
+      "name": "Responder Emergencia Qwen",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1000,
+        300
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $(\"Recibir Mensaje Cliente\").item.json.body.mensaje }}",
+        "options": {
+          "systemMessage": "Eres el asistente virtual de Farmacia Americana, una farmacia de Venezuela.\nTu objetivo es ayudar a los clientes de forma amable, profesional y eficiente.\n\nHERRAMIENTAS DISPONIBLES:\n- \"Buscar Stock Producto\" o \"Buscar Stock Emergencia\": busca disponibilidad por nombre.\n- \"Buscar Alternativas Genericas\" o \"Buscar Alternativas Emergencia\": busca por principio activo.\n- \"Consultar Precios USD\": muestra precios en Bolivares y Dolares.\n- \"Alertar Vencimientos Proximos\": lista productos proximos a vencer.\n\nREGLAS:\n1. SIEMPRE busca en la base de datos antes de responder sobre disponibilidad.\n2. Si no hay stock, busca alternativas con el principio activo.\n3. Si piden precio en dolares, usa la herramienta de precios USD.\n4. Muestra precios en Bs. y tambien en USD si estan disponibles.\n5. Maximo 5 opciones si hay varios similares.\n6. NUNCA inventes precios. Si no encuentras datos di: \"No encontre ese producto en inventario\".\n7. Responde en espanol, conciso y amigable.\n8. Si preguntan algo NO farmaceutico, indica amablemente que solo atendes medicamentos.\n\nNOTA: Actuas como respaldo de emergencia. El sistema principal esta temporalmente fuera de servicio. Misma calidad y profesionalismo.",
+          "maxIterations": 4,
+          "returnIntermediateSteps": false
+        }
+      }
+    },
+    {
+      "id": "c0407a91-f656-42ac-8c90-37160c968168",
+      "name": "Modelo Emergencia Qwen VL",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        700
+      ],
+      "parameters": {
+        "model": "qwen/qwen2.5-vl-72b-instruct",
+        "options": {
+          "temperature": 0.4,
+          "maxTokens": 1024,
+          "timeout": 120000,
+          "maxRetries": 3
+        }
+      },
+      "credentials": {}
+    },
+    {
+      "id": "92e68728-a786-4b34-acf6-d55aaf7b132f",
+      "name": "Buscar Stock Emergencia",
+      "type": "n8n-nodes-base.microsoftSqlTool",
+      "typeVersion": 1.1,
+      "position": [
+        1260,
+        700
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT TOP 10 sp.CodProd AS Codigo, sp.Descrip AS Producto, SUM(cl.Cantidad) AS Stock_Total, MIN(cl.Precio1) AS Precio_Desde_Bs FROM dbo.CUSTOM_LOTES cl INNER JOIN dbo.SAPROD sp ON cl.CodProd = sp.CodProd WHERE sp.Descrip LIKE '%' + '{{ $fromAi(\"nombre_producto\", \"Nombre del medicamento a buscar\") }}' + '%' AND cl.Cantidad > 0 AND sp.Activo = 1 GROUP BY sp.CodProd, sp.Descrip ORDER BY Stock_Total DESC"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "19976b57-083f-44a2-8216-7b1e95862cef",
+      "name": "Buscar Alternativas Emergencia",
+      "type": "n8n-nodes-base.microsoftSqlTool",
+      "typeVersion": 1.1,
+      "position": [
+        1420,
+        700
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT TOP 10 sp.CodProd AS Codigo, sp.Descrip AS Producto, sp.Marca, SUM(cl.Cantidad) AS Stock_Total, MIN(cl.Precio1) AS Precio_Desde_Bs FROM dbo.SAPROD sp INNER JOIN dbo.CUSTOM_LOTES cl ON sp.CodProd = cl.CodProd WHERE sp.Descrip LIKE '%' + '{{ $fromAi(\"principio_activo\", \"Principio activo del medicamento\") }}' + '%' AND cl.Cantidad > 0 AND sp.Activo = 1 GROUP BY sp.CodProd, sp.Descrip, sp.Marca ORDER BY Stock_Total DESC"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Mensaje Cliente": {
+      "main": [
+        [
+          {
+            "node": "Responder Consulta Farmacia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder Consulta Farmacia": {
+      "error": [
+        [
+          {
+            "node": "Responder Emergencia Qwen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo Principal Llama 3.3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Responder Consulta Farmacia",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo Escalada V4 Flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Responder Consulta Farmacia",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Recordar Conversacion": {
+      "ai_memory": [
+        [
+          {
+            "node": "Responder Consulta Farmacia",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Stock Producto": {
+      "ai_tool": [
+        [
+          {
+            "node": "Responder Consulta Farmacia",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Alternativas Genericas": {
+      "ai_tool": [
+        [
+          {
+            "node": "Responder Consulta Farmacia",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar Precios USD": {
+      "ai_tool": [
+        [
+          {
+            "node": "Responder Consulta Farmacia",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alertar Vencimientos Proximos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Responder Consulta Farmacia",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo Emergencia Qwen VL": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Responder Emergencia Qwen",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Stock Emergencia": {
+      "ai_tool": [
+        [
+          {
+            "node": "Responder Emergencia Qwen",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Alternativas Emergencia": {
+      "ai_tool": [
+        [
+          {
+            "node": "Responder Emergencia Qwen",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "22c1787a-bf86-42e2-aa0a-0b541f609484",
+  "triggerCount": 0,
+  "tags": []
+}

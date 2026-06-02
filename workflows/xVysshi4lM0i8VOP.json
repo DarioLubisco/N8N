@@ -1,0 +1,80 @@
+{
+  "createdAt": "2026-05-06T08:02:08.266Z",
+  "updatedAt": "2026-05-28T05:28:27.374Z",
+  "id": "xVysshi4lM0i8VOP",
+  "name": "[PROD] Watchdog de Latencia y Disponibilidad - OpenRouter API",
+  "active": false,
+  "nodes": [
+    {
+      "id": "30a9316b-0d97-4275-af0c-d678f02d32d6",
+      "name": "Every Minute",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "02472db6-51bc-4c75-bbf2-18b2056a7c3f",
+      "name": "Ejecutar Latency Logger",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        540,
+        300
+      ],
+      "parameters": {
+        "resource": "command",
+        "operation": "execute",
+        "command": "python3 /root/scripts/latency_logger_single.py"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every Minute": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar Latency Logger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": {
+    "node:Every Minute": {
+      "recurrenceRules": [],
+      "recurrencyRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "7806d65a-8a24-4349-a4bc-4c199311e4e7",
+  "triggerCount": 1,
+  "tags": []
+}

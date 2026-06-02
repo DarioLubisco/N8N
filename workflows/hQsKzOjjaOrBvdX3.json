@@ -1,0 +1,97 @@
+{
+  "createdAt": "2026-05-06T00:41:06.464Z",
+  "updatedAt": "2026-05-06T00:41:06.464Z",
+  "id": "hQsKzOjjaOrBvdX3",
+  "name": "[ADMIN] Calibrador de PDR",
+  "active": false,
+  "nodes": [
+    {
+      "id": "2fc439f3-6dba-42c2-a36a-3acb1c0f5d16",
+      "name": "Calibración PDR",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "formTitle": "Calibración de Pesos PDR",
+        "formDescription": "Ajuste los pesos de las señales para el cálculo de la Probabilidad de Disponibilidad Real (PDR). La suma de los pesos debería ser 1.0.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Peso Vitalidad Catálogo (VC)",
+              "fieldType": "number",
+              "fieldName": "peso_vc",
+              "defaultValue": 0.5
+            },
+            {
+              "fieldLabel": "Peso Cobertura Mercado (CMP)",
+              "fieldType": "number",
+              "fieldName": "peso_cmp",
+              "defaultValue": 0.35
+            },
+            {
+              "fieldLabel": "Peso Significancia Producto (PPP)",
+              "fieldType": "number",
+              "fieldName": "peso_ppp",
+              "defaultValue": 0.15
+            },
+            {
+              "fieldLabel": "Umbral PPP",
+              "fieldType": "number",
+              "fieldName": "umbral_ppp",
+              "defaultValue": 0.001
+            }
+          ]
+        }
+      },
+      "webhookId": "07df0d68-5e67-4ad5-aa53-170428141a4a"
+    },
+    {
+      "id": "65ed7c94-119e-420a-8676-0a992af30205",
+      "name": "Actualizar Pesos",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE [Analitica].[PDR_Config] SET valor = {{ $json.peso_vc }}, updated_at = GETDATE() WHERE parametro = \"peso_vc\";\nUPDATE [Analitica].[PDR_Config] SET valor = {{ $json.peso_cmp }}, updated_at = GETDATE() WHERE parametro = \"peso_cmp\";\nUPDATE [Analitica].[PDR_Config] SET valor = {{ $json.peso_ppp }}, updated_at = GETDATE() WHERE parametro = \"peso_ppp\";\nUPDATE [Analitica].[PDR_Config] SET valor = {{ $json.umbral_ppp }}, updated_at = GETDATE() WHERE parametro = \"umbral_ppp\";"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Calibración PDR": {
+      "main": [
+        [
+          {
+            "node": "Actualizar Pesos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "ae89c8c3-bc1d-4529-8c9b-26300c8ff32f",
+  "triggerCount": 0,
+  "tags": []
+}

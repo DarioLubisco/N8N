@@ -1,0 +1,203 @@
+{
+  "createdAt": "2026-04-30T02:41:17.223Z",
+  "updatedAt": "2026-04-30T03:08:20.882Z",
+  "id": "AAnxxGYtgg5sD0o8",
+  "name": "[PROD] Agente Clasificador (Automatico)",
+  "active": false,
+  "nodes": [
+    {
+      "id": "207b75a7-61e3-4164-8cc9-6f47cd0a596d",
+      "name": "Trigger Diario (08:00 AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "8f304704-e41b-4389-b36e-99aed63ec42a",
+      "name": "Check Pendientes",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as Pendientes FROM Procurement.por_aprobacion_equivalencias WHERE origen_dato IS NULL OR codigo_atc IS NULL"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "7fb33034-f0f5-4335-9079-c4c3f8623a8f",
+      "name": "¿Hay Registros?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const count = $input.first().json.Pendientes;\nreturn (count > 0) ? $input.all() : [];"
+      }
+    },
+    {
+      "id": "374c7bf3-7262-4239-abf6-06d6b93dcebd",
+      "name": "Ejecutar Agente Python",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "resource": "command",
+        "operation": "execute",
+        "command": "python3 /opt/scripts/Agente_Clasificador.py"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      },
+      "retryOnFail": true
+    },
+    {
+      "id": "c77e40e7-bdd6-4618-9415-940cf7054ec3",
+      "name": "Validar Ejecución",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const res = $input.first().json;\nif (res.code !== 0) {\n  throw new Error(\"Fallo en script Python: \" + (res.stderr || \"Error desconocido\"));\n}\nreturn $input.all();"
+      }
+    },
+    {
+      "id": "815a9f27-7eb6-4aee-a0b4-ca8aaac785b1",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        450
+      ]
+    },
+    {
+      "id": "e8183a2a-c2f9-4030-a2c2-8abff1c73757",
+      "name": "Notificar Error a Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        300,
+        450
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=🚨 <b>ERROR EN AGENTE CLASIFICADOR</b> 🚨\n\nEl flujo automatico de clasificacion de medicamentos ha fallado.\n\n<b>Nodo:</b> {{$json.execution.error.node.name}}\n<b>Mensaje:</b> <code>{{$json.execution.error.message}}</code>\n\nRevisar n8n de inmediato.",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      },
+      "webhookId": "e7fdcc72-fed4-45ac-8e32-cc324d150ec1"
+    }
+  ],
+  "connections": {
+    "Trigger Diario (08:00 AM)": {
+      "main": [
+        [
+          {
+            "node": "Check Pendientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Pendientes": {
+      "main": [
+        [
+          {
+            "node": "¿Hay Registros?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Hay Registros?": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar Agente Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejecutar Agente Python": {
+      "main": [
+        [
+          {
+            "node": "Validar Ejecución",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Notificar Error a Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "2f6fe416-f470-4fa3-8b80-13ad2f7ca28f",
+  "triggerCount": 0,
+  "tags": []
+}

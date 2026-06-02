@@ -1,0 +1,159 @@
+{
+  "createdAt": "2026-05-29T04:14:56.432Z",
+  "updatedAt": "2026-06-01T21:21:18.989Z",
+  "id": "V2DevDolarToday",
+  "name": "[DEV] [Finanzas] - Monitorear DolarToday V2 Paralelo",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger-1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 4
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger-1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT CAST(fecha AS DATE) as fecha, fuente, dolarbcv FROM dolartoday WHERE fecha >= DATEADD(day, -30, GETDATE())"
+      },
+      "id": "get-dates-2",
+      "name": "Get Recent Dates",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        300
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nlet bcv_4d = 0;\nlet paralelo = 0;\nlet difcamb = 0;\nlet web_rate = null;\n\n// Scraping always takes precedence for BCV (Source of truth)\nconst reqWeb = this.helpers.httpRequest({ url: \"https://www.bcv.org.ve/\", method: \"GET\", timeout: 30000, rejectUnauthorized: false });\nconst reqOficial = this.helpers.httpRequest({ url: \"https://ve.dolarapi.com/v1/dolares/oficial\", method: \"GET\", timeout: 30000 });\nconst reqParalelo = this.helpers.httpRequest({ url: \"https://ve.dolarapi.com/v1/dolares/paralelo\", method: \"GET\", timeout: 30000 });\n\nconst results = await Promise.allSettled([reqWeb, reqOficial, reqParalelo]);\n\nlet bcvHtml = results[0].status === 'fulfilled' ? results[0].value : \"\";\nlet oficialApi = results[1].status === 'fulfilled' ? (typeof results[1].value === 'string' ? JSON.parse(results[1].value) : results[1].value) : {};\nlet apiParalelo = results[2].status === 'fulfilled' ? (typeof results[2].value === 'string' ? JSON.parse(results[2].value) : results[2].value) : {};\n\nif (apiParalelo.promedio || apiParalelo.price) paralelo = apiParalelo.promedio || apiParalelo.price;\n\nlet api_val = oficialApi.promedio || oficialApi.price || 0;\nif (bcvHtml && typeof bcvHtml === 'string') {\n    let rateMatch = bcvHtml.match(/id\\s*=\\s*['\"]dolar['\"][\\s\\S]*?<strong[^>]*>([\\d,.]+)/i);\n    if (rateMatch && rateMatch[1]) {\n        let parsed = parseFloat(rateMatch[1].trim().replace(',', '.'));\n        if (!isNaN(parsed)) web_rate = parsed;\n    }\n}\n\nbcv_4d = web_rate || api_val || 0;\nif (!bcv_4d && !paralelo) throw new Error(\"Tasas nulas en todas las ramas paralelas.\");\nif (bcv_4d > 0 && paralelo > 0) difcamb = parseFloat((paralelo / bcv_4d).toFixed(6));\n\nlet recentDatesRecords = [];\ntry {\n    let recent = $('Get Recent Dates').all();\n    if (recent) recentDatesRecords = recent.map(i => i.json);\n} catch(e) {}\n\nlet getDbRecord = (dateStr) => {\n    return recentDatesRecords.find(r => String(r.fecha).split('T')[0] === dateStr);\n};\n\nlet sql = \"\";\nlet vzlaTime = new Date(new Date().toLocaleString(\"en-US\", {timeZone: \"America/Caracas\"}));\nlet hour = vzlaTime.getHours();\nlet todayStr = vzlaTime.toISOString().split('T')[0];\nlet currentDayOfWeek = vzlaTime.getDay(); \n\nlet datesToUpdateBCV = [];\nlet datesToUpdateParalelo = [todayStr]; \n\nif (hour >= 16) {\n    let tomorrow = new Date(vzlaTime); tomorrow.setDate(tomorrow.getDate() + 1);\n    let tomorrowStr = tomorrow.toISOString().split('T')[0];\n    datesToUpdateBCV.push(tomorrowStr);\n    \n    if (currentDayOfWeek === 5) { \n        let sunday = new Date(tomorrow); sunday.setDate(sunday.getDate() + 1);\n        let monday = new Date(tomorrow); monday.setDate(monday.getDate() + 2);\n        datesToUpdateBCV.push(sunday.toISOString().split('T')[0]);\n        datesToUpdateBCV.push(monday.toISOString().split('T')[0]);\n    }\n    \n    // Strict consistency validation FOR ALL DAYS\n    // If the rate pulled is identical to the rate of the previous banking day, \n    // it means the new rate hasn't been published yet (delayed).\n    // We abort pushing to tomorrow until it changes (unless it's a holiday).\n    let todayRecord = getDbRecord(todayStr);\n    if (todayRecord && todayRecord.dolarbcv) {\n        // Find the previous day's record (skip weekends to find previous banking day)\n        let daysToSubtract = (currentDayOfWeek === 1) ? 3 : 1; // If Monday, compare to Friday\n        let prevDay = new Date(vzlaTime.getTime() - daysToSubtract*86400000).toISOString().split('T')[0];\n        let prevRecord = getDbRecord(prevDay);\n        \n        if (todayRecord.dolarbcv !== prevRecord?.dolarbcv) {\n            // Not a holiday. The rate HAS changed between prev day and today.\n            // If bcv_4d equals today's OLD rate, it hasn't updated yet!\n            if (Math.abs(bcv_4d - todayRecord.dolarbcv) < 0.0001) {\n                datesToUpdateBCV = []; \n            }\n        }\n    }\n} else {\n    datesToUpdateBCV.push(todayStr);\n    if (currentDayOfWeek === 6) { \n        let sunday = new Date(vzlaTime); sunday.setDate(sunday.getDate() + 1);\n        let monday = new Date(vzlaTime); monday.setDate(monday.getDate() + 2);\n        datesToUpdateBCV.push(sunday.toISOString().split('T')[0]);\n        datesToUpdateBCV.push(monday.toISOString().split('T')[0]);\n    } else if (currentDayOfWeek === 0) { \n        let monday = new Date(vzlaTime); monday.setDate(monday.getDate() + 1);\n        datesToUpdateBCV.push(monday.toISOString().split('T')[0]);\n    }\n}\n\nlet allDatesSet = new Set([...datesToUpdateBCV, ...datesToUpdateParalelo]);\n\nfor (let dateStr of allDatesSet) {\n    let applyBcv = datesToUpdateBCV.includes(dateStr) ? bcv_4d : 0;\n    let applyPar = datesToUpdateParalelo.includes(dateStr) ? paralelo : 0;\n    let applyDif = (applyBcv > 0 && applyPar > 0) ? parseFloat((applyPar / applyBcv).toFixed(6)) : null;\n    \n    if (applyBcv > 0 || applyPar > 0) {\n        let isWeekend = datesToUpdateBCV.includes(dateStr) && !datesToUpdateParalelo.includes(dateStr);\n        let fuenteTag = isWeekend ? 'api_weekend' : 'api';\n        \n        sql += `\nIF EXISTS (SELECT 1 FROM dolartoday WHERE CAST(fecha AS DATE) = '${dateStr}' AND fuente NOT IN ('manual', 'bot_trigger'))\nBEGIN\n    UPDATE dolartoday SET \n`;\n        let sets = [];\n        if (applyPar > 0) sets.push(`Dolartoday = ${applyPar}`);\n        if (applyBcv > 0) sets.push(`dolarbcv = ${applyBcv}`);\n        if (applyDif !== null) sets.push(`DifCamb = ${applyDif}`);\n        sets.push(`pendiente = 0`);\n        sets.push(`_hora = dbo.sfAA_HoraClarion(GETDATE())`);\n        \n        sql += `        ${sets.join(\", \")}\n    WHERE id = (SELECT TOP 1 id FROM dolartoday WHERE CAST(fecha AS DATE) = '${dateStr}' AND fuente NOT IN ('manual', 'bot_trigger') ORDER BY id DESC);\nEND\nELSE\nBEGIN\n    INSERT INTO dolartoday (fecha, _fecha, _hora, Dolartoday, dolarbcv, pendiente, DifCamb, fuente) \n    VALUES ('${dateStr}', dbo.sfAA_FechaClarion('${dateStr}'), dbo.sfAA_HoraClarion(GETDATE()), ${applyPar > 0 ? applyPar : \"NULL\"}, ${applyBcv > 0 ? applyBcv : \"NULL\"}, 0, ${applyDif !== null ? applyDif : \"NULL\"}, '${fuenteTag}');\nEND\n`;\n    }\n}\n\nsql += `DECLARE @targetDate DATE = '${todayStr}';\\n`;\nif (bcv_4d > 0) {\n    sql += `UPDATE SACONF SET Factor = ${bcv_4d}, FactorM = ${bcv_4d};\\n`;\n    sql += `UPDATE SATARJ SET Monto = ${bcv_4d} WHERE TipoIns = 0;\\n`;\n}\n\nreturn { json: { sql: sql, status: \"OK\", bcv_4d: bcv_4d, paralelo: paralelo } };\n"
+      },
+      "id": "process-logic-3",
+      "name": "Process Logic & T-SQL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.sql }}"
+      },
+      "id": "update-db-4",
+      "name": "Update & Maintain DB",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        300
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Dates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Dates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Dates": {
+      "main": [
+        [
+          {
+            "node": "Process Logic & T-SQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Logic & T-SQL": {
+      "main": [
+        [
+          {
+            "node": "Update & Maintain DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": "true",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": [
+        8
+      ]
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "1fe0e5ff-319f-4760-aead-d68abff5468d",
+  "triggerCount": 1,
+  "tags": []
+}

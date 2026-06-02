@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-05-15T17:59:26.317Z",
+  "updatedAt": "2026-05-15T19:27:55.312Z",
+  "id": "SQH1JluRDorCcS04",
+  "name": "[PROD] OSINT Orquestador Maestro (Debian)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "Documentaci"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        848,
+        256
+      ],
+      "typeVersion": 1,
+      "id": "a9a0b148-7ff6-4215-bdd6-f90f3d0735ef",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Cada 30 Minutos": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "296828a2-884d-4ea2-aed0-ddc88e8bfd45",
+  "triggerCount": 1,
+  "tags": []
+}

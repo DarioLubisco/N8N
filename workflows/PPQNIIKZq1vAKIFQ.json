@@ -1,0 +1,89 @@
+{
+  "createdAt": "2026-04-27T23:23:32.558Z",
+  "updatedAt": "2026-04-27T23:25:13.123Z",
+  "id": "PPQNIIKZq1vAKIFQ",
+  "name": "Temp Check DB",
+  "active": false,
+  "nodes": [
+    {
+      "id": "2ec51d6d-9762-4278-8da4-a3a95d5a0c57",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "id": "465740f5-d4da-44b5-9948-4b276479783e",
+      "name": "Check AMC",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        200
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT TOP 1 * FROM EnterpriseAdmin_AMC.Procurement.sales_forecast ORDER BY fecha_calculo DESC;"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "Microsoft SQL account"
+        }
+      }
+    },
+    {
+      "id": "12df6b4c-1cbc-4c49-9aba-d0f170e9dd0d",
+      "name": "Check NAG",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        400
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT TOP 1 * FROM EnterpriseAdmin_NAG.Procurement.sales_forecast ORDER BY fecha_calculo DESC;"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "Microsoft SQL account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check AMC",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check NAG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "bb13ab83-d294-4cf7-bce3-11ae51ddb0fa",
+  "triggerCount": 0,
+  "tags": []
+}

@@ -1,0 +1,165 @@
+{
+  "createdAt": "2026-05-06T03:01:26.132Z",
+  "updatedAt": "2026-05-06T04:03:51.376Z",
+  "id": "1oieF8uU8JilZetJ",
+  "name": "[PROD] Monitoreo de Recepciones No Solicitadas (Huesos)",
+  "active": false,
+  "nodes": [
+    {
+      "id": "77b5eec4-7f2f-4c14-80e3-ae4b28f4686f",
+      "name": "Monitorear Huesos (Cada 1h)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "432da5b6-fc03-433f-8d57-9dcbdc17ac13",
+      "name": "Buscar Huesos Pendientes",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT NoSolicitadoID, PedidoID, CodProv, CodigoProducto, DescripcionProducto, CantidadRecibida \n              FROM Procurement.BackorderRecepcionesNoSolicitadas \n              WHERE EstadoDecision = 'PENDIENTE_DECISION';"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "8196fc45-9a97-4e93-af3d-3c8fd6ff27fc",
+      "name": "¿Hay Huesos?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $input.all().length > 0 }}",
+              "value2": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "d5fa705b-3436-4b7d-8313-5f9f9bbaffc4",
+      "name": "Formatear Alerta Telegram",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        200
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const items = $input.all();\nlet msg = \"🚨 *Alerta de Huesos (No Solicitados)*\\n\\n\";\nmsg += \"Se detectaron los siguientes productos ingresados sin orden de pedido:\\n\";\n\nitems.forEach(item => {\n  const d = item.json;\n  msg += `\\n📦 *Prov:* ${d.CodProv} | *Ped:* ${d.PedidoID}\\n`;\n  msg += `   - ${d.DescripcionProducto} (x${d.CantidadRecibida})\\n`;\n});\n\nmsg += \"\\nPor favor, ingresa a Synapse para [Aceptar] o generar [Devolución].\";\n\nreturn [{ json: { text: msg } }];"
+      }
+    },
+    {
+      "id": "05971c62-8a68-4c39-a4bf-17ebdd33a39d",
+      "name": "Notificar Operador",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        900,
+        200
+      ],
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "-1003531406167",
+        "text": "={{ $json.text }}",
+        "parseMode": "markdown"
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      },
+      "webhookId": "005a7b28-762d-4216-82d9-0a98c7f158f1"
+    }
+  ],
+  "connections": {
+    "Monitorear Huesos (Cada 1h)": {
+      "main": [
+        [
+          {
+            "node": "Buscar Huesos Pendientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Huesos Pendientes": {
+      "main": [
+        [
+          {
+            "node": "¿Hay Huesos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Hay Huesos?": {
+      "main": [
+        [
+          {
+            "node": "Formatear Alerta Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear Alerta Telegram": {
+      "main": [
+        [
+          {
+            "node": "Notificar Operador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "e569dba1-8233-4382-af83-e2679388bc6b",
+  "triggerCount": 0,
+  "tags": []
+}

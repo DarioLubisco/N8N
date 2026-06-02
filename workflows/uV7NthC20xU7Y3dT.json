@@ -1,0 +1,166 @@
+{
+  "createdAt": "2026-04-26T16:39:17.207Z",
+  "updatedAt": "2026-04-29T15:48:32.604Z",
+  "id": "uV7NthC20xU7Y3dT",
+  "name": "[PROD] Archivador Episodico (Sub-workflow)",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "920f477f-6279-493b-806a-496fb3476ef1",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        112,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT jsonb_agg(message) as messages FROM chat_messages WHERE session_id = '{{$json.conversation_id}}';",
+        "options": {}
+      },
+      "id": "256acf43-7888-4911-bdba-222c6d583915",
+      "name": "Get Chat History",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.1,
+      "position": [
+        352,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Resume la siguiente historia de conversación para guardarla como memoria episódica. Extrae hechos clave, preferencias del usuario y estado de pedidos: {{ JSON.stringify($json.messages) }}",
+        "options": {}
+      },
+      "id": "232ee1d2-26bd-4b30-9030-2ac60e348e79",
+      "name": "Gemini Summarize",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        608,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "gemini-1.5-flash",
+        "options": {}
+      },
+      "id": "a48259ee-1268-46d6-9342-2a02b8776026",
+      "name": "Gemini 1.5 Flash",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        560,
+        464
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ahqBbPI8ffeaZECJ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO document_vectors (content, metadata) VALUES ('{{$json.output}}', '{\"session_id\": \"{{$node[\"Execute Workflow Trigger\"].json[\"conversation_id\"]}}\", \"type\": \"episodic_memory\"}');\nDELETE FROM chat_messages WHERE session_id = '{{$node[\"Execute Workflow Trigger\"].json[\"conversation_id\"]}}';",
+        "options": {}
+      },
+      "id": "ad1aef02-1cbe-4b3d-aeed-22d4e505903f",
+      "name": "Save & Clean Active Memory",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.1,
+      "position": [
+        864,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Chat History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Chat History": {
+      "main": [
+        [
+          {
+            "node": "Gemini Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Summarize": {
+      "main": [
+        [
+          {
+            "node": "Save & Clean Active Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 1.5 Flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Gemini Summarize",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true,
+    "errorWorkflow": "zLtMDgsc7OSXyXrp"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "e58699ed-e1c0-46be-b00b-c01d1b9fab87",
+  "triggerCount": 0,
+  "tags": [
+    {
+      "createdAt": "2026-04-29T15:41:30.813Z",
+      "updatedAt": "2026-04-29T15:41:30.813Z",
+      "id": "ar7VkyPtRJkNlcoi",
+      "name": "Produccion"
+    }
+  ]
+}

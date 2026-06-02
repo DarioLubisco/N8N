@@ -1,0 +1,440 @@
+{
+  "createdAt": "2026-05-06T20:48:18.471Z",
+  "updatedAt": "2026-05-06T20:59:11.066Z",
+  "id": "iTe05F8vHyZgDs3F",
+  "name": "[PROD] [Proveedores-Híbridos] - Ingesta Mastranto",
+  "active": false,
+  "nodes": [
+    {
+      "id": "c8813172-8477-4b58-bbfa-6ee0984c0076",
+      "name": "⏱️ Trigger — Cada 30 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        304
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2aacad2e-94f9-451a-8960-ee4addb82b13",
+      "name": "📥 FTP — Descargar inventario.txt",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        224,
+        304
+      ],
+      "parameters": {
+        "operation": "download",
+        "path": "/Listados/txt/inventario.txt",
+        "binaryPropertyName": "inventario_raw"
+      },
+      "credentials": {
+        "ftp": {
+          "id": "H8y0GcAQHIkZHXyv",
+          "name": "[PROD] FTP - Inventario ITS"
+        }
+      }
+    },
+    {
+      "id": "2a7eb1e0-b5ba-4da6-b822-2f32f2faf422",
+      "name": "📄 Convertir a Texto",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        304
+      ],
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "inventario_raw",
+        "destinationKey": "inventario_txt"
+      }
+    },
+    {
+      "id": "9b444f1e-8746-4ba0-929e-07ae9b3e3331",
+      "name": "🔍 Consultar Configuración SQL",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        304
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT Sucursal, Activo FROM [Proveedores].[ConfiguracionSucursales] WHERE Proveedor = 'Mastranto'"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "e7a8d366-28cb-4d23-a3e0-e61ccdf10893",
+      "name": "⚙️ Mapear Switches",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        850,
+        304
+      ],
+      "parameters": {
+        "jsCode": "\nconst sqlRows = $input.all();\nconst textData = $('📄 Convertir a Texto').item.json;\n\nlet centroActivo = true;\nlet barinasActivo = true;\n\nfor (const row of sqlRows) {\n  if (row.json.Sucursal === 'CENTRO') centroActivo = row.json.Activo === true;\n  if (row.json.Sucursal === 'BARINAS') barinasActivo = row.json.Activo === true;\n}\n\nreturn [{\n  json: {\n    habilitar_centro: centroActivo,\n    habilitar_barinas: barinasActivo,\n    inventario_txt: textData.inventario_txt\n  }\n}];\n"
+      }
+    },
+    {
+      "id": "7ba21129-6b32-41db-a393-c97cd4a3dcb9",
+      "name": "¿Activar Centro?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1050,
+        200
+      ],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.habilitar_centro }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "eeaab7e1-f46e-4cbd-b7ec-e7957936d415",
+      "name": "🐍 SSH — Parsear Mastranto Centro",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        100
+      ],
+      "parameters": {
+        "command": "python3 /opt/scripts/droguerias/mastranto.py --sucursal CENTRO --tabla MastrantoC_Inventario"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "id": "77b8007e-fd3b-45f7-8966-fd7be4c13cdb",
+      "name": "✅ ¿Éxito Centro?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1450,
+        100
+      ],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.stdout }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              },
+              "rightValue": "OK"
+            }
+          ]
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      }
+    },
+    {
+      "id": "ee3fb298-c5b5-4242-b168-9df6c4ef737a",
+      "name": "📊 Formatear Resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1700,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\nconst outputCentro = $('🐍 SSH — Parsear Mastranto Centro').item?.json?.stdout || '';\nconst outputBarinas = $('🐍 SSH — Parsear Mastranto Barinas').item?.json?.stdout || '';\n\nconst matchCentro = outputCentro.match(/ROWS:(\\d+)/);\nconst matchBarinas = outputBarinas.match(/ROWS:(\\d+)/);\n\nconst rowsC = matchCentro ? parseInt(matchCentro[1]) : 0;\nconst rowsB = matchBarinas ? parseInt(matchBarinas[1]) : 0;\n\nreturn [{\n  json: {\n    status: 'success',\n    proveedor: 'Mastranto',\n    archivo: 'inventario.txt',\n    registros_centro: rowsC,\n    registros_barinas: rowsB,\n    timestamp: new Date().toISOString()\n  }\n}];\n"
+      }
+    },
+    {
+      "id": "00761762-f89d-44f2-a3c2-5e53d4ed849d",
+      "name": "❌ Preparar Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1650,
+        600
+      ],
+      "parameters": {
+        "jsCode": "\nconst stderr = $input.first().json.stderr || 'Sin detalles';\nconst stdout = $input.first().json.stdout || '';\n\nreturn [{\n  json: {\n    status: 'error',\n    proveedor: 'Mastranto',\n    error_detail: stderr || stdout,\n    timestamp: new Date().toISOString()\n  }\n}];\n"
+      }
+    },
+    {
+      "id": "08c07307-2ea2-4c94-b975-a8e4570b5798",
+      "name": "🔴 Lanzar Error → Global Handler",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1850,
+        600
+      ],
+      "parameters": {
+        "errorMessage": "=Mastranto ETL falló: {{ $json.error_detail }}"
+      }
+    },
+    {
+      "id": "e8746aba-af32-46c6-83cd-825426ba8031",
+      "name": "¿Activar Barinas?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1050,
+        400
+      ],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.habilitar_barinas }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "58d490c6-5014-473d-a38b-d165c400f60e",
+      "name": "🐍 SSH — Parsear Mastranto Barinas",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        500
+      ],
+      "parameters": {
+        "command": "python3 /opt/scripts/droguerias/mastranto.py --sucursal BARINAS --tabla MastrantoB_Inventario"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "id": "85d6bf37-753a-473e-a013-2deb7e1fe42b",
+      "name": "✅ ¿Éxito Barinas?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1450,
+        500
+      ],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.stdout }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              },
+              "rightValue": "OK"
+            }
+          ]
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      }
+    }
+  ],
+  "connections": {
+    "⏱️ Trigger — Cada 30 min": {
+      "main": [
+        [
+          {
+            "node": "📥 FTP — Descargar inventario.txt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📥 FTP — Descargar inventario.txt": {
+      "main": [
+        [
+          {
+            "node": "📄 Convertir a Texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 Convertir a Texto": {
+      "main": [
+        [
+          {
+            "node": "🔍 Consultar Configuración SQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 Consultar Configuración SQL": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Mapear Switches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚙️ Mapear Switches": {
+      "main": [
+        [
+          {
+            "node": "¿Activar Centro?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "¿Activar Barinas?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Activar Centro?": {
+      "main": [
+        [
+          {
+            "node": "🐍 SSH — Parsear Mastranto Centro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🐍 SSH — Parsear Mastranto Centro": {
+      "main": [
+        [
+          {
+            "node": "✅ ¿Éxito Centro?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ ¿Éxito Centro?": {
+      "main": [
+        [
+          {
+            "node": "📊 Formatear Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Preparar Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "❌ Preparar Error": {
+      "main": [
+        [
+          {
+            "node": "🔴 Lanzar Error → Global Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Activar Barinas?": {
+      "main": [
+        [
+          {
+            "node": "🐍 SSH — Parsear Mastranto Barinas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🐍 SSH — Parsear Mastranto Barinas": {
+      "main": [
+        [
+          {
+            "node": "✅ ¿Éxito Barinas?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ ¿Éxito Barinas?": {
+      "main": [
+        [
+          {
+            "node": "📊 Formatear Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Preparar Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "c34212cc-c6ae-40fb-976f-d6aed2abd4fb",
+  "triggerCount": 0,
+  "tags": []
+}

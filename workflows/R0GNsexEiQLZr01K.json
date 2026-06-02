@@ -1,0 +1,316 @@
+{
+  "createdAt": "2026-04-28T01:27:40.307Z",
+  "updatedAt": "2026-05-29T04:54:01.208Z",
+  "id": "R0GNsexEiQLZr01K",
+  "name": "[PROD] [Finanzas] - Monitorear DolarToday (4h)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 4
+            }
+          ]
+        }
+      },
+      "id": "54189cba-27dd-4323-be6b-a79860f51307",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://ve.dolarapi.com/v1/dolares/oficial",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "curl/7.81.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "f25f6a6c-2e7c-42ce-b20d-55b7f08a05b4",
+      "name": "Fetch API Oficial",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        512,
+        304
+      ],
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://ve.dolarapi.com/v1/dolares/paralelo",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "curl/7.81.0"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "1d4bf874-bae7-420b-abd1-11bc8b64ddd4",
+      "name": "Fetch API Paralelo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        304
+      ],
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.bcv.org.ve/",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "timeout": 30000
+        }
+      },
+      "id": "bc6906c3-401f-476d-9d22-5f6f6af60f8a",
+      "name": "Fetch Web BCV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        112
+      ],
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT CAST(fecha AS DATE) as fecha FROM dolartoday WHERE fecha >= DATEADD(day, -30, GETDATE())"
+      },
+      "id": "ae7053d5-9a8d-41fe-b19a-155a98dd732b",
+      "name": "Get Recent Dates",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        304
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let bcv_4d = 0;\n\n// Extracción segura de API Oficial\nlet oficialApi = {};\ntry {\n    let items = $('Fetch API Oficial').all();\n    if (items && items.length > 0 && items[0].json) {\n        oficialApi = items[0].json;\n    }\n} catch(e) {}\n\n// Extracción segura de API Paralelo\nlet paralelo = 0;\ntry {\n    let items = $('Fetch API Paralelo').all();\n    if (items && items.length > 0 && items[0].json) {\n        paralelo = items[0].json.promedio || items[0].json.price || 0;\n    }\n} catch(e) {}\n\n// Extracción segura de BCV Web\nlet bcvHtml = \"\";\ntry {\n    let items = $('Fetch Web BCV').all();\n    if (items && items.length > 0 && items[0].json) {\n        bcvHtml = items[0].json.data || \"\";\n    }\n} catch(e) {}\n\nlet web_rate = null;\nlet web_date_str = null;\n\ntry {\n    if (bcvHtml) {\n        let rateMatch = bcvHtml.match(/id\\s*=\\s*['\"]dolar['\"][\\s\\S]*?<strong[^>]*>([\\d,.]+)/i);\n        if (rateMatch && rateMatch[1]) {\n            let numStr = rateMatch[1].trim().replace(',', '.');\n            let parsed = parseFloat(numStr);\n            if (!isNaN(parsed)) web_rate = parsed;\n        }\n\n        let dateMatch = bcvHtml.match(/class\\s*=\\s*['\"]date-display-single['\"][^>]*>([^<]+)/i);\n        if (dateMatch && dateMatch[1]) {\n            let rawDate = dateMatch[1].trim();\n            let meses = {\"Enero\": \"01\", \"Febrero\": \"02\", \"Marzo\": \"03\", \"Abril\": \"04\", \"Mayo\": \"05\", \"Junio\": \"06\", \"Julio\": \"07\", \"Agosto\": \"08\", \"Septiembre\": \"09\", \"Octubre\": \"10\", \"Noviembre\": \"11\", \"Diciembre\": \"12\"};\n            let match = rawDate.match(/(\\d+)\\s+([a-zA-Záéíóú]+)\\s+(\\d{4})/i);\n            if (match) {\n                let d = match[1].padStart(2, '0');\n                let mesName = match[2].charAt(0).toUpperCase() + match[2].slice(1).toLowerCase();\n                let mes = meses[mesName] || \"01\";\n                let y = match[3];\n                web_date_str = y + '-' + mes + '-' + d + 'T00:00:00-04:00';\n            }\n        }\n    }\n} catch(e) {\n    // Si falla el parseo de BCV, web_rate quedara en null\n}\n\nlet api_val = oficialApi.promedio || oficialApi.price || 0;\nlet api_date_str = oficialApi.fechaActualizacion;\n\nlet final_bcv = api_val;\nlet final_date_str = api_date_str;\n\nlet api_date_short = api_date_str ? api_date_str.substring(0, 10) : \"\";\nlet web_date_short = web_date_str ? web_date_str.substring(0, 10) : \"\";\n\n// Si la web_rate existe y su fecha es mayor o igual a la de la API, la preferimos porque tiene más decimales\nif (web_rate && (!api_val || web_date_short >= api_date_short)) {\n    final_bcv = web_rate;\n    final_date_str = web_date_str || api_date_str;\n}\n\nbcv_4d = final_bcv;\n\n// Relajamos la restriccion: permitimos que corra aunque BCV no responda si Paralelo si respondio, y viceversa.\n// Si ambos son cero, no podemos hacer insercion util.\nif (!bcv_4d && !paralelo) {\n    throw new Error(\"Tasas criticas nulas: ni BCV ni Paralelo devolvieron datos.\");\n}\n\n// Si falta uno, podemos asumir que el otro debe al menos tratar de insertarse o actualizarse.\n// Asignamos 0 si es null.\nbcv_4d = bcv_4d || 0;\nparalelo = paralelo || 0;\n\nlet bcv_2d = parseFloat(bcv_4d.toFixed(2));\nlet difcamb = 0;\nif (bcv_4d > 0) {\n    difcamb = parseFloat((paralelo / bcv_4d).toFixed(6));\n}\n\nlet datesRaw = [];\ntry {\n    let recent = $('Get Recent Dates').all();\n    if (recent) {\n        datesRaw = recent.map(i => String(i.json.fecha).split('T')[0]);\n    }\n} catch(e) {}\nlet existingDates = new Set(datesRaw);\n\nlet now = new Date();\nlet targetDate = new Date();\nlet useFallback = true;\n\nif (final_date_str) {\n    let apiDt = new Date(final_date_str);\n    if (!isNaN(apiDt.getTime())) {\n        let diffTime = Math.abs(apiDt - now);\n        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));\n        if (diffDays <= 30) {\n            targetDate = apiDt;\n            useFallback = false;\n        }\n    }\n}\n\nif (useFallback) {\n    let hour = now.getHours();\n    if (hour >= 17) {\n        targetDate.setDate(now.getDate() + 1);\n    }\n}\n\nlet targetDateStr = targetDate.toISOString().split('T')[0];\nlet sql = '';\n\nif (final_date_str && bcv_4d > 0 && paralelo > 0) {\n    let apiDtOnly = new Date(targetDateStr + \"T00:00:00Z\");\n    let startDate = new Date(now);\n    startDate.setDate(now.getDate() - 30);\n    startDate.setHours(0,0,0,0);\n    \n    let curr = new Date(startDate);\n    while (curr <= apiDtOnly) {\n        let currStr = curr.toISOString().split('T')[0];\n        if (!existingDates.has(currStr)) {\n            sql += \"INSERT INTO dolartoday (fecha, _fecha, _hora, Dolartoday, dolarbcv, pendiente, DifCamb, fuente) VALUES ('\" + currStr + \"', dbo.sfAA_FechaClarion('\" + currStr + \"'), dbo.sfAA_HoraClarion(GETDATE()), \" + paralelo + \", \" + bcv_4d + \", 0, \" + difcamb + \", 'api');\\n\";\n        }\n        curr.setDate(curr.getDate() + 1);\n    }\n}\n\nsql += \"DECLARE @targetDate DATE = '\" + targetDateStr + \"';\\n\";\nsql += \"DECLARE @lastPar FLOAT = (SELECT TOP 1 Dolartoday FROM dolartoday WHERE CAST(fecha AS DATE) <= CAST(GETDATE() AS DATE) AND fuente = 'api' ORDER BY fecha DESC);\\n\";\nsql += \"DECLARE @parChanged BIT = CASE WHEN ROUND(@lastPar, 2) != ROUND(\" + paralelo + \", 2) THEN 1 ELSE 0 END;\\n\";\n\nsql += \"DECLARE @fuente VARCHAR(20) = (SELECT TOP 1 ISNULL(fuente, '') FROM dolartoday WHERE CAST(fecha AS DATE) = @targetDate ORDER BY id DESC);\\n\";\nsql += \"DECLARE @existingBcv FLOAT = (SELECT TOP 1 dolarbcv FROM dolartoday WHERE CAST(fecha AS DATE) = @targetDate AND dolarbcv IS NOT NULL AND dolarbcv > 0 ORDER BY id DESC);\\n\";\nsql += \"DECLARE @bcvLocked BIT = CASE WHEN @existingBcv IS NOT NULL AND @fuente = 'manual' AND ABS(@existingBcv - \" + bcv_4d + \") > 0.00001 THEN 1 ELSE 0 END;\\n\";\nsql += \"DECLARE @bcvChanged BIT = CASE WHEN ABS(ISNULL((SELECT TOP 1 Factor FROM SACONF), 0) - \" + bcv_4d + \") > 0.00001 OR ABS(ISNULL(@existingBcv, 0) - \" + bcv_4d + \") > 0.00001 THEN 1 ELSE 0 END;\\n\";\n\n// Si traemos bcv, actualizamos SACONF, etc\nif (bcv_4d > 0) {\n    sql += \"IF (@bcvLocked = 0 AND @bcvChanged = 1)\\n\";\n    sql += \"BEGIN\\n\";\n    sql += \"    DECLARE @lastIdBefore INT = (SELECT ISNULL(MAX(id), 0) FROM dolartoday WHERE CAST(fecha AS DATE) = CAST(GETDATE() AS DATE));\\n\";\n    sql += \"    UPDATE SACONF SET Factor = \" + bcv_4d + \", FactorM = \" + bcv_4d + \";\\n\";\n    sql += \"    UPDATE SATARJ SET Monto = \" + bcv_4d + \" WHERE TipoIns = 0;\\n\";\n    sql += \"    IF (@targetDate != CAST(GETDATE() AS DATE)) DELETE FROM dolartoday WHERE CAST(fecha AS DATE) = CAST(GETDATE() AS DATE) AND id > @lastIdBefore;\\n\";\n    sql += \"    IF EXISTS (SELECT 1 FROM dolartoday WHERE CAST(fecha AS DATE) = @targetDate)\\n\";\n    sql += \"        UPDATE dolartoday SET \" + (paralelo > 0 ? \"Dolartoday = \" + paralelo + \",\" : \"\") + \" pendiente = 0, DifCamb = \" + difcamb + \", _hora = dbo.sfAA_HoraClarion(GETDATE()), fuente = 'api' WHERE id = (SELECT TOP 1 id FROM dolartoday WHERE CAST(fecha AS DATE) = @targetDate ORDER BY id DESC);\\n\";\n    sql += \"    ELSE\\n\";\n    sql += \"        INSERT INTO dolartoday (fecha, _fecha, _hora, Dolartoday, dolarbcv, pendiente, DifCamb, fuente) VALUES (@targetDate, dbo.sfAA_FechaClarion(@targetDate), dbo.sfAA_HoraClarion(GETDATE()), \" + (paralelo > 0 ? paralelo : \"NULL\") + \", \" + bcv_4d + \", 0, \" + difcamb + \", 'api');\\n\";\n    sql += \"END\\n\";\n}\n\nif (paralelo > 0) {\n    sql += \"ELSE IF (@parChanged = 1)\\n\";\n    sql += \"BEGIN\\n\";\n    sql += \"    DECLARE @lastIdBeforePar INT = (SELECT ISNULL(MAX(id), 0) FROM dolartoday WHERE CAST(fecha AS DATE) = CAST(GETDATE() AS DATE));\\n\";\n    sql += \"    IF EXISTS (SELECT 1 FROM dolartoday WHERE CAST(fecha AS DATE) = @targetDate)\\n\";\n    sql += \"        UPDATE dolartoday SET Dolartoday = \" + paralelo + \", pendiente = 0, DifCamb = ROUND(\" + paralelo + \" / NULLIF(ISNULL(@existingBcv, dolarbcv), 0), 6), _hora = dbo.sfAA_HoraClarion(GETDATE()) WHERE id = (SELECT TOP 1 id FROM dolartoday WHERE CAST(fecha AS DATE) = @targetDate ORDER BY id DESC);\\n\";\n    sql += \"    ELSE\\n\";\n    sql += \"        INSERT INTO dolartoday (fecha, _fecha, _hora, Dolartoday, dolarbcv, pendiente, DifCamb, fuente) VALUES (@targetDate, dbo.sfAA_FechaClarion(@targetDate), dbo.sfAA_HoraClarion(GETDATE()), \" + paralelo + \", \" + (bcv_4d > 0 ? bcv_4d : \"NULL\") + \", 0, \" + (bcv_4d > 0 ? difcamb : \"NULL\") + \", 'api');\\n\";\n    sql += \"    IF (@targetDate != CAST(GETDATE() AS DATE)) DELETE FROM dolartoday WHERE CAST(fecha AS DATE) = CAST(GETDATE() AS DATE) AND id > @lastIdBeforePar;\\n\";\n    sql += \"END\\n\";\n}\n\nsql += \"ELSE\\n\";\nsql += \"BEGIN\\n\";\nsql += \"    IF EXISTS (SELECT 1 FROM dolartoday WHERE CAST(fecha AS DATE) = @targetDate)\\n\";\nsql += \"        UPDATE dolartoday SET _hora = dbo.sfAA_HoraClarion(GETDATE()) WHERE id = (SELECT TOP 1 id FROM dolartoday WHERE CAST(fecha AS DATE) = @targetDate ORDER BY id DESC);\\n\";\nsql += \"END\\n\";\n\nif (paralelo > 0) {\n    sql += \"UPDATE dolartoday SET Dolartoday = \" + paralelo + \", pendiente = 0, DifCamb = ROUND(\" + paralelo + \" / NULLIF(dolarbcv, 0), 6) WHERE (pendiente = 1 OR Dolartoday IS NULL OR DifCamb IS NULL);\\n\";\n}\nsql += \"UPDATE dolartoday SET fuente = 'manual' WHERE fuente IS NULL AND ROUND(dolarbcv, 2) = dolarbcv;\\n\";\nsql += \"UPDATE dolartoday SET fuente = 'bot_trigger' WHERE fuente IS NULL;\\n\";\nsql += \"DELETE FROM dolartoday WHERE fuente IN ('manual', 'bot_trigger') AND CAST(fecha AS DATE) IN (SELECT CAST(fecha AS DATE) FROM dolartoday WHERE fuente = 'api');\\n\";\n\nreturn { json: { sql: sql } };sql += \"WITH CTE AS (SELECT id, ROW_NUMBER() OVER(PARTITION BY CAST(fecha AS DATE) ORDER BY id DESC) as rn FROM dolartoday)\\n\";\nsql += \"DELETE FROM dolartoday WHERE id IN (SELECT id FROM CTE WHERE rn > 1);\\n\";\n"
+      },
+      "id": "9aab994e-d754-4db3-bbae-ce782a47c5d2",
+      "name": "Process Logic & T-SQL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.sql }}"
+      },
+      "id": "4d1d5a56-ae76-4da3-9726-6cd5a985150a",
+      "name": "Update & Maintain DB",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        1520,
+        304
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ !!$json.error || !$json.promedio }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "705c84ae-38fc-4444-8f7c-4df1fcfb0eb4",
+      "name": "IF API Oficial Failed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        720,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nlet apiOficial = {};\nlet apiParalelo = {};\nlet webBcv = {};\n\nlet apiOficialExecuted = false;\nlet apiParaleloExecuted = false;\nlet webBcvExecuted = false;\n\ntry {\n    let items = $('Fetch API Oficial').all();\n    if (items && items.length > 0) {\n        apiOficialExecuted = true;\n        apiOficial = items[0].json;\n    }\n} catch(e) {}\n\ntry {\n    let items = $('Fetch API Paralelo').all();\n    if (items && items.length > 0) {\n        apiParaleloExecuted = true;\n        apiParalelo = items[0].json;\n    }\n} catch(e) {}\n\ntry {\n    let items = $('Fetch Web BCV').all();\n    if (items && items.length > 0) {\n        webBcvExecuted = true;\n        webBcv = items[0].json;\n    }\n} catch(e) {}\n\nlet errorMessages = [];\n\nif (apiParalelo.error) {\n    errorMessages.push(\"Tasa Paralelo [Fallo API - Timeout o Error]\");\n} else if (!apiParalelo.promedio && !apiParalelo.price) {\n    errorMessages.push(\"Tasa Paralelo [Fallo API - Sin datos válidos]\");\n}\n\nlet oficialFallo = false;\nif (apiOficial.error) {\n    oficialFallo = true;\n    errorMessages.push(\"Tasa BCV Oficial [Fallo API - Timeout o Error]\");\n} else if (!apiOficial.promedio && !apiOficial.price) {\n    oficialFallo = true;\n    errorMessages.push(\"Tasa BCV Oficial [Fallo API - Sin datos válidos]\");\n}\n\nif (oficialFallo) {\n    if (webBcvExecuted) {\n        if (webBcv.error) {\n            errorMessages.push(\"Scraper BCV Fallback [Fallo - Error al raspar]\");\n        } else if (!webBcv.data) {\n            errorMessages.push(\"Scraper BCV Fallback [Fallo - Sin HTML]\");\n        } else {\n            let rateMatch = webBcv.data.match(/id\\s*=\\s*['\"]dolar['\"][\\s\\S]*?<strong[^>]*>([\\d,.]+)/i);\n            if (!rateMatch || !rateMatch[1]) {\n                errorMessages.push(\"Scraper BCV Fallback [Fallo - No se encontró la tasa en el HTML]\");\n            }\n        }\n    } else {\n        errorMessages.push(\"Scraper BCV Fallback [No se ejecutó inesperadamente]\");\n    }\n}\n\nif (errorMessages.length > 0) {\n    let msg = \"Reporte de Extracción Parcial:\\n- \" + errorMessages.join(\"\\n- \");\n    throw new Error(msg);\n}\n\nreturn [{ json: { success: true, message: \"Todas las fuentes solicitadas respondieron correctamente\" } }];\n"
+      },
+      "id": "2891143c-3a82-479c-988c-406278a9abad",
+      "name": "Check Errors & Throw",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        304
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch API Paralelo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch API Paralelo": {
+      "main": [
+        [
+          {
+            "node": "Fetch API Oficial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch API Oficial": {
+      "main": [
+        [
+          {
+            "node": "IF API Oficial Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF API Oficial Failed": {
+      "main": [
+        [
+          {
+            "node": "Fetch Web BCV",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Recent Dates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Web BCV": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Dates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Dates": {
+      "main": [
+        [
+          {
+            "node": "Process Logic & T-SQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Logic & T-SQL": {
+      "main": [
+        [
+          {
+            "node": "Update & Maintain DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update & Maintain DB": {
+      "main": [
+        [
+          {
+            "node": "Check Errors & Throw",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": [
+        0
+      ],
+      "recurrencyRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true,
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "e32b31fe-21b2-4605-ba87-a241f957faf9",
+  "triggerCount": 1,
+  "tags": [
+    {
+      "createdAt": "2026-04-29T15:41:30.813Z",
+      "updatedAt": "2026-04-29T15:41:30.813Z",
+      "id": "ar7VkyPtRJkNlcoi",
+      "name": "Produccion"
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "createdAt": "2026-05-07T00:42:23.599Z",
+  "updatedAt": "2026-05-07T02:30:39.555Z",
+  "id": "DI8kGGwESdCCLXg1",
+  "name": "[TEST] SRE Nena Error Trigger",
+  "active": false,
+  "nodes": [
+    {
+      "id": "a0a9f939-9516-4b5c-bb0b-d9a738c48576",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "adae9333-673d-41c8-b4b1-4a8bbd044060",
+      "name": "Mock Error Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "execution.error.message",
+              "type": "string",
+              "value": "🚨 CRÍTICO (Primer Grado)\\nFallo de conexión en Nena FTP a IP 10.200.8.5. Simulación de prueba SRE."
+            },
+            {
+              "id": "2",
+              "name": "execution.url",
+              "type": "string",
+              "value": "https://n8n.farmaciaamericana.es/execution/9999"
+            },
+            {
+              "id": "3",
+              "name": "workflow.id",
+              "type": "string",
+              "value": "WSqDpWaAXQ427UQX"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "b72c8f09-7586-47c0-af29-40f6399f91f6",
+      "name": "Trigger Global Error System",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        300
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "zLtMDgsc7OSXyXrp",
+          "mode": "id"
+        },
+        "mode": "each",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Mock Error Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock Error Payload": {
+      "main": [
+        [
+          {
+            "node": "Trigger Global Error System",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "2da43c46-477b-4608-92b5-c7ec58b8c6e2",
+  "triggerCount": 0,
+  "tags": []
+}

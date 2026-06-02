@@ -1,0 +1,66 @@
+{
+  "createdAt": "2026-04-27T23:43:24.723Z",
+  "updatedAt": "2026-04-29T18:00:14.001Z",
+  "id": "YvcHoMP1mIzdjEFS",
+  "name": "TEST: Error Notification",
+  "active": false,
+  "nodes": [
+    {
+      "id": "9fab9b1b-572c-43a3-bfa4-6a7f040abaec",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "path": "test-error-antigravity",
+        "httpMethod": "GET",
+        "responseMode": "onReceived"
+      },
+      "webhookId": "8f71d08d-78bf-4c38-a895-2a61356659af"
+    },
+    {
+      "id": "ad5428b4-0136-4f8a-8838-a115abdf9e73",
+      "name": "Force Failure",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "throw new Error('TEST ERROR: Verificando notificación de Telegram desde Antigravity (Modo Webhook)');"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Force Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "faa44ad3-914c-448c-b542-ddab8a24ba97",
+  "triggerCount": 1,
+  "tags": []
+}

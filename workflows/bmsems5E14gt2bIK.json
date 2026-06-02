@@ -1,0 +1,129 @@
+{
+  "createdAt": "2026-05-06T04:09:51.029Z",
+  "updatedAt": "2026-05-06T04:24:16.628Z",
+  "id": "bmsems5E14gt2bIK",
+  "name": "[TEST] Validacion Final",
+  "active": false,
+  "nodes": [
+    {
+      "id": "cae17a4d-078c-45dd-b5e9-54249b43829f",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "id": "0f52c489-52e0-4172-9967-39088768ccb8",
+      "name": "Download Biogenetica",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "operation": "download",
+        "path": "/inventario/inventario.txt"
+      },
+      "credentials": {
+        "ftp": {
+          "id": "H8y0GcAQHIkZHXyv",
+          "name": "[PROD] FTP - Inventario ITS"
+        }
+      }
+    },
+    {
+      "id": "7f1f505d-bba3-4c8d-a834-005aaf2ebfa3",
+      "name": "Upload Biogenetica",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "path": "/tmp/",
+        "options": {
+          "fileName": "biogenetica_raw.txt"
+        }
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "id": "fc37cd0c-5098-453d-8244-f0324e1234dc",
+      "name": "Run Biogenetica Script",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "command": "cat /tmp/biogenetica_raw.txt | python3 /opt/scripts/droguerias/biogenetica.py"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Download Biogenetica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Biogenetica": {
+      "main": [
+        [
+          {
+            "node": "Upload Biogenetica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Biogenetica": {
+      "main": [
+        [
+          {
+            "node": "Run Biogenetica Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "c29fdb58-dab3-4770-9f81-d50170dec29c",
+  "triggerCount": 0,
+  "tags": []
+}

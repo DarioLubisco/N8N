@@ -1,0 +1,64 @@
+{
+  "createdAt": "2026-05-06T00:22:15.056Z",
+  "updatedAt": "2026-05-06T00:36:03.548Z",
+  "id": "ufJFQ7YTHKuQaoMC",
+  "name": "Test FTP List",
+  "active": false,
+  "nodes": [
+    {
+      "id": "05ac3fa3-b43e-4cf7-836b-a074a73d4832",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "id": "8e33e974-c994-48ff-824c-386650305198",
+      "name": "List FTP",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "operation": "list",
+        "path": "./inventario"
+      },
+      "credentials": {
+        "ftp": {
+          "id": "H8y0GcAQHIkZHXyv",
+          "name": "[PROD] FTP - Inventario ITS"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "List FTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "3860ffc7-1b02-4f92-8d2d-d9b9f73335a7",
+  "triggerCount": 0,
+  "tags": []
+}

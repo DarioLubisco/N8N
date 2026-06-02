@@ -1,0 +1,111 @@
+{
+  "createdAt": "2026-05-15T19:28:07.567Z",
+  "updatedAt": "2026-05-15T20:04:08.479Z",
+  "id": "1jzXdoPcTF894xI1",
+  "name": "My workflow 3",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "id": "21bfc80b-7e10-44d3-95ef-25c297d34694",
+      "name": "Synapse UI (Trigger)",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        -48
+      ],
+      "webhookId": "02b77ff7-2cbc-44d0-a15e-08bd8f2ff5dc"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Eres el Orquestador Master de Farmacia Americana. Tu misión es entender la necesidad del cliente y responder con creatividad desinhibida. Si la tarea es técnica, delega. Si es de marketing, sé persuasivo."
+        }
+      },
+      "id": "9309071b-13bf-4738-a073-2afe88965d00",
+      "name": "Hermes 405B (Orquestador)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        160,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "model": "nousresearch/hermes-4-405b",
+        "options": {
+          "temperature": 0.85
+        }
+      },
+      "id": "f0353ba3-72c6-43f1-b8d2-fc7deca96c03",
+      "name": "OpenRouter (Modelo)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        160,
+        208
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "df9b1a29-e794-4f36-a1f4-9b5e89424275",
+      "name": "Memoria de Sesión",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        208
+      ]
+    }
+  ],
+  "connections": {
+    "Synapse UI (Trigger)": {
+      "main": [
+        [
+          {
+            "node": "Hermes 405B (Orquestador)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter (Modelo)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Hermes 405B (Orquestador)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memoria de Sesión": {
+      "ai_memory": [
+        [
+          {
+            "node": "Hermes 405B (Orquestador)",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "b17bde96-5ec4-466f-a0dc-e49e4b9f016e",
+  "triggerCount": 0,
+  "tags": []
+}

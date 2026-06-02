@@ -1,0 +1,93 @@
+{
+  "createdAt": "2026-05-06T01:09:08.153Z",
+  "updatedAt": "2026-05-06T01:35:31.625Z",
+  "id": "Ic3ZrRthidrD9w3H",
+  "name": "[ADMIN] Debug Nuevas Credenciales FTP",
+  "active": false,
+  "nodes": [
+    {
+      "id": "9d08ef68-cbbf-4cae-b3e7-ee08c273bbcb",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "id": "ff575bcb-6532-44ec-8917-cab14f895854",
+      "name": "Debug Gama New",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "command": "curl -v --ftp-pasv -u GAMA@electrodomotica.com.ve:SK1OiDJaTKtT ftp://ftp.electrodomotica.com.ve/ --max-time 10"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "id": "51531fd1-088c-4452-9cbc-ba58c8bde376",
+      "name": "Debug Bio New",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "command": "curl -v --ftp-pasv -u u381534864.clientesdrogueriabiogenetica:D=Qb13vi.Wmh ftp://46.202.182.119/Existencia/inventario.txt --max-time 10"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Debug Gama New",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Debug Gama New": {
+      "main": [
+        [
+          {
+            "node": "Debug Bio New",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "b9a63ed9-36b2-482c-b7b4-f994c49fae45",
+  "triggerCount": 0,
+  "tags": []
+}

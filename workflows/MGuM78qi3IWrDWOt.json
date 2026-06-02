@@ -1,0 +1,171 @@
+{
+  "createdAt": "2026-04-27T21:41:54.299Z",
+  "updatedAt": "2026-05-19T04:15:58.118Z",
+  "id": "MGuM78qi3IWrDWOt",
+  "name": "[PROD] [Finanzas] - Monitorear Frescura DolarToday",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "5ea33254-91df-49ed-9932-e9350f289e05",
+      "name": "Cada 4 Horas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "f8e95af5-7540-4449-bea4-fe7ee7e3c173",
+      "name": "Normalizar Resultado",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        608,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as total FROM EnterpriseAdmin_AMC.dbo.dolartoday WHERE CAST(fecha AS DATE) = CAST(GETDATE() AS DATE);"
+      },
+      "id": "6b5041db-32e3-401f-a0a7-d8d9f64934a3",
+      "name": "Check DolarToday de Hoy",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        352,
+        464
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst total = $input.first().json.total;\nif (total === 0 || total === undefined || total === null) {\n  return [{ json: { trigger_alert: true } }];\n}\nreturn []; // No alert needed\n"
+      },
+      "id": "37ccff59-9d3a-4576-ae25-759aaa73d589",
+      "name": "Evaluar Alerta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "-1003531406167",
+        "text": "🚨 *ALERTA DOLARTODAY*\n\nNo se detectó el registro de la tasa para el día de hoy en la base de datos.\n\nFavor revisar el bot de actualización.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "14f71d01-faa5-419f-b2c1-292d928c39e7",
+      "name": "Alarma Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        304
+      ],
+      "webhookId": "40d71f0c-f3cd-47b6-a1dc-54a0128ac46d",
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cada 4 Horas": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Resultado",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check DolarToday de Hoy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Resultado": {
+      "main": [
+        [
+          {
+            "node": "Evaluar Alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check DolarToday de Hoy": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Resultado",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Evaluar Alerta": {
+      "main": [
+        [
+          {
+            "node": "Alarma Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Cada 4 Horas": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "d1092f1f-d988-4277-92ec-09a1b99962a8",
+  "triggerCount": 1,
+  "tags": []
+}

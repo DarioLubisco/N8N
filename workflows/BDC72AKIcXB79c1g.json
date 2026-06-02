@@ -1,0 +1,231 @@
+{
+  "createdAt": "2026-04-26T17:48:45.155Z",
+  "updatedAt": "2026-05-28T05:00:53.287Z",
+  "id": "BDC72AKIcXB79c1g",
+  "name": "[PROD] [IT] - Monitorear Inactividad (Cron)",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "1a5fdb4a-f569-4e77-8b31-879c5513dc27",
+      "name": "Every 10 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT clave, valor FROM configuracion_sistema;",
+        "options": {}
+      },
+      "id": "6da4c673-611f-4334-98ba-f1e022821b72",
+      "name": "Get Timeout Configs",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "[PROD] Postgres - Synapse DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=http://chatwoot-rails:3000/api/v1/accounts/1/conversations?label={{$json.clave}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "Anvb7ggYMcyzoHjksUwBdurM"
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "id": "70bc2d6e-8497-477d-9c62-27d77ee8c4c0",
+      "name": "Get Chatwoot Conversations",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        608,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ (new Date() - new Date($json.last_activity_at)) / 60000 }}",
+              "value2": "={{ parseInt($node[\"Batch Configs\"].json.valor) }}"
+            }
+          ]
+        }
+      },
+      "id": "cc161e0e-3808-4769-be64-0fecafd20210",
+      "name": "Filter Expired",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [
+        800,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://chatwoot-rails:3000/api/v1/accounts/1/conversations/{{$json.id}}/toggle_status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "Anvb7ggYMcyzoHjksUwBdurM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"status\": \"resolved\"\n}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "id": "42721742-8ce3-46f2-be49-f1866b89df7f",
+      "name": "Resolve Conversation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1008,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "2c44c857-d7dd-43cb-a96b-c35bf185dcdb",
+      "name": "Batch Configs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        400,
+        208
+      ]
+    }
+  ],
+  "connections": {
+    "Every 10 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Get Timeout Configs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Timeout Configs": {
+      "main": [
+        [
+          {
+            "node": "Batch Configs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Chatwoot Conversations": {
+      "main": [
+        [
+          {
+            "node": "Filter Expired",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Expired": {
+      "main": [
+        [
+          {
+            "node": "Resolve Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Conversation": {
+      "main": [
+        [
+          {
+            "node": "Batch Configs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Configs": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get Chatwoot Conversations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Every 10 Minutes": {
+      "recurrenceRules": [],
+      "recurrencyRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "29ddef4e-89c4-4728-bcdd-1567753debf8",
+  "triggerCount": 1,
+  "tags": []
+}

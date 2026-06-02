@@ -1,0 +1,147 @@
+{
+  "createdAt": "2026-05-07T14:29:32.057Z",
+  "updatedAt": "2026-05-28T05:00:53.662Z",
+  "id": "5rohaNIVsg9neAFT",
+  "name": "Ingesta: Intercontinental (Híbrido)",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "7f8d5318-0e63-4eb3-9674-fcaaed5894c7",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "path": "/inventario.txt",
+        "options": {}
+      },
+      "id": "497a31ff-0904-4441-90f8-8219efacce7c",
+      "name": "Descargar Inventario FTP",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        304,
+        304
+      ],
+      "credentials": {
+        "ftp": {
+          "id": "BX7NhT1lfL0pUowM",
+          "name": "Intercontinental FTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "path": "/tmp",
+        "options": {
+          "fileName": "intercontinental.txt"
+        }
+      },
+      "id": "0668a5d1-4c29-45fe-93e0-231dbfc9107a",
+      "name": "Cargar a Debian",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        512,
+        304
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "B3MvaiaBeDRdgs3C",
+          "name": "Debian SSH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "cat /tmp/intercontinental.txt \n python3 /opt/scripts/droguerias/intercontinental.py"
+      },
+      "id": "c587df47-e100-4f1c-a929-786b8cd31d1f",
+      "name": "Ejecutar Python",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        704,
+        304
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "B3MvaiaBeDRdgs3C",
+          "name": "Debian SSH"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "Descargar Inventario FTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar Inventario FTP": {
+      "main": [
+        [
+          {
+            "node": "Cargar a Debian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar a Debian": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Schedule": {
+      "recurrenceRules": [
+        10
+      ],
+      "recurrencyRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true,
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "228c92fb-efc4-4082-bca6-f6d29c250648",
+  "triggerCount": 1,
+  "tags": []
+}

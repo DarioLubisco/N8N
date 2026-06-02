@@ -1,0 +1,177 @@
+{
+  "createdAt": "2026-05-07T14:29:43.051Z",
+  "updatedAt": "2026-05-28T05:00:53.667Z",
+  "id": "iRkJsrAulAqsK72G",
+  "name": "Ingesta: Mastranto (Híbrido)",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "0ef8efdd-3935-48a3-9058-e8224aa01fee",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "path": "/Listados/txt/listado.txt",
+        "options": {}
+      },
+      "id": "7b01e685-fe61-4b93-a8f2-7351728b60f0",
+      "name": "Descargar Inventario FTP",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        304,
+        304
+      ],
+      "credentials": {
+        "ftp": {
+          "id": "Sn8EBtpGArKCjFIw",
+          "name": "Mastranto FTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "path": "/tmp",
+        "options": {
+          "fileName": "mastranto.txt"
+        }
+      },
+      "id": "b50f189c-77e2-4f4f-a116-8dbe35787b2b",
+      "name": "Cargar a Debian",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        512,
+        304
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "B3MvaiaBeDRdgs3C",
+          "name": "Debian SSH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "cat /tmp/mastranto.txt \n python3 /opt/scripts/droguerias/mastranto.py --sucursal CENTRO --tabla MastrantoC_Inventario"
+      },
+      "id": "0d0adca1-0a19-4733-99a8-aad1d54f788a",
+      "name": "Ejecutar Python Centro",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        704,
+        304
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "B3MvaiaBeDRdgs3C",
+          "name": "Debian SSH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "cat /tmp/mastranto.txt \n python3 /opt/scripts/droguerias/mastranto.py --sucursal BARINAS --tabla MastrantoB_Inventario"
+      },
+      "id": "8e2359b0-244d-4922-a0f1-e03697933aea",
+      "name": "Ejecutar Python Barinas",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        912,
+        304
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "B3MvaiaBeDRdgs3C",
+          "name": "Debian SSH"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "Descargar Inventario FTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar Inventario FTP": {
+      "main": [
+        [
+          {
+            "node": "Cargar a Debian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar a Debian": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar Python Centro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejecutar Python Centro": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar Python Barinas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Schedule": {
+      "recurrenceRules": [
+        10
+      ],
+      "recurrencyRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true,
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "069a90a6-21e3-444c-92f2-f597770265e2",
+  "triggerCount": 1,
+  "tags": []
+}

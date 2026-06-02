@@ -1,0 +1,81 @@
+{
+  "createdAt": "2026-04-23T14:37:35.248Z",
+  "updatedAt": "2026-04-29T18:00:13.141Z",
+  "id": "wmoOpSQMAEufWtFN",
+  "name": "WhatsApp Gateway: Evolution to Chatwoot",
+  "active": false,
+  "nodes": [
+    {
+      "id": "42c773cf-9ac5-4422-b1a7-e0b786682903",
+      "name": "Evolution Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "evolution-to-chatwoot",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "webhookId": "f4772793-100b-4e0a-928f-a220845eb7d3"
+    },
+    {
+      "id": "a34ef41f-27e1-4c60-a303-fa6781048dd8",
+      "name": "Sync to Chatwoot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        540,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=http://10.147.18.204:3000/api/v1/accounts/{{ $json.accountId }}/conversations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "={{ $json.accessToken }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}"
+      }
+    }
+  ],
+  "connections": {
+    "Evolution Webhook": {
+      "main": [
+        [
+          {
+            "node": "Sync to Chatwoot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "7c2687e0-f684-4f4d-88ed-6d5e90563e6a",
+  "triggerCount": 0,
+  "tags": []
+}

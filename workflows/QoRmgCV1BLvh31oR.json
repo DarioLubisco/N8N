@@ -1,0 +1,243 @@
+{
+  "createdAt": "2026-05-06T02:49:43.259Z",
+  "updatedAt": "2026-05-06T02:49:43.259Z",
+  "id": "QoRmgCV1BLvh31oR",
+  "name": "[SUB] [Pedidos] - Generar XLS Biogenetica y Subir FTP",
+  "active": false,
+  "nodes": [
+    {
+      "id": "5900646e-78d5-409d-a244-94cd12b3ead6",
+      "name": "Recibir Pedido",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\"items\": [{\"codigo_barras\": \"001234\", \"cantidad\": 10}], \"drogueria_code\": \"BIOGENETICA\", \"cod_cliente\": \"0169\", \"carpeta_pedidos\": \"Pedidos/\", \"ftp_credential_name\": \"[PROD] FTP - Biogenetica\"}"
+      }
+    },
+    {
+      "id": "76e2f1c6-32f1-4891-831b-91e85b52e358",
+      "name": "Obtener Correlativo",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE Proveedores.Pedidos_FTP_Secuencia SET UltimoCorrelativo = UltimoCorrelativo + 1, UpdatedAt = SYSDATETIME() WHERE DrogueriaCode = '{{ $json.drogueria_code }}'; SELECT UltimoCorrelativo AS correlativo FROM Proveedores.Pedidos_FTP_Secuencia WHERE DrogueriaCode = '{{ $json.drogueria_code }}';"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "14737a47-b008-4472-b44f-2c7e42fe51d7",
+      "name": "Preparar Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const items = $('Recibir Pedido').first().json.items || [];\nreturn items.map(item => ({\n  json: {\n    codigo: item.codigo_barras || item.codigo_producto,\n    cantidad: parseInt(item.cantidad) || 0\n  }\n}));"
+      }
+    },
+    {
+      "id": "1f8f684e-b33d-4c18-941f-e3fa3a067e1d",
+      "name": "Convertir a Excel",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "operation": "xls",
+        "binaryPropertyName": "data",
+        "options": {
+          "fileName": "={{ $('Recibir Pedido').first().json.cod_cliente }}P{{ $('Obtener Correlativo').first().json.correlativo.toString().padStart(6, '0') }}.xls"
+        }
+      }
+    },
+    {
+      "id": "603683bb-cdfb-4d05-ad36-907f2b6ce001",
+      "name": "Subir Pedido FTP",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "protocol": "ftp",
+        "operation": "upload",
+        "path": "={{ $('Recibir Pedido').first().json.carpeta_pedidos }}{{ $('Recibir Pedido').first().json.cod_cliente }}P{{ $('Obtener Correlativo').first().json.correlativo.toString().padStart(6, '0') }}.xls",
+        "binaryData": true,
+        "binaryPropertyName": "data"
+      },
+      "credentials": {
+        "ftp": {
+          "id": "H8y0GcAQHIkZHXyv",
+          "name": "[PROD] FTP - Inventario ITS"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "02eddc9e-91e3-4158-82e4-3afc69b9bb86",
+      "name": "Registrar Pedido en BD",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO Proveedores.Pedidos_FTP (DrogueriaCode, CodClienteFTP, Correlativo, NombreArchivo, CarpetaFTP, Estado, TotalItems, TotalUnidades, TotalMonto, ExecutionID) VALUES ('{{ $('Recibir Pedido').first().json.drogueria_code }}', '{{ $('Recibir Pedido').first().json.cod_cliente }}', {{ $('Obtener Correlativo').first().json.correlativo }}, '{{ $('Recibir Pedido').first().json.cod_cliente }}P{{ $('Obtener Correlativo').first().json.correlativo.toString().padStart(6, '0') }}.xls', '{{ $('Recibir Pedido').first().json.carpeta_pedidos }}', 'SUBIDO', {{ $('Recibir Pedido').first().json.items.length }}, {{ $('Recibir Pedido').first().json.items.reduce((s, i) => s + (parseFloat(i.cantidad) || 0), 0) }}, 0, '{{ $execution.id }}'); SELECT SCOPE_IDENTITY() AS PedidoID;"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "d9539424-cb6d-4942-a0fd-34d9199f16bc",
+      "name": "Registrar Error FTP",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        1300,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO Proveedores.Pedidos_FTP (DrogueriaCode, CodClienteFTP, Correlativo, NombreArchivo, CarpetaFTP, Estado, ErrorMensaje, TotalItems, TotalUnidades, TotalMonto, ExecutionID) VALUES ('{{ $('Recibir Pedido').first().json.drogueria_code }}', '{{ $('Recibir Pedido').first().json.cod_cliente }}', {{ $('Obtener Correlativo').first().json.correlativo }}, '{{ $('Recibir Pedido').first().json.cod_cliente }}P{{ $('Obtener Correlativo').first().json.correlativo.toString().padStart(6, '0') }}.xls', '{{ $('Recibir Pedido').first().json.carpeta_pedidos }}', 'ERROR', 'Error al subir archivo FTP XLS', {{ $('Recibir Pedido').first().json.items.length }}, {{ $('Recibir Pedido').first().json.items.reduce((s, i) => s + (parseFloat(i.cantidad) || 0), 0) }}, 0, '{{ $execution.id }}');"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "3f4bee40-528f-497f-8351-b84f8efa714c",
+      "name": "Lanzar Error Global",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        300
+      ],
+      "parameters": {
+        "errorMessage": "=Pedido FTP XLS falló para {{ $('Recibir Pedido').first().json.drogueria_code }}: {{ $('Recibir Pedido').first().json.cod_cliente }}P{{ $('Obtener Correlativo').first().json.correlativo.toString().padStart(6, '0') }}.xls"
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Pedido": {
+      "main": [
+        [
+          {
+            "node": "Obtener Correlativo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Correlativo": {
+      "main": [
+        [
+          {
+            "node": "Preparar Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Items": {
+      "main": [
+        [
+          {
+            "node": "Convertir a Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convertir a Excel": {
+      "main": [
+        [
+          {
+            "node": "Subir Pedido FTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subir Pedido FTP": {
+      "main": [
+        [
+          {
+            "node": "Registrar Pedido en BD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Pedido en BD": {
+      "error": [
+        [
+          {
+            "node": "Registrar Error FTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Error FTP": {
+      "main": [
+        [
+          {
+            "node": "Lanzar Error Global",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "dd43b446-7947-42c3-9ef5-4f9a6e83299a",
+  "triggerCount": 0,
+  "tags": []
+}

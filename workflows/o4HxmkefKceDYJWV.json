@@ -1,0 +1,142 @@
+{
+  "createdAt": "2026-05-07T14:29:23.143Z",
+  "updatedAt": "2026-05-28T05:00:53.657Z",
+  "id": "o4HxmkefKceDYJWV",
+  "name": "Ingesta: VitalClinic (Híbrido)",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "d8b2f0d6-1e88-443f-a888-fc3848a50a06",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "path": "Existencia/inventario.txt",
+        "options": {}
+      },
+      "id": "edc0ead0-5500-47a9-bf6d-179a515baea1",
+      "name": "Descargar Inventario FTP",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        304,
+        304
+      ],
+      "credentials": {
+        "ftp": {
+          "id": "6d67u6BGhQbL0Cb5",
+          "name": "VitalClinic FTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "path": "/tmp",
+        "options": {
+          "fileName": "vitalclinic.txt"
+        }
+      },
+      "id": "575ad53e-2c73-45fd-9673-4043364c1d76",
+      "name": "Cargar a Debian",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        512,
+        304
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "B3MvaiaBeDRdgs3C",
+          "name": "Debian SSH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "cat /tmp/vitalclinic.txt \n python3 /opt/scripts/droguerias/generic_inventario.py --proveedor VITALCLINIC --tabla VitalClinic_Inventario"
+      },
+      "id": "0d0a08f6-9af3-4c81-a507-c0dc63b28a9f",
+      "name": "Ejecutar Python",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        704,
+        304
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "B3MvaiaBeDRdgs3C",
+          "name": "Debian SSH"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "Descargar Inventario FTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar Inventario FTP": {
+      "main": [
+        [
+          {
+            "node": "Cargar a Debian",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar a Debian": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Schedule": {
+      "recurrenceRules": [],
+      "recurrencyRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true,
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "5a88a216-5311-4ab5-84c2-84946888a302",
+  "triggerCount": 1,
+  "tags": []
+}

@@ -1,0 +1,195 @@
+{
+  "createdAt": "2026-04-29T20:39:21.414Z",
+  "updatedAt": "2026-05-10T02:38:12.624Z",
+  "id": "PA5sz3MmobD28zBA",
+  "name": "[PROD] Orquestador de Inventarios",
+  "active": false,
+  "nodes": [
+    {
+      "id": "8a00119f-ce82-4d0c-bb92-9ed646b0f426",
+      "name": "Every 2 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cc9b1b15-d258-4171-af61-7bb29d4265e9",
+      "name": "Lista de Proveedores",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "proveedores",
+              "type": "array",
+              "value": [
+                {
+                  "nombre": "Andicar"
+                },
+                {
+                  "nombre": "Biogenetica"
+                },
+                {
+                  "nombre": "Cobeca13"
+                },
+                {
+                  "nombre": "Cristmed"
+                },
+                {
+                  "nombre": "DROCERCA"
+                },
+                {
+                  "nombre": "Drodelca"
+                },
+                {
+                  "nombre": "Dropharma"
+                },
+                {
+                  "nombre": "Drosolveca"
+                },
+                {
+                  "nombre": "Emmanuelle"
+                },
+                {
+                  "nombre": "Gama"
+                },
+                {
+                  "nombre": "InsuamincaM"
+                },
+                {
+                  "nombre": "InsuamincaB"
+                },
+                {
+                  "nombre": "InsuamincaG"
+                },
+                {
+                  "nombre": "Intercontinental"
+                },
+                {
+                  "nombre": "ITS"
+                },
+                {
+                  "nombre": "Mastranto"
+                },
+                {
+                  "nombre": "NENA"
+                },
+                {
+                  "nombre": "VitalClinic"
+                },
+                {
+                  "nombre": "Zakipharma"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "74f5dd24-f5d6-4564-aa4c-e42e207169de",
+      "name": "Split Proveedores",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const proveedores = $input.first().json.proveedores;\nreturn proveedores.map(p => ({ json: p }));"
+      }
+    },
+    {
+      "id": "7d06aba0-a734-472a-8389-97b8e52d8230",
+      "name": "Llamar Procesador",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "BFtLTg1ayr6qFbXI",
+          "mode": "id"
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Every 2 Hours": {
+      "main": [
+        [
+          {
+            "node": "Lista de Proveedores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lista de Proveedores": {
+      "main": [
+        [
+          {
+            "node": "Split Proveedores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Proveedores": {
+      "main": [
+        [
+          {
+            "node": "Llamar Procesador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "139a49e5-66e4-4fa3-ac0e-dc1090d638bd",
+  "triggerCount": 0,
+  "tags": []
+}

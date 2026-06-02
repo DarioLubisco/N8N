@@ -1,0 +1,64 @@
+{
+  "createdAt": "2026-04-23T01:37:22.507Z",
+  "updatedAt": "2026-04-23T01:37:51.910Z",
+  "id": "ZS2n993C4hBgurWS",
+  "name": "Migration Verification",
+  "active": false,
+  "nodes": [
+    {
+      "id": "fa8d005b-f730-4adc-b935-d6a235aac4d5",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "id": "80659c7c-e3f4-4d00-a3be-94db7a83293c",
+      "name": "Verification",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "server",
+              "value": "10.200.8.197"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Verification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "fdd14369-9ca4-415e-be65-8dc2927dcfec",
+  "triggerCount": 0,
+  "tags": []
+}

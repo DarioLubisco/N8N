@@ -1,0 +1,220 @@
+{
+  "createdAt": "2026-05-07T01:10:53.022Z",
+  "updatedAt": "2026-05-07T02:52:20.746Z",
+  "id": "1HuvD04gTSdwdYqw",
+  "name": "[PROD] Hermes SRE ChatOps",
+  "active": false,
+  "nodes": [
+    {
+      "id": "b9ae431f-56dd-4ba2-9e3d-43ea0c61e823",
+      "name": "Escuchar Respuestas Humanas",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "webhookId": "462207b6-57c1-4847-8ab0-a9d48827940a",
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      }
+    },
+    {
+      "id": "8fe08e54-01f5-4ec5-b44c-9d5d22c8c299",
+      "name": "Recibir Alerta del Sistema",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        500
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "52e31e2d-9020-49a3-9935-857a1bab5945",
+      "name": "Normalizar Entrada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        350,
+        400
+      ],
+      "parameters": {
+        "jsCode": "\nlet text = \"\";\nlet chatId = \"-1003531406167\"; // Default group\nlet messageId = \"\";\n\ntry {\n  // Check if called from Execute Workflow Trigger\n  const internalData = $input.first().json;\n  if (internalData.alert_text) {\n    text = internalData.alert_text;\n    chatId = internalData.chat_id || \"-1003531406167\";\n  } else if (internalData.message) {\n    // Check if called from Telegram Trigger\n    text = internalData.message.text || \"\";\n    chatId = internalData.message.chat.id;\n    messageId = internalData.message.message_id;\n  }\n} catch (e) {\n  // Fallback\n  text = \"Error in normalization: \" + e.message;\n}\n\nreturn { json: { text: text, chat_id: chatId, message_id: messageId } };\n"
+      }
+    },
+    {
+      "id": "64cba555-6242-47a1-89f4-4d0bdd47fb4b",
+      "name": "Clasificar Mensaje",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        550,
+        400
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "CRÍTICO (Primer Grado)",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Primer Grado"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "ADVERTENCIA (Segundo Grado)",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Segundo Grado"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Respuesta"
+            }
+          ]
+        },
+        "fallbackOutput": 3
+      }
+    },
+    {
+      "id": "9c413b91-7501-40d9-8c16-0b660160299e",
+      "name": "Ejecutar Hermes (Debian)",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        800,
+        400
+      ],
+      "parameters": {
+        "command": "=\"export LANG=C.UTF-8; docker exec hermes /opt/hermes/.venv/bin/hermes chat -q '\" + $json.text.replace(/'/g, \"\\'\").replace(/\"/g, \"\\\"\") + \"' -Q --continue \" + $json.chat_id"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Alerta del Sistema": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Entrada": {
+      "main": [
+        [
+          {
+            "node": "Clasificar Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificar Mensaje": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar Hermes (Debian)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ejecutar Hermes (Debian)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ejecutar Hermes (Debian)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "5f28a5c1-523f-4c3e-9aa2-73c26d55db09",
+  "triggerCount": 1,
+  "tags": []
+}

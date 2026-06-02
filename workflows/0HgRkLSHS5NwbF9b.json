@@ -1,0 +1,296 @@
+{
+  "createdAt": "2026-04-26T00:42:13.568Z",
+  "updatedAt": "2026-04-29T00:32:36.084Z",
+  "id": "0HgRkLSHS5NwbF9b",
+  "name": "Omnichannel AI Router (Instagram/FB)",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "omnichannel-router",
+        "options": {}
+      },
+      "id": "16c7e0c3-0f48-4c7a-8c87-cd4179df6b3b",
+      "name": "Chatwoot Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        208
+      ],
+      "webhookId": "dbc28f6f-3c74-41a8-9fe5-bf43d8d2675c"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.body.event}}",
+              "value2": "conversation_status_changed"
+            },
+            {
+              "value1": "={{$json.body.status}}",
+              "value2": "resolved"
+            }
+          ]
+        }
+      },
+      "id": "0b8f7727-890f-411a-ba1b-ed855d83edef",
+      "name": "Is Resolved Event?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        256,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "uV7NthC20xU7Y3dT",
+        "mode": "parameter",
+        "options": {}
+      },
+      "id": "8009f390-e57e-4d17-990d-0d267d5b592b",
+      "name": "Call Archivador",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        512,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.messages[0].content }}",
+        "options": {
+          "systemMessage": "Eres un asistente experto para Farmacia Americana. \n1. Responde la duda del cliente.\n2. ASIGNA una etiqueta de tiempo basada en la urgencia: \n- 'timeout:fast' (15m): Consultas de stock, saludos, dudas simples.\n- 'timeout:medium' (12h): Consultas de precios, seguimientos estándar.\n- 'timeout:slow' (24h): Reclamos o casos complejos.\n- 'timeout:pre_pedido' (72h): Pedidos grandes o cotizaciones especiales.\n\nIMPORTANTE: Responde SIEMPRE en formato JSON: {\"reply\": \"...\", \"tag\": \"timeout:...\"}"
+        }
+      },
+      "id": "f32aa47c-1325-47bf-8288-56cf0bb4a362",
+      "name": "Omnichannel Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "=gemini-1.5-flash",
+        "options": {}
+      },
+      "id": "d8ad631e-86c8-49e7-9d1e-5da172242669",
+      "name": "Gemini 1.5 Flash",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        400,
+        560
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ahqBbPI8ffeaZECJ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=$json.body.conversation.id",
+        "tableName": "chat_messages"
+      },
+      "id": "6cdc8de2-7c8e-48d7-9a45-41a208c7a174",
+      "name": "Postgres Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        608,
+        560
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://chatwoot-rails:3000/api/v1/accounts/1/conversations/{{$node[\"Chatwoot Webhook\"].json.body.conversation.id}}/labels",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "Anvb7ggYMcyzoHjksUwBdurM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"labels\": [\"{{ JSON.parse($json.output).tag }}\"]\n}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "id": "a360b2d3-5a7a-4c25-8e66-565926e3e6ca",
+      "name": "Set Label in Chatwoot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        800,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://chatwoot-rails:3000/api/v1/accounts/1/conversations/{{$node[\"Chatwoot Webhook\"].json.body.conversation.id}}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "Anvb7ggYMcyzoHjksUwBdurM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"{{ JSON.parse($json.output).reply }}\",\n  \"message_type\": \"outgoing\"\n}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "id": "f48627b4-5217-4d9e-989f-d0e4576cb93f",
+      "name": "Send Message to Chatwoot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1008,
+        256
+      ]
+    }
+  ],
+  "connections": {
+    "Chatwoot Webhook": {
+      "main": [
+        [
+          {
+            "node": "Is Resolved Event?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Resolved Event?": {
+      "main": [
+        [
+          {
+            "node": "Call Archivador",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Omnichannel Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Omnichannel Agent": {
+      "main": [
+        [
+          {
+            "node": "Set Label in Chatwoot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 1.5 Flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Omnichannel Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Omnichannel Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Label in Chatwoot": {
+      "main": [
+        [
+          {
+            "node": "Send Message to Chatwoot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {
+    "Chatwoot Webhook": [
+      {
+        "json": {
+          "body": {
+            "conversation": {
+              "id": "12345"
+            },
+            "messages": [
+              {
+                "content": "Hola,como estas?"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "versionId": "9cbd3eb8-db3a-4380-85ee-ea7ee8349e94",
+  "triggerCount": 1,
+  "tags": []
+}

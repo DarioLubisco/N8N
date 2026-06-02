@@ -1,0 +1,63 @@
+{
+  "createdAt": "2026-05-06T01:09:19.237Z",
+  "updatedAt": "2026-05-06T01:49:43.699Z",
+  "id": "gO0s0kAK1YJpGz3b",
+  "name": "[ADMIN] Leer Script Debian",
+  "active": false,
+  "nodes": [
+    {
+      "id": "136414f2-700f-4c51-bd1c-9c38647e94ac",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "id": "4bcfcf4d-e1c8-49cd-9cb3-87511ded8e19",
+      "name": "Read Generic",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "command": "cat /opt/scripts/droguerias/generic_inventario.py"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Read Generic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "97e92825-3d6d-4c1c-a8ef-9fefd87c32c6",
+  "triggerCount": 0,
+  "tags": []
+}

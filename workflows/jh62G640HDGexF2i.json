@@ -1,0 +1,152 @@
+{
+  "createdAt": "2026-05-06T02:39:42.908Z",
+  "updatedAt": "2026-05-06T02:39:42.908Z",
+  "id": "jh62G640HDGexF2i",
+  "name": "Sub-Flujo: Registrar Pedido en Base de Datos",
+  "active": false,
+  "nodes": [
+    {
+      "id": "4afd6c6b-3604-496c-86d3-da0e9e203e10",
+      "name": "Recibir Orden",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "c66e5a0b-d4ea-4a85-a059-9c48b13fb367",
+      "name": "Insert Cabecera",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=DECLARE @TotalMonto DECIMAL(18,4) = 0;\n        -- Insertamos la cabecera\n        INSERT INTO Procurement.BackorderPedidosCabecera \n        (CodProv, FechaEnvioFTP, MetodoEnvio, ArchivoEnviado, MontoTotal) \n        OUTPUT INSERTED.PedidoID \n        VALUES ('{{ $json.CodProv }}', GETDATE(), '{{ $json.MetodoEnvio }}', '{{ $json.ArchivoEnviado }}', 0);\n      "
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "42842a85-4682-40fc-ba88-c644537623da",
+      "name": "Map Lineas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2.2,
+      "position": [
+        680,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\n// Obtenemos el PedidoID del nodo anterior\nconst pedidoID = $('Insert Cabecera').first().json.PedidoID;\n\n// Obtenemos las lineas del input original\nconst lineas = $('Recibir Orden').first().json.Lineas || [];\n\n// Retornamos un item por cada linea\nreturn lineas.map(linea => {\n  return {\n    json: {\n      PedidoID: pedidoID,\n      CodigoProducto: linea.CodigoProducto,\n      CantidadPedida: linea.CantidadPedida,\n      PrecioSolicitado: linea.PrecioSolicitado\n    }\n  };\n});\n      "
+      }
+    },
+    {
+      "id": "220991cd-c5af-45c2-b1ff-97b282269049",
+      "name": "Insert Lineas",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "operation": "insert",
+        "table": "Procurement.BackorderPedidosLineas",
+        "columns": "PedidoID,CodigoProducto,CantidadPedida,PrecioSolicitado"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "93c2ca75-3a30-4b48-bd44-dcecd34b8895",
+      "name": "Ejecutar SP Fecha Limite",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=EXEC Procurement.SP_CalcularFechaLimite @PedidoID = {{ $('Insert Cabecera').first().json.PedidoID }};"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Orden": {
+      "main": [
+        [
+          {
+            "node": "Insert Cabecera",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Cabecera": {
+      "main": [
+        [
+          {
+            "node": "Map Lineas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Lineas": {
+      "main": [
+        [
+          {
+            "node": "Insert Lineas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Lineas": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar SP Fecha Limite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "cd845175-d51f-437f-bf62-beb0fa46f65f",
+  "triggerCount": 0,
+  "tags": []
+}

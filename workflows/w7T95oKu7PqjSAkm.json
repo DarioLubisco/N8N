@@ -1,0 +1,291 @@
+{
+  "createdAt": "2026-04-29T20:40:29.405Z",
+  "updatedAt": "2026-05-07T22:20:10.379Z",
+  "id": "w7T95oKu7PqjSAkm",
+  "name": "[ETL] Sub-Workflow: Procesar Proveedor",
+  "active": false,
+  "nodes": [
+    {
+      "id": "10ef354a-1be9-42e7-8285-1b3c097d9bb0",
+      "name": "Recibir Proveedor",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        400
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "nombre",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "45b8d906-d928-4f91-a106-63576bb30fae",
+      "name": "Ruta por Proveedor",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        350,
+        400
+      ],
+      "parameters": {
+        "dataType": "string",
+        "value": "={{ $json.nombre }}",
+        "rules": {
+          "rules": [
+            {
+              "value": "Gama",
+              "output": 0
+            },
+            {
+              "value": "NENA",
+              "output": 1
+            },
+            {
+              "value": "Biogenetica",
+              "output": 2
+            },
+            {
+              "value": "DROCERCA",
+              "output": 3
+            }
+          ]
+        },
+        "fallbackOutput": 4
+      }
+    },
+    {
+      "id": "f8f2d377-1fa6-45a6-95f2-1b954f69efd5",
+      "name": "ETL Gama",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        650,
+        50
+      ],
+      "parameters": {
+        "command": "curl -s -u GAMA@electrodomotica.com.ve:SK1OiDJaTKtT ftp://ftp.electrodomotica.com.ve/Inventario/INVENTARIO.Txt | python3 /opt/scripts/droguerias/gama.py"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "id": "dcc654a9-c706-4437-a764-d12bdb078462",
+      "name": "ETL Nena",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        650,
+        200
+      ],
+      "parameters": {
+        "command": "curl -s -u c344-foraneo:c2wi6yl1 ftp://ftp.dronena.com/Maracay/C344/Inventario.txt | python3 /opt/scripts/droguerias/nena.py"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "id": "300283f4-1675-4b2e-9818-11733cc4ec43",
+      "name": "Download Biogenetica",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        650,
+        350
+      ],
+      "parameters": {
+        "operation": "download",
+        "path": "/inventario/inventario.txt"
+      },
+      "credentials": {
+        "ftp": {
+          "id": "H8y0GcAQHIkZHXyv",
+          "name": "[PROD] FTP - Inventario ITS"
+        }
+      }
+    },
+    {
+      "id": "dfc421a1-5e19-4f56-b504-a5e0edf1f34c",
+      "name": "Upload Biogenetica",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        850,
+        350
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "path": "/tmp/",
+        "options": {
+          "fileName": "biogenetica_raw.txt"
+        }
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "id": "3523b2d7-7ccc-4070-a076-89492378e6fc",
+      "name": "Run Biogenetica Script",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        350
+      ],
+      "parameters": {
+        "command": "cat /tmp/biogenetica_raw.txt | python3 /opt/scripts/droguerias/biogenetica.py"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "id": "aa5a6169-9deb-4a2c-a5ad-41a6d1bfa069",
+      "name": "ETL Drocerca",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        650,
+        500
+      ],
+      "parameters": {
+        "command": "curl -s -u C0005r:008376238 ftp://drocerca.proteoerp.org/inventario.txt | python3 /opt/scripts/droguerias/drocerca.py"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "id": "fb384c6c-c6c1-417e-b76a-95c123a13243",
+      "name": "ETL Genérico",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        650,
+        650
+      ],
+      "parameters": {
+        "command": "echo \"Proveedor genérico {{ $json.nombre }} sin configuración FTP específica\""
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Proveedor": {
+      "main": [
+        [
+          {
+            "node": "Ruta por Proveedor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ruta por Proveedor": {
+      "main": [
+        [
+          {
+            "node": "ETL Gama",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ETL Nena",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download Biogenetica",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ETL Drocerca",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ETL Genérico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Biogenetica": {
+      "main": [
+        [
+          {
+            "node": "Upload Biogenetica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Biogenetica": {
+      "main": [
+        [
+          {
+            "node": "Run Biogenetica Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "zLtMDgsc7OSXyXrp"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "c6d3f529-1995-4e5e-acaa-c7d0fb3d0e12",
+  "triggerCount": 0,
+  "tags": []
+}

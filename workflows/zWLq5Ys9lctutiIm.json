@@ -1,0 +1,274 @@
+{
+  "createdAt": "2026-05-04T03:20:04.089Z",
+  "updatedAt": "2026-05-04T03:48:29.427Z",
+  "id": "zWLq5Ys9lctutiIm",
+  "name": "[PROD] [Finanzas] - Procesar Fatture Docling",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### 📦 Ingesta de Fatture (Docling + OpenRouter)\\n- **Docling:** Corre localmente en Debian (IP 10.147.18.204)\\n- **Cerebro:** Gemini 3.1 Flash Lite\\n- **Destino:** JSON compatible con `safact` e `saitemfac`",
+        "height": 200,
+        "width": 1180,
+        "color": 4
+      },
+      "id": "8ba854e4-188e-4271-8af8-2fe0f138d1ec",
+      "name": "Sticky Note 4377fbe7",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        64,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "watchFolder": true,
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "<__PLACEHOLDER_VALUE__AQUI SELECCIONA EL FOLDER DE FATTURE_DA_ELABORARE__>"
+        },
+        "options": {}
+      },
+      "id": "d2c47b1c-57fb-443f-9fff-8bf5ebfd4e79",
+      "name": "1. Al Agregar Fattura",
+      "type": "n8n-nodes-base.microsoftOneDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        112,
+        304
+      ],
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "a1M6c0mwV5N9w2VW",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": "={{ $json.id }}",
+        "type": "view",
+        "scope": "anonymous"
+      },
+      "id": "de6f6536-5d55-47eb-bdbd-7caa2e3cf078",
+      "name": "2. Obtener Enlace Descarga",
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        304
+      ],
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "a1M6c0mwV5N9w2VW",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=python3 /opt/scripts/docling_extract.py --url \"{{ $json.link.webUrl }}\""
+      },
+      "id": "9c87453c-f053-4a13-88d1-7153300755fc",
+      "name": "3. Docling (Debian)",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        544,
+        304
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Eres un contador experto. Extrae los datos de la factura (en formato Markdown procesado por Docling) y genera un único JSON válido compatible con Saint Enterprise.\nDebes devolver SOLO un JSON con dos arreglos exactos:\n1. \"safact\": Contiene un único objeto con los campos: \"rif\", \"fecha\" (YYYY-MM-DD), \"total\", \"proveedor\".\n2. \"saitemfac\": Contiene un arreglo de objetos con los campos: \"codigo\", \"descripcion\", \"cantidad\", \"costo\", \"iva\".\n\nNO respondas NADA MÁS que el JSON (sin backticks de markdown).\n\nFACTURA MARKDOWN:\n{{ $json.stdout }}",
+        "batching": {}
+      },
+      "id": "7a1b5d47-2015-4f4e-853d-c649c8c1a360",
+      "name": "4. Cerebro (OpenRouter)",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        768,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-3.1-flash-lite-preview",
+        "options": {
+          "responseFormat": "json_object",
+          "temperature": 0.1
+        }
+      },
+      "id": "e3a5ed63-6edc-4b5e-a4d0-d820606354c8",
+      "name": "Gemini 3.1 Flash",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        768,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\ntry {\n  let raw = $input.first().json.text;\n  if(raw.startsWith(\"```json\")) {\n    raw = raw.replace(/```json/g, \"\").replace(/```/g, \"\").trim();\n  }\n  let data = JSON.parse(raw);\n  \n  // Agregar ID original del archivo por si lo necesitamos después\n  data.fileId = $('1. Al Agregar Fattura').item.json.id;\n  \n  return [ { json: data } ];\n} catch (e) {\n  throw new Error(\"Gemini returned invalid JSON: \" + e.message);\n}\n"
+      },
+      "id": "bf3e0b5c-b96e-4643-a6ce-d8939b7f6c8e",
+      "name": "5. Parse JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder"
+      },
+      "id": "28ebbc2e-fdbc-4a35-a668-84e1d9275cfa",
+      "name": "6. Copiar a Procesadas",
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        304
+      ],
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "a1M6c0mwV5N9w2VW",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "fileId": "={{ $(\"5. Parse JSON\").item.json.fileId }}"
+      },
+      "id": "6015e901-fe8f-43fb-96cc-ee641431ea02",
+      "name": "7. Borrar Original",
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1.1,
+      "position": [
+        1424,
+        304
+      ],
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "a1M6c0mwV5N9w2VW",
+          "name": "Microsoft Drive account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "1. Al Agregar Fattura": {
+      "main": [
+        [
+          {
+            "node": "2. Obtener Enlace Descarga",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Obtener Enlace Descarga": {
+      "main": [
+        [
+          {
+            "node": "3. Docling (Debian)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Docling (Debian)": {
+      "main": [
+        [
+          {
+            "node": "4. Cerebro (OpenRouter)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Cerebro (OpenRouter)": {
+      "main": [
+        [
+          {
+            "node": "5. Parse JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 3.1 Flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "4. Cerebro (OpenRouter)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5. Parse JSON": {
+      "main": [
+        [
+          {
+            "node": "6. Copiar a Procesadas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "6. Copiar a Procesadas": {
+      "main": [
+        [
+          {
+            "node": "7. Borrar Original",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "85dfa957-4963-43cd-b24c-5bf65281f4b7",
+  "triggerCount": 0,
+  "tags": []
+}

@@ -1,0 +1,64 @@
+{
+  "createdAt": "2026-04-27T23:00:41.990Z",
+  "updatedAt": "2026-04-27T23:16:37.444Z",
+  "id": "FwHZoimwVpHA3YDK",
+  "name": "Temp Check - DB Name",
+  "active": false,
+  "nodes": [
+    {
+      "id": "14cc66b7-f498-4a1d-aeb1-2fba8a2db18b",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "id": "ea74bc8b-8ee7-4579-8fe8-b4a61cd17e49",
+      "name": "Check DB Name",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DB_NAME() as current_db;"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "Microsoft SQL account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check DB Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "7df15201-53a7-4361-b1f9-2d50f22c60d8",
+  "triggerCount": 0,
+  "tags": []
+}

@@ -1,0 +1,113 @@
+{
+  "createdAt": "2026-04-29T15:36:51.011Z",
+  "updatedAt": "2026-05-03T23:41:22.558Z",
+  "id": "pi2vfdgAY40Mh850",
+  "name": "[PROD] [Logistica] - Procesar Excel WhatsApp",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "f1a5f3b0-7303-4447-b4ca-3e675fc71299",
+      "name": "Receive from Master",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        208,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c2c1bf36-d56b-4311-9230-6451ad9d6845",
+      "name": "Extraer Parámetros",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "command": "python3 /opt/scripts/Clas_Med_Final.py --url \"{{ $json.url }}\" --phone \"{{ $json.phone }}\""
+      },
+      "id": "102b004a-4817-4547-a917-95d6d3ed3684",
+      "name": "Ejecutar Clas_Med_Final.py",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        608,
+        208
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Receive from Master": {
+      "main": [
+        [
+          {
+            "node": "Extraer Parámetros",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer Parámetros": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar Clas_Med_Final.py",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "2a7470f1-9d44-44e1-bfee-08852b1610bf",
+  "triggerCount": 0,
+  "tags": [
+    {
+      "createdAt": "2026-04-29T15:41:30.813Z",
+      "updatedAt": "2026-04-29T15:41:30.813Z",
+      "id": "ar7VkyPtRJkNlcoi",
+      "name": "Produccion"
+    }
+  ]
+}

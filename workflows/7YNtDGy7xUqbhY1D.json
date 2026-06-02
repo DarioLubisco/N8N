@@ -1,0 +1,144 @@
+{
+  "createdAt": "2026-04-29T20:38:50.450Z",
+  "updatedAt": "2026-05-28T05:00:53.342Z",
+  "id": "7YNtDGy7xUqbhY1D",
+  "name": "[PROD] [Mercado] - Generar Cierre Estadistico",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "50 23 * * *"
+            }
+          ]
+        }
+      },
+      "id": "d787834d-8485-46c9-b572-4883461ad6fc",
+      "name": "Every Night",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "\n        -- 1. Insert daily averages per supplier into Historico_Diario\n        INSERT INTO Proveedores.Historico_Diario (CodBarras, Proveedor, Fecha, PrecioPromedio, StockPromedio)\n        SELECT \n            CodBarras,\n            Proveedor,\n            CAST(FechaCarga AS DATE) as Fecha,\n            AVG(Precio) as PrecioPromedio,\n            AVG(Stock) as StockPromedio\n        FROM Proveedores.Transacciones_Diarias\n        GROUP BY CodBarras, Proveedor, CAST(FechaCarga AS DATE);\n      "
+      },
+      "id": "37327b2d-635b-45b9-ab84-131e20fd8f8c",
+      "name": "Calculate Provider Averages",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        304
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "\n        -- 2. Take a snapshot of the live market view and save to Mercado_Historico\n        INSERT INTO Analitica.Mercado_Historico (CodBarras, Fecha, PrecioPromedio, PrecioMinimo, PrecioMaximo, PrecioStdDev, PrecioMediana, StockTotalMercado, ProveedoresConStock, DisponibilidadPorcentual)\n        SELECT \n            CodBarras,\n            CAST(GETDATE() AS DATE),\n            PrecioPromedio,\n            PrecioMinimo,\n            PrecioMaximo,\n            PrecioStdDev,\n            PrecioPromedio, \n            StockTotalMercado,\n            ProveedoresConStock,\n            DisponibilidadPorcentual\n        FROM Analitica.Mercado_Vivo;\n      "
+      },
+      "id": "1516398b-c6c0-495a-9384-302cda97acf3",
+      "name": "Save Historical Market Snapshot",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        304
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "TRUNCATE TABLE Proveedores.Transacciones_Diarias;"
+      },
+      "id": "6293f5b5-97f8-4572-afc7-f48b72adf7cd",
+      "name": "Cleanup Transacciones",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        1008,
+        304
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every Night": {
+      "main": [
+        [
+          {
+            "node": "Calculate Provider Averages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Provider Averages": {
+      "main": [
+        [
+          {
+            "node": "Save Historical Market Snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Historical Market Snapshot": {
+      "main": [
+        [
+          {
+            "node": "Cleanup Transacciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Every Night": {
+      "recurrenceRules": [],
+      "recurrencyRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "18f3f0af-c4f5-4f1d-801f-2e5d65f983c7",
+  "triggerCount": 1,
+  "tags": []
+}

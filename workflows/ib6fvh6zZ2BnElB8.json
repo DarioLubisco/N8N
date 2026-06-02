@@ -1,0 +1,128 @@
+{
+  "createdAt": "2026-04-29T17:57:58.713Z",
+  "updatedAt": "2026-05-28T05:00:53.337Z",
+  "id": "ib6fvh6zZ2BnElB8",
+  "name": "[PROD] [DevOps] - Respaldar Flujos en Git",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 3 * * *"
+            }
+          ]
+        }
+      },
+      "id": "11d18e44-3c69-4f1c-b4b2-7660ca60ec51",
+      "name": "Daily Backup (3 AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "command": "python3 /opt/synapse/n8n_backup_script.py"
+      },
+      "id": "38481c43-d7af-4ed8-909f-1c8718cb1866",
+      "name": "Run Backup Script",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        400,
+        304
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "-1003531406167",
+        "text": "✅ Backup de n8n completado y sincronizado con GitHub.",
+        "additionalFields": {}
+      },
+      "id": "55735c90-d4d9-4f87-8776-3f8277f2e040",
+      "name": "Notify Success",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        304
+      ],
+      "webhookId": "934c6276-d132-4c49-a1d9-8b4056a1b113",
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### 💾 Git Auto-Backup\n- **Logic**: SSH execute /opt/synapse/n8n_backup_script.py\n- **Task**: Exporta workflows del container y hace push a GitHub\n- **Freq**: Diario 3:00 AM",
+        "width": 350
+      },
+      "id": "6d5a30ce-c9e9-48a2-baa2-aa8405085b73",
+      "name": "Nota de Infraestructura",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        112,
+        112
+      ]
+    }
+  ],
+  "connections": {
+    "Daily Backup (3 AM)": {
+      "main": [
+        [
+          {
+            "node": "Run Backup Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Backup Script": {
+      "main": [
+        [
+          {
+            "node": "Notify Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Daily Backup (3 AM)": {
+      "recurrenceRules": [],
+      "recurrencyRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "c3291327-b8a3-46c9-b209-b16f1adcf859",
+  "triggerCount": 1,
+  "tags": []
+}

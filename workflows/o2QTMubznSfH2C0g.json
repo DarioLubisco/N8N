@@ -1,0 +1,215 @@
+{
+  "createdAt": "2026-05-16T21:44:27.892Z",
+  "updatedAt": "2026-05-17T00:00:50.489Z",
+  "id": "o2QTMubznSfH2C0g",
+  "name": "[PROD] [Config] - Orquestador SQL y Webhook",
+  "active": true,
+  "nodes": [
+    {
+      "id": "e3ece93a-cbb0-480e-8b80-f2ae1d6a1cc8",
+      "name": "Revisar Tareas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "dfbe5986-9a6a-4016-85ab-84a2f8e5d885",
+      "name": "Buscar Tareas SQL",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        200,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM Config.AutomationTriggers WHERE IsActive = 1 AND ActionCommand IS NOT NULL;"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "89eae71d-683f-40a2-a736-054200e5fc63",
+      "name": "Disparar Python",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://synapse-api:8000/api/orquestador/start",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}"
+      }
+    },
+    {
+      "id": "3d6ba3ba-a3fa-42ef-b84d-63bcee080c8f",
+      "name": "Webhook Resultados",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "osint-resultados",
+        "responseMode": "onReceived"
+      },
+      "webhookId": "13f9b4b2-c45f-4522-8435-b8daddee670a"
+    },
+    {
+      "id": "e66e6863-0d3b-4bda-ae8e-ae9d1525b7bd",
+      "name": "Extraer Resultados",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3.2,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {
+        "operation": "splitOutItems",
+        "fieldToSplitOut": "body.data",
+        "options": {}
+      }
+    },
+    {
+      "id": "95cd0b0c-de79-466e-bd48-86f63fd5cde3",
+      "name": "MERGE Resultados",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        200
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=\nMERGE Procurement.por_aprobacion_equivalencias AS target\nUSING (\n    SELECT \n        '{{ $json.codigo }}' AS codigo, \n        '{{ $json.principio_activo_Des }}' AS principio_activo_Des, \n        '{{ $json.concentracion_Des }}' AS concentracion_Des, \n        '{{ $json.forma_farmaceutica_Des }}' AS forma_farmaceutica_Des\n) AS source\nON (target.codigo = source.codigo)\nWHEN MATCHED THEN\n    UPDATE SET \n        principio_activo_Des = source.principio_activo_Des,\n        concentracion_Des = source.concentracion_Des,\n        forma_farmaceutica_Des = source.forma_farmaceutica_Des,\n        origen_dato = 'IA_INVESTIGATED_V10_CLEANSE';\n      "
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "ffc530e4-e586-4400-8254-02f0d8ccd9f0",
+      "name": "Marcar Tarea Lista",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        600,
+        200
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE Config.AutomationTriggers SET LastTriggered = GETDATE() WHERE TriggerID = {{ $('Webhook Resultados').item.json.body.TriggerID }};"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Revisar Tareas": {
+      "main": [
+        [
+          {
+            "node": "Buscar Tareas SQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Tareas SQL": {
+      "main": [
+        [
+          {
+            "node": "Disparar Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Resultados": {
+      "main": [
+        [
+          {
+            "node": "Extraer Resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer Resultados": {
+      "main": [
+        [
+          {
+            "node": "MERGE Resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE Resultados": {
+      "main": [
+        [
+          {
+            "node": "Marcar Tarea Lista",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Revisar Tareas": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "f1e86a56-7a29-45c3-9485-e02b6f9de9fb",
+  "triggerCount": 2,
+  "tags": []
+}

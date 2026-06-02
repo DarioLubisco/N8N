@@ -1,0 +1,214 @@
+{
+  "createdAt": "2026-05-06T17:30:22.846Z",
+  "updatedAt": "2026-05-06T17:30:22.846Z",
+  "id": "h3GdquiOfpdxmVS5",
+  "name": "[SUB] [Pedidos] - Generar API Cristmedical",
+  "active": false,
+  "nodes": [
+    {
+      "id": "9d51ab6d-b5d3-4825-bd45-a3c0f43ce4a5",
+      "name": "Recibir Pedido",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\"items\": [{\"codigo_producto\": \"ART001\", \"cantidad\": 2, \"precio_unitario\": 50.00}], \"drogueria_code\": \"CRISTMEDICAL\", \"cod_cliente\": \"FAR01159\", \"carpeta_pedidos\": \"API\", \"api_credential_name\": \"[PROD] API - Cristmedical\"}"
+      }
+    },
+    {
+      "id": "e954db45-6172-4c9f-a5ee-876a2fcbf34c",
+      "name": "Obtener Correlativo",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE Proveedores.Pedidos_FTP_Secuencia SET UltimoCorrelativo = UltimoCorrelativo + 1, UpdatedAt = SYSDATETIME() WHERE DrogueriaCode = '{{ $json.drogueria_code }}'; SELECT UltimoCorrelativo AS correlativo FROM Proveedores.Pedidos_FTP_Secuencia WHERE DrogueriaCode = '{{ $json.drogueria_code }}';"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "f8cfb877-783a-4032-8eb3-ae0115358231",
+      "name": "Preparar Payload API",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const triggerData = $('Recibir Pedido').first().json;\nconst corrData = $('Obtener Correlativo').first().json;\n\nconst items = triggerData.items || [];\nlet totalBruto = 0;\n\nconst renglones = items.map((item, index) => {\n  const cant = parseInt(item.cantidad) || 0;\n  const precio = parseFloat(item.precio_unitario) || 0;\n  const rengNeto = cant * precio;\n  totalBruto += rengNeto;\n  \n  return {\n    reng_num: index + 1,\n    co_art: item.codigo_producto,\n    co_alma: \"01\", // Por defecto\n    total_art: cant,\n    prec_vta: precio,\n    reng_neto: rengNeto\n  };\n});\n\n// Suponemos 16% IVA para simplificar, se puede ajustar desde el orquestador\nconst iva = totalBruto * 0.16;\nconst totalNeto = totalBruto + iva;\n\n// Fechas\nconst now = new Date();\nconst fecEmis = now.toISOString().split('T')[0];\nnow.setMonth(now.getMonth() + 1);\nconst fecVenc = now.toISOString().split('T')[0];\n\nconst payload = {\n  fact_num: corrData.correlativo,\n  nombre: \"FARMACIA AMERICANA, C.A.\",\n  rif: \"J-41074957-1\",\n  co_cli: triggerData.cod_cliente,\n  co_ven: \"VEN01\",\n  fec_emis: fecEmis,\n  fec_venc: fecVenc,\n  tasa: parseFloat(triggerData.tasa_bcv) || 36.50, // Idealmente el orquestador lo pasa\n  moneda: \"USD\",\n  tot_bruto: parseFloat(totalBruto.toFixed(2)),\n  tot_neto: parseFloat(totalNeto.toFixed(2)),\n  iva: parseFloat(iva.toFixed(2)),\n  renglones: renglones\n};\n\nreturn [{ json: { payload: payload } }];"
+      }
+    },
+    {
+      "id": "af205c7a-e3a1-4192-9b39-227e7d3752a0",
+      "name": "Enviar Pedido API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://apienterprise.cristmedicals.com/api/v1/pedidos",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.payload) }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": "={{ $('Recibir Pedido').first().json.api_credential_name }}"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "1791ed59-ba30-46e8-b946-cc89b3430bf2",
+      "name": "Registrar Pedido en BD",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO Proveedores.Pedidos_FTP (DrogueriaCode, CodClienteFTP, Correlativo, NombreArchivo, CarpetaFTP, Estado, TotalItems, TotalUnidades, TotalMonto, ExecutionID) VALUES ('{{ $('Recibir Pedido').first().json.drogueria_code }}', '{{ $('Recibir Pedido').first().json.cod_cliente }}', {{ $('Obtener Correlativo').first().json.correlativo }}, 'API_REQUEST', 'API', 'SUBIDO', {{ $('Recibir Pedido').first().json.items.length }}, {{ $('Recibir Pedido').first().json.items.reduce((s, i) => s + (parseFloat(i.cantidad) || 0), 0) }}, {{ $('Preparar Payload API').first().json.payload.tot_neto }}, '{{ $execution.id }}'); SELECT SCOPE_IDENTITY() AS PedidoID;"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "43af25b7-ec0f-47a3-8ed4-3b630f322158",
+      "name": "Registrar Error API",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO Proveedores.Pedidos_FTP (DrogueriaCode, CodClienteFTP, Correlativo, NombreArchivo, CarpetaFTP, Estado, ErrorMensaje, TotalItems, TotalUnidades, TotalMonto, ExecutionID) VALUES ('{{ $('Recibir Pedido').first().json.drogueria_code }}', '{{ $('Recibir Pedido').first().json.cod_cliente }}', {{ $('Obtener Correlativo').first().json.correlativo }}, 'API_REQUEST', 'API', 'ERROR', 'Error al enviar petición API HTTP a Cristmedical', {{ $('Recibir Pedido').first().json.items.length }}, {{ $('Recibir Pedido').first().json.items.reduce((s, i) => s + (parseFloat(i.cantidad) || 0), 0) }}, {{ $('Preparar Payload API').first().json.payload.tot_neto }}, '{{ $execution.id }}');"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "c3e40863-f229-4dcd-8981-333f824831aa",
+      "name": "Lanzar Error Global",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        300
+      ],
+      "parameters": {
+        "errorMessage": "=Pedido API HTTP falló para {{ $('Recibir Pedido').first().json.drogueria_code }}. Revisa el payload y credenciales."
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Pedido": {
+      "main": [
+        [
+          {
+            "node": "Obtener Correlativo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Correlativo": {
+      "main": [
+        [
+          {
+            "node": "Preparar Payload API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Payload API": {
+      "main": [
+        [
+          {
+            "node": "Enviar Pedido API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Pedido API": {
+      "main": [
+        [
+          {
+            "node": "Registrar Pedido en BD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Pedido en BD": {
+      "error": [
+        [
+          {
+            "node": "Registrar Error API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Error API": {
+      "main": [
+        [
+          {
+            "node": "Lanzar Error Global",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "f3909e68-9815-4fe2-bbf3-3820a62a94db",
+  "triggerCount": 0,
+  "tags": []
+}

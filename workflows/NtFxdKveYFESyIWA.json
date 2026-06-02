@@ -1,0 +1,248 @@
+{
+  "createdAt": "2026-05-06T04:04:51.288Z",
+  "updatedAt": "2026-05-06T17:31:05.399Z",
+  "id": "NtFxdKveYFESyIWA",
+  "name": "[PROD] [Pedidos] - Orquestador Maestro (Pull)",
+  "active": false,
+  "nodes": [
+    {
+      "id": "be80ef40-c515-4d12-a9c1-41badac8ce73",
+      "name": "Disparador Diario (4 PM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 16 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fa3b9164-6194-43ea-8a7d-0b37d314db58",
+      "name": "MOCK: SSH Python Script",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Simula la salida estándar (stdout) del nodo SSH capturando el script Python\nreturn [\n  {\n    json: {\n      lote_pedido_id: \"LOTE-2026-05-06-MOCK\",\n      ordenes: [\n        {\n          drogueria_code: \"VITALCLINIC\",\n          cod_cliente: \"0169\",\n          carpeta_pedidos: \"Pedidos/\",\n          ftp_credential_name: \"[PROD] FTP - Vital Clinic\",\n          tipo_workflow: \"TXT_ESTANDAR\",\n          items: [\n            { codigo_barras: \"111222333\", descripcion: \"IBUPROFENO 400MG\", cantidad: 20, precio_unitario: 2.5 },\n            { codigo_barras: \"444555666\", descripcion: \"PARACETAMOL 500MG\", cantidad: 50, precio_unitario: 1.2 }\n          ]\n        },\n        {\n          drogueria_code: \"INTERCONTINENTAL\",\n          cod_cliente: \"0169\",\n          carpeta_pedidos: \"Pedidos/\",\n          ftp_credential_name: \"[PROD] FTP - Intercontinental\",\n          tipo_workflow: \"TXT_POSICIONAL\",\n          items: [\n            { codigo_producto: \"INT-001\", codigo_barras: \"777888999\", descripcion: \"LOSARTAN 50MG\", cantidad: 15, precio_unitario: 4.0 }\n          ]\n        },\n        {\n          drogueria_code: \"BIOGENETICA\",\n          cod_cliente: \"0169\",\n          carpeta_pedidos: \"Pedidos/\",\n          ftp_credential_name: \"[PROD] FTP - Biogenetica\",\n          tipo_workflow: \"XLS\",\n          items: [\n            { codigo_producto: \"BIO-999\", codigo_barras: \"123123123\", descripcion: \"AMOXICILINA 500MG\", cantidad: 100, precio_unitario: 3.0 }\n          ]\n        },\n        {\n          drogueria_code: \"CRISTMEDICAL\",\n          cod_cliente: \"FAR01159\",\n          carpeta_pedidos: \"API\",\n          api_credential_name: \"[PROD] API - Cristmedical\",\n          tipo_workflow: \"API_REST\",\n          items: [\n            { codigo_producto: \"ART001\", codigo_barras: \"001001\", descripcion: \"VITAMINA C\", cantidad: 5, precio_unitario: 10.0 }\n          ]\n        }\n      ]\n    }\n  }\n];"
+      },
+      "notes": "Reemplazar con nodo SSH ejecutando python3 /opt/farmacia/generador_pedidos.py"
+    },
+    {
+      "id": "1ae31cfc-7340-4b40-979b-3b958c15262f",
+      "name": "Separar Órdenes",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "operation": "splitOutItems",
+        "fieldToSplitOut": "ordenes",
+        "options": {}
+      }
+    },
+    {
+      "id": "ba517965-a42a-4998-8979-976d8956eb62",
+      "name": "Enrutador por Tipo de Workflow",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "rules": [
+            {
+              "outputKey": "0",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true
+                },
+                "conditions": [
+                  {
+                    "id": "1",
+                    "leftValue": "={{ $json.tipo_workflow }}",
+                    "operator": "equals",
+                    "rightValue": "TXT_ESTANDAR"
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "1",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true
+                },
+                "conditions": [
+                  {
+                    "id": "2",
+                    "leftValue": "={{ $json.tipo_workflow }}",
+                    "operator": "equals",
+                    "rightValue": "TXT_POSICIONAL"
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "2",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true
+                },
+                "conditions": [
+                  {
+                    "id": "3",
+                    "leftValue": "={{ $json.tipo_workflow }}",
+                    "operator": "equals",
+                    "rightValue": "XLS"
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "3",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true
+                },
+                "conditions": [
+                  {
+                    "id": "4",
+                    "leftValue": "={{ $json.tipo_workflow }}",
+                    "operator": "equals",
+                    "rightValue": "API_REST"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "844cc867-a949-4ef4-a2bd-7ce798b23038",
+      "name": "Ejecutar TXT Estándar",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        100,
+        450
+      ],
+      "parameters": {
+        "workflowId": "B4YiA5FjkNlsLygm",
+        "mode": "each",
+        "options": {}
+      }
+    },
+    {
+      "id": "38a46280-e176-4bab-9a82-42ee10ddebdb",
+      "name": "Ejecutar TXT Posicional",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        100,
+        600
+      ],
+      "parameters": {
+        "workflowId": "TUDesLm3edSD85RG",
+        "mode": "each",
+        "options": {}
+      }
+    },
+    {
+      "id": "1662bec9-cacd-4188-b7c7-212d9491d358",
+      "name": "Ejecutar XLS Biogenética",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        100,
+        750
+      ],
+      "parameters": {
+        "workflowId": "QoRmgCV1BLvh31oR",
+        "mode": "each",
+        "options": {}
+      }
+    },
+    {
+      "id": "d4a29ded-860f-4f1b-b546-339a8a0cdbb7",
+      "name": "Ejecutar API Cristmedical",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        100,
+        900
+      ],
+      "parameters": {
+        "workflowId": "h3GdquiOfpdxmVS5",
+        "mode": "each",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Disparador Diario (4 PM)": {
+      "main": [
+        [
+          {
+            "node": "MOCK: SSH Python Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MOCK: SSH Python Script": {
+      "main": [
+        [
+          {
+            "node": "Separar Órdenes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar Órdenes": {
+      "main": [
+        [
+          {
+            "node": "Enrutador por Tipo de Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "62c40353-26f5-469f-a7ed-8cbe33d2af5e",
+  "triggerCount": 0,
+  "tags": []
+}

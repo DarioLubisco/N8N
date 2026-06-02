@@ -1,0 +1,107 @@
+{
+  "createdAt": "2026-04-28T01:39:09.852Z",
+  "updatedAt": "2026-06-02T04:43:33.137Z",
+  "id": "bYAzWWtQTPbsdeZV",
+  "name": "InventoryUpload360_Linux_V2",
+  "active": true,
+  "nodes": [
+    {
+      "id": "6859e5e1-04ad-4cd5-8c0c-657ce983f087",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "1d857bc8-41fe-48cb-a7c5-b47c938bccc5",
+      "name": "SSH Execute icompras360",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "resource": "command",
+        "operation": "execute",
+        "command": "docker exec -i synapse-api python3 /app/icompras360_linux.py",
+        "authentication": "password"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      },
+      "notes": "Ejecuta el script vía SSH para saltar restricciones locales de n8n",
+      "retryOnFail": true
+    },
+    {
+      "id": "63b99354-0d3b-4eff-8ad1-ea1bfb8061d6",
+      "name": "Check Exit Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ],
+      "parameters": {
+        "jsCode": "if ($input.item.json.code !== 0) {\n  throw new Error($input.item.json.stderr || \"Script execution failed\");\n}\nreturn $input.item;"
+      },
+      "notes": "Fuerza el fallo del flujo si el script de Python devuelve error (code != 0)"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "SSH Execute icompras360",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SSH Execute icompras360": {
+      "main": [
+        [
+          {
+            "node": "Check Exit Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "39631493-d99f-4237-b391-4422e6876673",
+  "triggerCount": 1,
+  "tags": []
+}

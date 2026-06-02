@@ -1,0 +1,270 @@
+{
+  "createdAt": "2026-05-16T05:58:13.018Z",
+  "updatedAt": "2026-05-16T07:01:11.794Z",
+  "id": "hVVDsYKZy8HNl3Pk",
+  "name": "Synapse Portero Gemini 2.0",
+  "active": true,
+  "nodes": [
+    {
+      "id": "9c2fed74-0641-4c81-a71f-b5bf89d067dd",
+      "name": "Recibir Mensaje",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        100,
+        300
+      ],
+      "webhookId": "9199549e-eee4-466a-9f3d-6f54ab23abe9",
+      "parameters": {
+        "path": "9199549e-eee4-466a-9f3d-6f54ab23abe9/chat",
+        "options": {},
+        "httpMethod": "POST",
+        "responseMode": "responseNode"
+      },
+      "typeVersion": 2.1
+    },
+    {
+      "id": "2595a0c1-9a52-408a-a770-e4cecea362ab",
+      "name": "Obtener Memoria",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        340,
+        300
+      ],
+      "parameters": {
+        "query": "=SELECT role, content FROM n8n_chat_memory WHERE session_id = '{{ $json.body.sessionId }}' ORDER BY created_at ASC LIMIT 10",
+        "operation": "executeQuery"
+      },
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "[PROD] Postgres - Synapse DB"
+        }
+      },
+      "typeVersion": 2.6,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "f38d5546-4892-4a83-a4be-1831cef84767",
+      "name": "Preparar Mensajes",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        580,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const webhookJson = $node[\"Recibir Mensaje\"].json;\nconst body = webhookJson.body || {};\nconst chatInput = body.chatInput || '';\nconst image = body.image;\nconst audio = body.audio;\nconst sessionId = body.sessionId || ('session_' + Date.now());\n\nlet memory = [];\ntry {\n  const allItems = $input.all();\n  memory = allItems.map(i => i.json).filter(r => r.role && r.content);\n} catch(e) { memory = []; }\n\nlet messages = [{ \n  role: \"system\", \n  content: \"Eres Synapse Portero, el asistente de IA de Farmacia Americana. Puedes procesar imágenes, audio y texto. Responde siempre en español de manera amable y profesional.\" \n}];\nmemory.forEach(r => messages.push({ role: r.role, content: r.content }));\n\nlet userContent = [];\nif (chatInput) userContent.push({ type: \"text\", text: chatInput });\nif (image) userContent.push({ type: \"image_url\", image_url: { url: `data:image/jpeg;base64,${image}` } });\nif (audio) userContent.push({ type: \"input_audio\", input_audio: { data: audio, format: \"webm\" } });\nif (!userContent.length) userContent.push({ type: \"text\", text: \"Hola\" });\n\nmessages.push({ role: \"user\", content: userContent });\nreturn [{ json: { messages, sessionId, chatInput } }];"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "88162517-b1e0-428d-b37a-3dce9341136e",
+      "name": "Llamar OpenRouter",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        820,
+        300
+      ],
+      "parameters": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "method": "POST",
+        "jsonBody": "={\n  \"model\": \"google/gemini-2.0-flash-lite-001\",\n  \"messages\": {{ JSON.stringify($json.messages) }}\n}",
+        "sendBody": true,
+        "contentType": "json",
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "authentication": "none",
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer sk-or-v1-REDACTED"
+            },
+            {
+              "name": "HTTP-Referer",
+              "value": "https://farmaciaamericana.es"
+            },
+            {
+              "name": "X-Title",
+              "value": "Synapse Portero"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "openRouterApi": {
+          "id": "5RBlk4ISiJ3NRiRy",
+          "name": "[PROD] OpenRouter - Cuenta Principal"
+        }
+      },
+      "typeVersion": 4.4
+    },
+    {
+      "id": "9070f696-160a-4237-aa78-0fa3104cd2ee",
+      "name": "Extraer y Preparar",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1060,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const reply = $json.choices[0].message.content;\nconst sessionId = $node[\"Preparar Mensajes\"].json.sessionId;\nconst userMsg = $node[\"Preparar Mensajes\"].json.chatInput;\nconst safe = (s) => (s || '').replace(/'/g, \"''\");\nconst insertUser = `INSERT INTO n8n_chat_memory (session_id, role, content) VALUES ('${safe(sessionId)}', 'user', '${safe(userMsg)}')`;\nconst insertAI = `INSERT INTO n8n_chat_memory (session_id, role, content) VALUES ('${safe(sessionId)}', 'assistant', '${safe(reply)}')`;\nreturn [{ json: { output: reply, sessionId, userMessage: userMsg, insertUser, insertAI } }];"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "cf2e2889-bea9-4791-89ea-024a0fd07169",
+      "name": "Guardar Msg Usuario",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        1300,
+        300
+      ],
+      "parameters": {
+        "query": "={{ $json.insertUser }}",
+        "operation": "executeQuery"
+      },
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "[PROD] Postgres - Synapse DB"
+        }
+      },
+      "typeVersion": 2.6
+    },
+    {
+      "id": "8479dce1-7574-49eb-a1bd-80d0262802c5",
+      "name": "Guardar Msg IA",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        1540,
+        300
+      ],
+      "parameters": {
+        "query": "={{ $node[\"Extraer y Preparar\"].json.insertAI }}",
+        "operation": "executeQuery"
+      },
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "[PROD] Postgres - Synapse DB"
+        }
+      },
+      "typeVersion": 2.6
+    },
+    {
+      "id": "316e2a38-c2e0-4734-b510-29b6248058a9",
+      "name": "Responder al Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        1780,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"output\": $node[\"Extraer y Preparar\"].json.output } }}"
+      },
+      "typeVersion": 1.5
+    }
+  ],
+  "connections": {
+    "Recibir Mensaje": {
+      "main": [
+        [
+          {
+            "node": "Obtener Memoria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Memoria": {
+      "main": [
+        [
+          {
+            "node": "Preparar Mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Mensajes": {
+      "main": [
+        [
+          {
+            "node": "Llamar OpenRouter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Llamar OpenRouter": {
+      "main": [
+        [
+          {
+            "node": "Extraer y Preparar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer y Preparar": {
+      "main": [
+        [
+          {
+            "node": "Guardar Msg Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar Msg Usuario": {
+      "main": [
+        [
+          {
+            "node": "Guardar Msg IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar Msg IA": {
+      "main": [
+        [
+          {
+            "node": "Responder al Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "723c64d2-e0c6-409c-ab5e-e004519a60c8",
+  "triggerCount": 1,
+  "tags": []
+}

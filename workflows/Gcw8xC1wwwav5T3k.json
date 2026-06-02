@@ -1,0 +1,86 @@
+{
+  "createdAt": "2026-04-25T22:37:41.735Z",
+  "updatedAt": "2026-04-27T20:45:39.232Z",
+  "id": "Gcw8xC1wwwav5T3k",
+  "name": "AMC_Gestión Administrativa",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "8d19f096-a3d0-4b7b-871f-9c28e70a3a55",
+      "name": "Prueba Manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "-1003522687541",
+        "text": "🏛️ **Pilar #4: Gestión Administrativa**\n\nEl bot @AMC_Notificacion_bot ha sido configurado exitosamente en n8n.\n\nEste canal se utilizará para:\n✅ Notificaciones de Proveedores (CXP)\n✅ Alertas de Actos Administrativos\n✅ Resúmenes Gerenciales",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "1ee52b97-f0e3-4a78-a011-af9c7b1509cc",
+      "name": "Notificación Administrativa",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        400,
+        304
+      ],
+      "webhookId": "c47c290b-780b-4d96-b487-3df255046240",
+      "credentials": {
+        "telegramApi": {
+          "id": "4I2mxF1bCgABeO4Y",
+          "name": "AMC Admin Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Configuración del Cuarto Pilar\n1. Ve a la pestaña **Credentials** en n8n.\n2. Crea una nueva credencial de tipo **Telegram API**.\n3. Cámbiale el nombre a: `AMC Notification Bot`.\n4. Pega el Token: `8795593743:AAEebBKpsAlITvv72Fb8BaQNbfwPdVjP-3s`.\n5. Ejecuta este flujo para probar la conexión.",
+        "height": 200,
+        "width": 300,
+        "color": 4
+      },
+      "id": "94fc96c1-6f7e-4e6b-9899-052f17f8c4fc",
+      "name": "Sticky Note 71e97771",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        352,
+        256
+      ]
+    }
+  ],
+  "connections": {
+    "Prueba Manual": {
+      "main": [
+        [
+          {
+            "node": "Notificación Administrativa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "3fafd8d5-e7f3-48e1-addb-3c701a5d94e0",
+  "triggerCount": 0,
+  "tags": []
+}

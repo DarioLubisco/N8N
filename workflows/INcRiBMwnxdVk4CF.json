@@ -1,0 +1,239 @@
+{
+  "createdAt": "2026-04-30T22:23:13.806Z",
+  "updatedAt": "2026-05-04T03:46:15.349Z",
+  "id": "INcRiBMwnxdVk4CF",
+  "name": "Lanzar Error",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/inventario.txt",
+        "binaryPropertyName": "inventario_raw",
+        "options": {}
+      },
+      "id": "a94b8022-1ef7-4879-a802-7250016121e6",
+      "name": "📥 FTP — Descargar inventario.txt",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "toBinaryFile"
+      },
+      "id": "31601610-a340-4022-aedf-cb593e77b84f",
+      "name": "📄 Convertir a Texto",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "command": "python3 /opt/scripts/droguerias/generic_inventario.py --proveedor BIOGENETICA --tabla Biogenetica_Inventario"
+      },
+      "id": "6f70fd0a-1b63-4789-8831-9fad188a7856",
+      "name": "🐍 SSH — Parsear y cargar en SQL",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "OK",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c56533ad-a64e-4b8e-b249-bf2ada5562cc",
+      "name": "✅ ¿Éxito?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extraer estadísticas del output del script Python\nconst output = $input.first().json.stdout || '';\nconst match = output.match(/ROWS:(\\d+)/);\nconst rows = match ? parseInt(match[1]) : 0;\n\nreturn [{\n  json: {\n    status: 'success',\n    proveedor: 'Biogenetica',\n    archivo: 'inventario.txt',\n    registros_procesados: rows,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "1ba9d048-1005-4f3a-8f4f-7b394ff60fe7",
+      "name": "📊 Formatear Resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Preparar mensaje de error para el flujo global\nconst stderr = $input.first().json.stderr || 'Sin detalles';\nconst stdout = $input.first().json.stdout || '';\n\nreturn [{\n  json: {\n    status: 'error',\n    proveedor: 'Biogenetica',\n    archivo: 'inventario.txt',\n    error_detail: stderr || stdout,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "37c68dfd-57ed-4561-95d2-7984ceb90ae5",
+      "name": "❌ Preparar Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Biogenetica ETL falló: {{ .error_detail }}"
+      },
+      "id": "e9fe7d28-3ea7-4a7e-a3fb-cec4b570aad6",
+      "name": "🔴 Lanzar Error → Global Handler",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        224,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Logica"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        128
+      ],
+      "typeVersion": 1,
+      "id": "f4377214-df90-4bc4-977c-efb74b563b4a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "ad8254ce-c3ab-4fdd-9f97-c135568d5a67",
+      "name": "Activar Flujo",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1104,
+        112
+      ],
+      "notes": "La droguería actualiza inventario.txt cada 20 min. Descargamos cada 30 min para asegurar consistencia."
+    }
+  ],
+  "connections": {
+    "📥 FTP — Descargar inventario.txt": {
+      "main": [
+        [
+          {
+            "node": "📄 Convertir a Texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 Convertir a Texto": {
+      "main": [
+        [
+          {
+            "node": "🐍 SSH — Parsear y cargar en SQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🐍 SSH — Parsear y cargar en SQL": {
+      "main": [
+        [
+          {
+            "node": "✅ ¿Éxito?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ ¿Éxito?": {
+      "main": [
+        [
+          {
+            "node": "📊 Formatear Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Preparar Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "❌ Preparar Error": {
+      "main": [
+        [
+          {
+            "node": "🔴 Lanzar Error → Global Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Activar Flujo": {
+      "main": [
+        [
+          {
+            "node": "📥 FTP — Descargar inventario.txt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "09a1940c-6b0f-4972-b531-05ef8225b97e",
+  "triggerCount": 0,
+  "tags": []
+}

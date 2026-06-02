@@ -1,0 +1,57 @@
+{
+  "createdAt": "2026-04-23T01:37:36.605Z",
+  "updatedAt": "2026-04-23T01:37:52.378Z",
+  "id": "ZxYRB10BMobrhQFs",
+  "name": "Get Host IPs",
+  "active": false,
+  "nodes": [
+    {
+      "id": "6606bf41-4196-47b7-b26e-c93c96a1f358",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "id": "1b14a02a-6477-40ec-a6e3-de7eaadca4bf",
+      "name": "Get Env Vars",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "jsCode": "return [{ json: process.env }];"
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Get Env Vars",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "8e206f6c-9583-49e2-8bde-ad449390517e",
+  "triggerCount": 0,
+  "tags": []
+}

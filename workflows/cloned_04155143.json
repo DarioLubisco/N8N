@@ -1,0 +1,254 @@
+{
+  "createdAt": "2026-05-15T19:38:15.000Z",
+  "updatedAt": "2026-05-16T05:00:36.674Z",
+  "id": "cloned_04155143",
+  "name": "Synapse Portero Gemini 2.0 (Cloned)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "501f20c6-6d64-4fec-80e8-1f5d3520476e/chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "e7f007ea-e95c-490b-96b4-7e152d7b1667",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "webhookId": "501f20c6-6d64-4fec-80e8-1f5d3520476e"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT role, content FROM n8n_chat_memory WHERE session_id = '{{$json.body.sessionId}}' ORDER BY created_at ASC LIMIT 10"
+      },
+      "id": "44b48c19-7271-4b2f-8610-4f4b916be2c1",
+      "name": "Get Memory",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.2,
+      "position": [
+        300,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "[PROD] Postgres - Synapse DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const memory = $items(\"Get Memory\").map(i => i.json);\nconst chatInput = $node[\"Webhook\"].json.body.chatInput;\nconst image = $node[\"Webhook\"].json.body.image;\nconst audio = $node[\"Webhook\"].json.body.audio;\nconst sessionId = $node[\"Webhook\"].json.body.sessionId;\n\nlet messages = [];\nmessages.push({\n    role: \"system\",\n    content: \"You are Synapse Portero. You are a helpful AI assistant connected to Farmacia Americana. You can process images, audio, and text.\"\n});\n\nmemory.forEach(row => {\n    if (row.role && row.content) {\n        messages.push({ role: row.role, content: row.content });\n    }\n});\n\nlet userContent = [];\nuserContent.push({ type: \"text\", text: chatInput });\n\nif (image) {\n    userContent.push({ type: \"image_url\", image_url: { url: `data:image/jpeg;base64,${image}` } });\n}\n\nif (audio) {\n    userContent.push({ type: \"input_audio\", input_audio: { data: audio, format: \"webm\" } });\n}\n\nmessages.push({ role: \"user\", content: userContent });\n\nreturn { messages: messages, sessionId: sessionId, chatInput: chatInput };"
+      },
+      "id": "4be9c85b-2209-4e94-bf27-00e30e223974",
+      "name": "Prepare Messages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "HTTP-Referer",
+              "value": "https://farmaciaamericana.es"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/gemini-2.0-flash-lite-001\",\n  \"messages\": {{ JSON.stringify($json.messages) }}\n}",
+        "options": {},
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openRouterApi"
+      },
+      "id": "c44f6b74-f519-4727-9da2-0b2b51ad68db",
+      "name": "Call OpenRouter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        700,
+        300
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "5RBlk4ISiJ3NRiRy",
+          "name": "[PROD] OpenRouter - Cuenta Principal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const assistantReply = $json.choices[0].message.content;\nreturn { \n    output: assistantReply, \n    sessionId: $node[\"Prepare Messages\"].json.sessionId,\n    userMessage: $node[\"Prepare Messages\"].json.chatInput\n};"
+      },
+      "id": "bdaec516-e583-4b80-b4f3-e97b5bab2553",
+      "name": "Extract Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO n8n_chat_memory (session_id, role, content) VALUES ('{{$json.sessionId}}', 'user', '{{$json.userMessage.replace(/'/g, \"''\")}}' )"
+      },
+      "id": "d1a2ef86-673b-4c85-bd84-c9375c93bce2",
+      "name": "Save User Msg",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.2,
+      "position": [
+        1100,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "[PROD] Postgres - Synapse DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO n8n_chat_memory (session_id, role, content) VALUES ('{{$node[\"Extract Response\"].json.sessionId}}', 'assistant', '{{$node[\"Extract Response\"].json.output.replace(/'/g, \"''\")}}' )"
+      },
+      "id": "b152f1fe-358a-4bbe-9e34-373f536aa7d8",
+      "name": "Save AI Msg",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.2,
+      "position": [
+        1300,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "[PROD] Postgres - Synapse DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"output\": [\"Extract Response\"].json.output } }}",
+        "options": {}
+      },
+      "id": "cce34061-6eae-446b-b0c4-ea4088f89798",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Memory": {
+      "main": [
+        [
+          {
+            "node": "Prepare Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Messages": {
+      "main": [
+        [
+          {
+            "node": "Call OpenRouter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call OpenRouter": {
+      "main": [
+        [
+          {
+            "node": "Extract Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Response": {
+      "main": [
+        [
+          {
+            "node": "Save User Msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save User Msg": {
+      "main": [
+        [
+          {
+            "node": "Save AI Msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save AI Msg": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "e076883b-e29d-41a3-b38c-6db11e94af2c",
+  "triggerCount": 1,
+  "tags": []
+}

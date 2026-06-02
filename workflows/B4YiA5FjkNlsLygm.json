@@ -1,0 +1,248 @@
+{
+  "createdAt": "2026-05-06T02:03:50.489Z",
+  "updatedAt": "2026-05-06T02:44:15.209Z",
+  "id": "B4YiA5FjkNlsLygm",
+  "name": "[SUB] [Pedidos] - Generar TXT Estándar y Subir FTP",
+  "active": false,
+  "nodes": [
+    {
+      "id": "a42611e9-d345-40fc-827b-b12ddc107117",
+      "name": "Recibir Pedido",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\"items\": [{\"codigo_producto\": \"001234\", \"descripcion\": \"AMOXICILINA 500MG\", \"cantidad\": 10, \"precio_unitario\": 125.50}], \"drogueria_code\": \"VITAL_CLINIC\", \"cod_cliente\": \"1547\", \"cod_cliente_len\": 4, \"carpeta_pedidos\": \"Pedidos/\", \"ftp_credential_name\": \"[PROD] FTP - Vital Clinic\"}"
+      }
+    },
+    {
+      "id": "a6e49a11-f563-47e8-a02a-fb4c9c825d3a",
+      "name": "Obtener Correlativo",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE Proveedores.Pedidos_FTP_Secuencia SET UltimoCorrelativo = UltimoCorrelativo + 1, UpdatedAt = SYSDATETIME() WHERE DrogueriaCode = '{{ $json.drogueria_code }}'; SELECT UltimoCorrelativo AS correlativo FROM Proveedores.Pedidos_FTP_Secuencia WHERE DrogueriaCode = '{{ $json.drogueria_code }}';"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "452cbb9a-91e2-4c28-84d3-6194b1b3e00e",
+      "name": "Generar Archivo TXT",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Datos del trigger\nconst triggerData = $('Recibir Pedido').first().json;\nconst corrData = $('Obtener Correlativo').first().json;\n\nconst items = triggerData.items;\nconst codCliente = triggerData.cod_cliente;\nconst codLen = triggerData.cod_cliente_len || 4;\nconst carpeta = triggerData.carpeta_pedidos;\nconst correlativo = corrData.correlativo;\n\nconst codPadded = codCliente.toString().padStart(codLen, '0');\nconst corrPadded = correlativo.toString().padStart(6, '0');\nconst fileName = `${codPadded}P${corrPadded}.txt`;\n\nconst lines = items.map(item => {\n  const precio = parseFloat(item.precio_unitario || 0).toFixed(2);\n  return `${item.codigo_producto};${item.descripcion};${item.cantidad};${precio}`;\n});\nconst fileContent = lines.join('\\n');\n\nconst totalItems = items.length;\nconst totalUnidades = items.reduce((s, i) => s + (parseFloat(i.cantidad) || 0), 0);\nconst totalMonto = items.reduce((s, i) => s + ((parseFloat(i.cantidad) || 0) * (parseFloat(i.precio_unitario) || 0)), 0);\n\nreturn [{\n  json: {\n    fileName,\n    fileContent,\n    fullPath: `${carpeta}${fileName}`,\n    correlativo,\n    totalItems,\n    totalUnidades: totalUnidades.toFixed(2),\n    totalMonto: totalMonto.toFixed(2),\n    drogueria_code: triggerData.drogueria_code,\n    cod_cliente: codCliente,\n    ftp_credential_name: triggerData.ftp_credential_name\n  }\n}];"
+      }
+    },
+    {
+      "id": "1988e338-5cfc-43fb-b04d-e95c01436e4c",
+      "name": "Subir Pedido FTP",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "protocol": "ftp",
+        "operation": "upload",
+        "path": "={{ $json.fullPath }}",
+        "binaryData": false,
+        "fileContent": "={{ $json.fileContent }}"
+      },
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "ftp": {
+          "id": "H8y0GcAQHIkZHXyv",
+          "name": "[PROD] FTP - Inventario ITS"
+        }
+      }
+    },
+    {
+      "id": "a9603b29-2226-4f8a-9aff-f67f3cab3d67",
+      "name": "Registrar Pedido en BD",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO Proveedores.Pedidos_FTP (DrogueriaCode, CodClienteFTP, Correlativo, NombreArchivo, CarpetaFTP, Estado, TotalItems, TotalUnidades, TotalMonto, ExecutionID) VALUES ('{{ $('Generar Archivo TXT').item.json.drogueria_code }}', '{{ $('Generar Archivo TXT').item.json.cod_cliente }}', {{ $('Generar Archivo TXT').item.json.correlativo }}, '{{ $('Generar Archivo TXT').item.json.fileName }}', '{{ $('Recibir Pedido').first().json.carpeta_pedidos }}', 'SUBIDO', {{ $('Generar Archivo TXT').item.json.totalItems }}, {{ $('Generar Archivo TXT').item.json.totalUnidades }}, {{ $('Generar Archivo TXT').item.json.totalMonto }}, '{{ $execution.id }}'); SELECT SCOPE_IDENTITY() AS PedidoID;"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "a145fbf6-80fc-4518-80e4-5dfbdbbabf69",
+      "name": "Registrar Backorder",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        300
+      ],
+      "parameters": {
+        "workflowId": "jh62G640HDGexF2i",
+        "mode": "once",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "values": {
+            "CodProv": "={{ $('Generar Archivo TXT').item.json.drogueria_code }}",
+            "MetodoEnvio": "FTP",
+            "ArchivoEnviado": "={{ $('Generar Archivo TXT').item.json.fileName }}",
+            "Lineas": "={{ $('Recibir Pedido').first().json.items.map(i => ({ CodigoProducto: i.codigo_producto, CantidadPedida: i.cantidad, PrecioSolicitado: i.precio_unitario || 0 })) }}"
+          }
+        }
+      }
+    },
+    {
+      "id": "7c7c8e4c-3c74-41a3-9255-27c64f9ba53c",
+      "name": "Registrar Error FTP",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        500
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO Proveedores.Pedidos_FTP (DrogueriaCode, CodClienteFTP, Correlativo, NombreArchivo, CarpetaFTP, Estado, ErrorMensaje, TotalItems, TotalUnidades, TotalMonto, ExecutionID) VALUES ('{{ $('Generar Archivo TXT').item.json.drogueria_code }}', '{{ $('Generar Archivo TXT').item.json.cod_cliente }}', {{ $('Generar Archivo TXT').item.json.correlativo }}, '{{ $('Generar Archivo TXT').item.json.fileName }}', '{{ $('Recibir Pedido').first().json.carpeta_pedidos }}', 'ERROR', 'Error al subir archivo FTP', {{ $('Generar Archivo TXT').item.json.totalItems }}, {{ $('Generar Archivo TXT').item.json.totalUnidades }}, {{ $('Generar Archivo TXT').item.json.totalMonto }}, '{{ $execution.id }}');"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "bbfc6119-0a2f-435c-9493-125e059cd553",
+      "name": "Lanzar Error Global",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        500
+      ],
+      "parameters": {
+        "errorMessage": "=Pedido FTP falló para {{ $(\"Generar Archivo TXT\").item.json.drogueria_code }}: {{ $(\"Generar Archivo TXT\").item.json.fileName }}"
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Pedido": {
+      "main": [
+        [
+          {
+            "node": "Obtener Correlativo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Correlativo": {
+      "main": [
+        [
+          {
+            "node": "Generar Archivo TXT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Archivo TXT": {
+      "main": [
+        [
+          {
+            "node": "Subir Pedido FTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subir Pedido FTP": {
+      "main": [
+        [
+          {
+            "node": "Registrar Pedido en BD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Pedido en BD": {
+      "main": [
+        [
+          {
+            "node": "Registrar Backorder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Registrar Error FTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Error FTP": {
+      "main": [
+        [
+          {
+            "node": "Lanzar Error Global",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "602fdbbb-c98f-4a97-8d68-bf2b1b3af089",
+  "triggerCount": 0,
+  "tags": []
+}

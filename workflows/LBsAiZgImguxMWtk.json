@@ -1,0 +1,152 @@
+{
+  "createdAt": "2026-05-06T03:00:15.826Z",
+  "updatedAt": "2026-05-06T03:00:15.826Z",
+  "id": "LBsAiZgImguxMWtk",
+  "name": "[SUB] [Pedidos] - Generar Excel y Enviar",
+  "active": false,
+  "nodes": [
+    {
+      "id": "cf08c568-03d2-480f-be32-fc74d5053513",
+      "name": "Recibir Pedido Fallback",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\"items\": [{\"codigo_producto\": \"001234\", \"descripcion\": \"PROD EJEMPLO\", \"cantidad\": 5}], \"drogueria_code\": \"DROCERCA\", \"cod_cliente\": \"02735\", \"metodo_envio\": \"WHATSAPP\"}"
+      }
+    },
+    {
+      "id": "e89cd566-6eea-45ee-9e37-e12ec101001d",
+      "name": "Mapear a Líneas Excel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const data = $('Recibir Pedido Fallback').first().json;\nconst items = data.items || [];\nreturn items.map(i => ({\n  json: {\n    \"Codigo de Producto\": i.codigo_producto,\n    \"Descripcion\": i.descripcion,\n    \"Cantidad\": i.cantidad,\n    \"Precio\": i.precio_unitario || 0\n  }\n}));"
+      }
+    },
+    {
+      "id": "cbcacc1e-0d13-4922-881f-74ef4af3aa78",
+      "name": "Generar Excel",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "operation": "xlsx",
+        "binaryPropertyName": "data",
+        "options": {
+          "fileName": "=Pedido_{{ $('Recibir Pedido Fallback').first().json.drogueria_code }}_{{ $now.format('YYYYMMDD_HHmmss') }}.xlsx"
+        }
+      }
+    },
+    {
+      "id": "060a1c56-045e-4ea7-a5ac-d155073368f7",
+      "name": "Enviar Mensaje (Mock)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Aquí iría el nodo de Twilio, WhatsApp Business API, o Email (SMTP)\n// Por ahora simulamos éxito\nreturn [{ json: { success: true, method: $('Recibir Pedido Fallback').first().json.metodo_envio } }];"
+      }
+    },
+    {
+      "id": "87aa5b10-64cd-4a2c-bc01-2af19eb64b64",
+      "name": "Registrar Backorder",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "workflowId": "jh62G640HDGexF2i",
+        "mode": "once",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "values": {
+            "CodProv": "={{ $('Recibir Pedido Fallback').first().json.drogueria_code }}",
+            "MetodoEnvio": "={{ $('Recibir Pedido Fallback').first().json.metodo_envio }}",
+            "ArchivoEnviado": "={{ $('Generar Excel').item.binary.data.fileName }}",
+            "Lineas": "={{ $('Recibir Pedido Fallback').first().json.items.map(i => ({ CodigoProducto: i.codigo_producto, CantidadPedida: i.cantidad, PrecioSolicitado: i.precio_unitario || 0 })) }}"
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Pedido Fallback": {
+      "main": [
+        [
+          {
+            "node": "Mapear a Líneas Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear a Líneas Excel": {
+      "main": [
+        [
+          {
+            "node": "Generar Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Excel": {
+      "main": [
+        [
+          {
+            "node": "Enviar Mensaje (Mock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Mensaje (Mock)": {
+      "main": [
+        [
+          {
+            "node": "Registrar Backorder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "012bc672-9f06-46fa-93c0-c3ce9e875d9f",
+  "triggerCount": 0,
+  "tags": []
+}

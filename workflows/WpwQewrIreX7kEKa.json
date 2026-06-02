@@ -1,0 +1,303 @@
+{
+  "createdAt": "2026-05-06T04:08:32.716Z",
+  "updatedAt": "2026-05-06T04:08:32.716Z",
+  "id": "WpwQewrIreX7kEKa",
+  "name": "[PROD] Telegram Pedidos Handler",
+  "active": false,
+  "nodes": [
+    {
+      "id": "dbb3b85f-732e-4d34-8e13-bd7e3d90bd0e",
+      "name": "Callback Recebido",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "updates": [
+          "callback_query"
+        ]
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      },
+      "webhookId": "0c585ee0-df33-44c9-b3d0-9f78dc0f56ac"
+    },
+    {
+      "id": "6ea6fea2-0dfe-42bd-96af-9800ab01b543",
+      "name": "Switch Acción",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "mode": "expression",
+        "evalutionMode": "all",
+        "rules": {
+          "rules": [
+            {
+              "expression": "={{ $json.callback_query.data.startsWith('ver_pedido_') }}",
+              "output": 0
+            },
+            {
+              "expression": "={{ $json.callback_query.data.startsWith('enviar_pedido_') }}",
+              "output": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "f01f86ba-8068-4808-83a1-f1dbd0e6124c",
+      "name": "Extraer ID (Ver)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        500,
+        150
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "PropuestaID",
+              "type": "string",
+              "value": "={{ $json.callback_query.data.split('_')[2] }}"
+            },
+            {
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $json.callback_query.message.chat.id }}"
+            },
+            {
+              "name": "message_id",
+              "type": "string",
+              "value": "={{ $json.callback_query.message.message_id }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ef43fa0c-6e9c-401e-904a-0e25f3a7f097",
+      "name": "Obtener TOP 15 Líneas",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        150
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT TOP 15 Descrip, CantidadPropuesta, CostoCalculadoUSD\n             FROM Procurement.BorradorPedidosLineas \n             WHERE PropuestaID = {{ $json.PropuestaID }}\n             ORDER BY CostoCalculadoUSD DESC;"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "b9846bec-b1b9-4aa3-892c-bb95e24d1e38",
+      "name": "Formatear Lista",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        150
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const items = $input.all();\nconst vars = $items(\"Extraer ID (Ver)\")[0].json;\n\nlet text = `📋 *Resumen del Pedido #${vars.PropuestaID}*\\n\\n`;\ntext += `(Mostrando Top 15 ítems de mayor costo)\\n\\n`;\n\nitems.forEach(item => {\n  const d = item.json;\n  text += `🔸 *${d.Descrip}*\\n   Cant: ${d.CantidadPropuesta} | $${parseFloat(d.CostoCalculadoUSD).toFixed(2)}\\n`;\n});\n\ntext += `\\n💡 Si estás de acuerdo, puedes enviarlo de una vez o editarlo en Synapse.`;\n\nreturn [{\n  json: {\n    text: text,\n    chat_id: vars.chat_id,\n    PropuestaID: vars.PropuestaID,\n    reply_markup: {\n      inline_keyboard: [[\n        { text: \"🚀 Aprobar y Enviar (FTP)\", callback_data: `enviar_pedido_${vars.PropuestaID}` }\n      ]]\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "440d340d-d885-44c0-ac4c-9b084e807115",
+      "name": "Enviar Resumen (HTTP)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1100,
+        150
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8645482282:AAGqzeZPtgSJYTZMTiRYDX9uHvf7cr6DzEw/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n        chat_id: $json.chat_id,\n        text: $json.text,\n        parse_mode: \"markdown\",\n        reply_markup: $json.reply_markup\n      }) }}"
+      }
+    },
+    {
+      "id": "ea744d97-a0ed-45f9-963d-b3d1e55dc488",
+      "name": "Extraer ID (Enviar)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        500,
+        400
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "PropuestaID",
+              "type": "string",
+              "value": "={{ $json.callback_query.data.split('_')[2] }}"
+            },
+            {
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $json.callback_query.message.chat.id }}"
+            },
+            {
+              "name": "message_id",
+              "type": "string",
+              "value": "={{ $json.callback_query.message.message_id }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "5cc510ff-036a-4622-9020-92454621590e",
+      "name": "Llamar Orquestador",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        700,
+        400
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.147.18.204:5678/webhook/pedidos-orchestrator",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"drogueria_code\": \"DROCERCA\",\n  \"metodo_envio\": \"FTP\",\n  \"pedido_id\": {{ $json.PropuestaID }}\n}"
+      }
+    },
+    {
+      "id": "bec48aa2-9c0b-418d-90fc-93c2cc1757aa",
+      "name": "Avisar Éxito (HTTP)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        400
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8645482282:AAGqzeZPtgSJYTZMTiRYDX9uHvf7cr6DzEw/editMessageText",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n        chat_id: $json.chat_id,\n        message_id: $json.message_id,\n        text: \"✅ *Pedido #\" + $json.PropuestaID + \" Enviado Exitosamente por FTP al Orquestador.*\",\n        parse_mode: \"markdown\"\n      }) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Callback Recebido": {
+      "main": [
+        [
+          {
+            "node": "Switch Acción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Acción": {
+      "main": [
+        [
+          {
+            "node": "Extraer ID (Ver)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extraer ID (Enviar)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer ID (Ver)": {
+      "main": [
+        [
+          {
+            "node": "Obtener TOP 15 Líneas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener TOP 15 Líneas": {
+      "main": [
+        [
+          {
+            "node": "Formatear Lista",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear Lista": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resumen (HTTP)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer ID (Enviar)": {
+      "main": [
+        [
+          {
+            "node": "Llamar Orquestador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Llamar Orquestador": {
+      "main": [
+        [
+          {
+            "node": "Avisar Éxito (HTTP)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "3a103083-16fe-4f2f-a9b4-5c38d3de18d3",
+  "triggerCount": 0,
+  "tags": []
+}

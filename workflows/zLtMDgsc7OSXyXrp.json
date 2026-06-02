@@ -1,0 +1,333 @@
+{
+  "createdAt": "2026-04-23T23:31:35.943Z",
+  "updatedAt": "2026-05-07T02:46:07.761Z",
+  "id": "zLtMDgsc7OSXyXrp",
+  "name": "[PROD] Error Notification System",
+  "active": true,
+  "nodes": [
+    {
+      "id": "5d6b9ea3-4741-492f-9cc0-f8c020e82ffa",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "5cf238f6-dd3d-4c85-bc80-f5b022da0688",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        500
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "10b4a759-915a-4bef-841c-50d400ed407b",
+      "name": "Format Alert Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "alert_title",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "2",
+              "name": "alert_body",
+              "type": "string",
+              "value": "={{ $json.execution?.error?.message || \"⚠️ ERROR DESCONOCIDO\\n\\nNo se capturó un mensaje de error específico.\" }}"
+            },
+            {
+              "id": "3",
+              "name": "execution_url",
+              "type": "string",
+              "value": "={{ $json.execution?.url }}"
+            },
+            {
+              "id": "4",
+              "name": "workflow_id",
+              "type": "string",
+              "value": "={{ $json.workflow?.id }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ed57e2dc-21f5-4b77-99c4-5d368714c243",
+      "name": "Check Mute Status",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        600,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SAv7NkTUX9oYd4v3"
+        },
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "ServiceName",
+              "condition": "eq",
+              "keyValue": "={{ $json.workflow_id }}"
+            }
+          ]
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "5048a721-af5e-456f-951b-ba1dd916ef6e",
+      "name": "Is Muted?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "d9b350f5-3006-44b4-ad0c-b26a6dbb01ab",
+              "leftValue": "={{ $json.MuteUntil ? (DateTime.fromISO($json.MuteUntil) > DateTime.now()) : false }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "df42f65a-b8db-48cb-b94d-5320a891ec7f",
+      "name": "Send Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1100,
+        400
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "-1003531406167",
+        "text": "={{ $(\"Format Alert Data\").item.json.alert_body }}\\n\\n<a href=\"{{ $(\"Format Alert Data\").item.json.execution_url }}\">🔍 Ver detalles de ejecución en n8n</a>",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "appendAttribution": false
+        },
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "🔕 1h",
+                    "additionalFields": {
+                      "callback_data": "={{ \"mute_1_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
+                    }
+                  },
+                  {
+                    "text": "🔕 4h",
+                    "additionalFields": {
+                      "callback_data": "={{ \"mute_4_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
+                    }
+                  },
+                  {
+                    "text": "🔕 12h",
+                    "additionalFields": {
+                      "callback_data": "={{ \"mute_12_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "🔊 Desilenciar",
+                    "additionalFields": {
+                      "callback_data": "={{ \"mute_0_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      },
+      "webhookId": "e92a863d-21c9-40e8-a05d-18c44568cc5f"
+    },
+    {
+      "id": "fcaafa1a-56ae-4c4f-b8a1-171ffe7b31f8",
+      "name": "Preparar Payload para Hermes",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1225,
+        600
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "alert_text",
+              "type": "string",
+              "value": "={{ $(\"Format Alert Data\").item.json.alert_body }}"
+            },
+            {
+              "id": "2",
+              "name": "chat_id",
+              "type": "string",
+              "value": "-1003531406167"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "4eedf55f-421e-4874-bceb-dd6028e9d0ad",
+      "name": "Llamar a Hermes",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1350,
+        600
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "1HuvD04gTSdwdYqw",
+          "mode": "id"
+        },
+        "mode": "each",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Alert Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Alert Data": {
+      "main": [
+        [
+          {
+            "node": "Check Mute Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Mute Status": {
+      "main": [
+        [
+          {
+            "node": "Is Muted?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Muted?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Telegram Alert": {
+      "main": [
+        [
+          {
+            "node": "Preparar Payload para Hermes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Payload para Hermes": {
+      "main": [
+        [
+          {
+            "node": "Llamar a Hermes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "5b9394f8-fd64-4ae4-862d-73bdb4164da7",
+  "triggerCount": 0,
+  "tags": []
+}

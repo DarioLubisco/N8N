@@ -1,0 +1,132 @@
+{
+  "createdAt": "2026-04-23T01:37:45.263Z",
+  "updatedAt": "2026-04-23T01:37:52.454Z",
+  "id": "No3yreghKrWplAFE",
+  "name": "Sistema de Pago Móvil - Farmacia",
+  "active": false,
+  "nodes": [
+    {
+      "id": "b0d06b15-fadc-47f1-8189-a0fffda86b74",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        304
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pago-movil",
+        "options": {}
+      },
+      "webhookId": "2ee81e53-97f5-47c4-b626-828232ad34ce"
+    },
+    {
+      "id": "65950536-6e43-4060-9bd8-6a03942eeb7e",
+      "name": "Procesamiento JS",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        304
+      ],
+      "parameters": {
+        "jsCode": "\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const text = item.json.body?.text || \"\";\n  \n  // Buscar monto: Ej \"Bs. 500,00\" o \"500.50\"\n  let monto = \"0.00\";\n  const montoMatch = text.match(/(?:Bs\\.?\\s*|monto\\s*|Bs\\.\\s*)?(\\d{1,3}(?:[.,]\\d{3})*(?:[.,]\\d{1,2})?)/i);\n  if (montoMatch) {\n    monto = montoMatch[1].replace(',', '.'); // Normalizar decimales a punto\n  }\n\n  // Buscar Referencia: Busca explícitamente \"Ref:\", \"Referencia:\" etc.\n  let referencia = \"Desconocida\";\n  const refMatch = text.match(/(?:Ref(?:erencia)?[:\\s]*)(\\d{6,12})/i);\n  if (refMatch) {\n    referencia = refMatch[1];\n  } else {\n    // Intentar buscar un conjunto de dígitos largos como respaldo al final o en algún lugar\n    const fallbackRef = text.match(/\\b\\d{6,12}\\b/g);\n    if(fallbackRef) {\n       // Buscar el primer número largo que no empiece con 04 (teléfono)\n       const nonPhone = fallbackRef.find(r => !r.startsWith('04'));\n       if(nonPhone) referencia = nonPhone;\n       else if(fallbackRef.length > 0) referencia = fallbackRef[fallbackRef.length - 1]; // ultimo numero largo\n    }\n  }\n  \n  // Identificar Banco\n  let banco = \"Desconocido\";\n  const textLower = text.toLowerCase();\n  if (textLower.includes(\"bdv\") || textLower.includes(\"venezuela\") || textLower.includes(\"pagomovilbdv\")) banco = \"BDV\";\n  else if (textLower.includes(\"banesco\")) banco = \"Banesco\";\n  else if (textLower.includes(\"mercantil\")) banco = \"Mercantil\";\n  else if (textLower.includes(\"provincial\") || textLower.includes(\"bbva\")) banco = \"Provincial\";\n  else if (textLower.includes(\"bnc\")) banco = \"BNC\";\n  else if (textLower.includes(\"bancamiga\")) banco = \"Bancamiga\";\n\n  // Retornar la estructura deseada\n  results.push({\n    json: {\n      banco: banco,\n      monto: parseFloat(monto) || 0,\n      referencia: referencia,\n      texto_original: text\n    }\n  });\n}\nreturn results;"
+      }
+    },
+    {
+      "id": "3b14ba4c-63c6-477f-b227-b95718b97e7c",
+      "name": "Microsoft SQL",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        304
+      ],
+      "parameters": {
+        "operation": "insert",
+        "table": "[Procurement].[CajaPagoMovil]",
+        "columns": "banco, monto, referencia, texto_original"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "Microsoft SQL account"
+        }
+      }
+    },
+    {
+      "id": "176ec38a-a22e-4a35-833e-b096835781aa",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        704,
+        304
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "-5130651596",
+        "text": "=✅ *PAGO MÓVIL CONFIRMADO* \\n\\n 🏛️ *Banco:* {{ $json.banco }} \\n 💰 *Monto:* Bs. {{ $json.monto }} \\n 🔢 *Ref:* {{ $json.referencia }} \\n 📝 *Original:* {{ $json.texto_original }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "webhookId": "380655fa-d19d-45d9-aec6-67665bbc69be",
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Procesamiento JS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesamiento JS": {
+      "main": [
+        [
+          {
+            "node": "Microsoft SQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Microsoft SQL": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "bcedd372-91da-4c09-a91c-4e6e7a253734",
+  "triggerCount": 0,
+  "tags": []
+}

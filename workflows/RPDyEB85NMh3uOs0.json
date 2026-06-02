@@ -1,0 +1,75 @@
+{
+  "createdAt": "2026-05-06T00:40:54.550Z",
+  "updatedAt": "2026-05-06T00:40:54.550Z",
+  "id": "RPDyEB85NMh3uOs0",
+  "name": "[CRON] Snapshot Diario de Mercado",
+  "active": false,
+  "nodes": [
+    {
+      "id": "3df745e2-d03d-4133-847c-7d97d97c5d09",
+      "name": "Every Day at 6 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24,
+              "minutesInterval": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "f1ca1ee9-9b66-4d66-a5dd-fb0b9f24b5ae",
+      "name": "Ejecutar SP Snapshot",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "EXEC [Analitica].[SP_Snapshot_Mercado];"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every Day at 6 AM": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar SP Snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "3b9a946d-3823-4d52-afe0-41522ac19ce8",
+  "triggerCount": 0,
+  "tags": []
+}

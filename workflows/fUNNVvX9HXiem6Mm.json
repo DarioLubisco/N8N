@@ -1,0 +1,160 @@
+{
+  "createdAt": "2026-05-06T03:53:13.736Z",
+  "updatedAt": "2026-05-06T04:08:08.882Z",
+  "id": "fUNNVvX9HXiem6Mm",
+  "name": "[PROD] Generador de Pedidos Automáticos",
+  "active": false,
+  "nodes": [
+    {
+      "id": "003c7db4-2919-48cb-b496-ad61c50ef76d",
+      "name": "Generador Diario (14:00)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 14 * * 1-5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "6aa92b43-2620-4607-80bf-212b59629036",
+      "name": "Generar Propuesta SQL",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "EXEC Procurement.SP_GenerarPropuestaAutomatica @CodProvSugerido = 'DROCERCA';"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "5c38b7b1-b1e6-4f1b-9081-1ad836eee3c2",
+      "name": "¿Se generó propuesta?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.PropuestaID }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "dab0aacb-cdc1-4a0e-ab60-e9da75f64ef9",
+      "name": "Formatear Mensaje",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        200
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const d = $input.first().json;\nconst synapseUrl = `https://synapse.farmaciaamericana.es/pedidos/validar/${d.PropuestaID}`;\n\nconst text = `🤖 *NUEVA PROPUESTA DE PEDIDO AUTOMÁTICO*\n\nSe ha calculado un pedido basado en el inventario actual y puntos de reorden.\n\n🏢 *Proveedor Sugerido:* ${d.CodProv}\n📦 *Ítems:* ${d.TotalLineas} líneas (${d.TotalUnidades} uds)\n💰 *Monto Estimado:* $${parseFloat(d.MontoTotalUSD).toFixed(2)} USD\n\n⚠️ *Requiere Acción:* El pedido está en Borrador. ¿Deseas revisarlo aquí o en Synapse?`;\n\nreturn [{\n  json: {\n    text: text,\n    reply_markup: {\n      inline_keyboard: [\n        [\n          { text: \"👀 Ver Resumen Aquí\", callback_data: `ver_pedido_${d.PropuestaID}` }\n        ],\n        [\n          { text: \"🌐 Revisar en Synapse\", url: synapseUrl }\n        ]\n      ]\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "7da302ad-9dd9-4ed3-810c-f844f6c82567",
+      "name": "Notificar Admin Bot (HTTP)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8645482282:AAGqzeZPtgSJYTZMTiRYDX9uHvf7cr6DzEw/sendMessage",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n        chat_id: \"-1003531406167\",\n        text: $json.text,\n        parse_mode: \"markdown\",\n        reply_markup: $json.reply_markup\n      }) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Generador Diario (14:00)": {
+      "main": [
+        [
+          {
+            "node": "Generar Propuesta SQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Propuesta SQL": {
+      "main": [
+        [
+          {
+            "node": "¿Se generó propuesta?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Se generó propuesta?": {
+      "main": [
+        [
+          {
+            "node": "Formatear Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear Mensaje": {
+      "main": [
+        [
+          {
+            "node": "Notificar Admin Bot (HTTP)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "82fd4d05-edaa-4552-b1fd-5d2be6827ce5",
+  "triggerCount": 0,
+  "tags": []
+}

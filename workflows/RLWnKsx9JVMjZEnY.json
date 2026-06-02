@@ -1,0 +1,141 @@
+{
+  "createdAt": "2026-05-08T02:37:02.338Z",
+  "updatedAt": "2026-05-08T02:38:07.751Z",
+  "id": "RLWnKsx9JVMjZEnY",
+  "name": "My workflow 2",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "items"
+            },
+            {
+              "name": "cod_cliente"
+            },
+            {
+              "name": "cod_cliente_len",
+              "type": "number"
+            },
+            {
+              "name": "carpeta_pedidos"
+            }
+          ]
+        }
+      },
+      "id": "87e83e67-48f5-4208-aec4-4e9ee8fa1713",
+      "name": "Recibir Pedido Dronena",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -464,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE Proveedores.Pedidos_FTP_Secuencia SET UltimoCorrelativo = UltimoCorrelativo + 1, UpdatedAt = SYSDATETIME() WHERE DrogueriaCode = 'DRONENA'; SELECT UltimoCorrelativo AS correlativo FROM Proveedores.Pedidos_FTP_Secuencia WHERE DrogueriaCode = 'DRONENA';"
+      },
+      "id": "0015b40d-7444-4e74-b142-c746b7c70698",
+      "name": "Obtener Correlativo Nena",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        -272,
+        16
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const triggerData = $('Recibir Pedido Dronena').first().json;\nconst corrData = $('Obtener Correlativo Nena').first().json;\n\nconst items = triggerData.items || [];\nconst codCliente = triggerData.cod_cliente || 'C344';\nconst carpeta = triggerData.carpeta_pedidos || '/Maracay/C344/';\nconst correlativo = corrData.correlativo || 1;\n\n// Formato de Pedido para Dronena\nconst fileName = 'pedido_dronena_' + correlativo + '.txt';\n\nconst lines = items.map(item => {\n  return `${item.codigo_producto};${item.cantidad}`;\n});\nconst fileContent = lines.join('\\n');\n\nreturn [{\n  json: {\n    fileName,\n    fileContent,\n    fullPath: `${carpeta}${fileName}`,\n    correlativo,\n    drogueria_code: 'DRONENA'\n  }\n}];"
+      },
+      "id": "d9915d0d-20ff-42cb-8141-026296dfd1ee",
+      "name": "Generar Archivo TXT",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "path": "={{ $json.fullPath }}",
+        "binaryData": false,
+        "fileContent": "={{ $json.fileContent }}",
+        "options": {}
+      },
+      "id": "859f6433-36ef-405b-a2e8-136642a5a37e",
+      "name": "Subir Pedido FTP",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        144,
+        16
+      ],
+      "credentials": {
+        "ftp": {
+          "id": "6d67u6BGhQbL0Cb5",
+          "name": "VitalClinic FTP"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Pedido Dronena": {
+      "main": [
+        [
+          {
+            "node": "Obtener Correlativo Nena",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Correlativo Nena": {
+      "main": [
+        [
+          {
+            "node": "Generar Archivo TXT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Archivo TXT": {
+      "main": [
+        [
+          {
+            "node": "Subir Pedido FTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "a6d495c6-ac3b-42b1-be08-1fe46970034d",
+  "triggerCount": 0,
+  "tags": []
+}

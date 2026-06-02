@@ -1,0 +1,63 @@
+{
+  "createdAt": "2026-05-06T01:12:33.039Z",
+  "updatedAt": "2026-05-06T01:12:33.039Z",
+  "id": "A79diTHU71aDRDAO",
+  "name": "[ADMIN] Syntax Check Python",
+  "active": false,
+  "nodes": [
+    {
+      "id": "94736cd8-64e0-4c18-bb22-f9b730cccf05",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "id": "c4b64512-07fb-4fcb-9544-3eb9cdb0802a",
+      "name": "Syntax Check",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "command": "python3 -m py_compile /opt/scripts/droguerias/*.py"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Syntax Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "3e570412-0a1d-4fd2-b7c0-8f3f6d7620dd",
+  "triggerCount": 0,
+  "tags": []
+}

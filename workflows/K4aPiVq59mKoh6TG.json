@@ -1,0 +1,170 @@
+{
+  "createdAt": "2026-04-23T01:50:49.002Z",
+  "updatedAt": "2026-04-27T22:56:25.225Z",
+  "id": "K4aPiVq59mKoh6TG",
+  "name": "DolarToday_AutoUpdate (Python via SSH)",
+  "active": false,
+  "nodes": [
+    {
+      "id": "3159e784-4988-4795-98dd-4b807429d9fd",
+      "name": "Cada 30 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        304
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "71977d3c-acfd-4bf5-a2ba-7cde459a98dc",
+      "name": "Ejecutar DolarToday.py",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        464,
+        304
+      ],
+      "parameters": {
+        "command": "python3 /opt/scripts/DolarToday.py"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "id": "6069e9ed-e4ca-4955-adc8-cc9d7500f3a6",
+      "name": "Check DolarToday de Hoy",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        680,
+        304
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as total FROM EnterpriseAdmin_AMC.dbo.dolartoday WHERE CAST(fecha AS DATE) = CAST(GETDATE() AS DATE);"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "Microsoft SQL account"
+        }
+      }
+    },
+    {
+      "id": "b4c2b617-b6b3-4cfe-9f5a-b38fa0677e33",
+      "name": "Evaluar Alerta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        304
+      ],
+      "parameters": {
+        "jsCode": "\nconst total = $input.first().json.total;\nif (total === 0 || total === undefined || total === null) {\n  return [{ json: { trigger_alert: true, message: \"No se actualizaron los datos después de ejecutar el script.\" } }];\n}\nreturn []; // Stop execution here if data exists\n"
+      }
+    },
+    {
+      "id": "1f20665f-5089-448f-8491-4af3b720a278",
+      "name": "Alarma Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        304
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "-1003531406167",
+        "text": "🚨 *ERROR: DOLARTODAY*\n\nEl script de automatización DolarToday.py se ejecutó, pero la base de datos *NO* tiene registros para el día de hoy.\n\nPor favor, revisa el servidor y la conexión a la base de datos.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "webhookId": "9b9a2272-c48c-4853-a297-dcb4880acc1d",
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cada 30 min": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar DolarToday.py",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejecutar DolarToday.py": {
+      "main": [
+        [
+          {
+            "node": "Check DolarToday de Hoy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check DolarToday de Hoy": {
+      "main": [
+        [
+          {
+            "node": "Evaluar Alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluar Alerta": {
+      "main": [
+        [
+          {
+            "node": "Alarma Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Cada 30 min": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "8c74e886-e06f-4791-90c1-bf6f9da58308",
+  "triggerCount": 1,
+  "tags": []
+}

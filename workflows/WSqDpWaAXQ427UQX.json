@@ -1,0 +1,149 @@
+{
+  "createdAt": "2026-04-29T17:45:45.848Z",
+  "updatedAt": "2026-05-28T05:00:53.332Z",
+  "id": "WSqDpWaAXQ427UQX",
+  "name": "[PROD] [Inventario] - ETL Inventario Dronena",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## ETL Dronena (Híbrido)\n- **Ejecución:** Python vía SSH (Nativo en Debian)\n- **Ruta:** /opt/scripts/Dronena/\n- **SQL Server IP:** 10.200.8.5 (Vía ZeroTier)\n- **Extracción:** FTP (ftp.dronena.com)\n- **Frecuencia:** Cada 2 horas.",
+        "color": 6
+      },
+      "id": "9c998e50-12b3-49b1-aa7b-c973192d2a52",
+      "name": "Sticky Note 8fff01cb",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        112,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "8042a722-76d2-4d33-9b21-6b4fde645f87",
+      "name": "Disparador (Cada 2 Horas)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "command": "python3 \"/opt/scripts/Dronena/Imp_Inv_Dronena.py\""
+      },
+      "id": "aeb86541-0470-4d65-8c90-0f134e368723",
+      "name": "Ejecutar Script Python",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        400,
+        304
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        288,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "e79323b9-5cd3-48a3-b315-d59632847f46",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        288,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "2a70b27a-8801-4649-8802-96638c199534",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        288,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "8db795f4-be9e-4bbf-9419-ddd62a113b66",
+      "name": "Sticky Note2"
+    }
+  ],
+  "connections": {
+    "Disparador (Cada 2 Horas)": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar Script Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": [
+        18
+      ]
+    },
+    "node:Disparador (Cada 2 Horas)": {
+      "recurrenceRules": [
+        10
+      ],
+      "recurrencyRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "b1b3b693-2208-4b55-a891-c75208cc9fe5",
+  "triggerCount": 1,
+  "tags": [
+    {
+      "createdAt": "2026-04-29T18:47:49.915Z",
+      "updatedAt": "2026-04-29T18:47:49.915Z",
+      "id": "zfDPQy3ToLGJHzFZ",
+      "name": "Proveedores-Híbridos"
+    },
+    {
+      "createdAt": "2026-04-29T15:41:30.813Z",
+      "updatedAt": "2026-04-29T15:41:30.813Z",
+      "id": "ar7VkyPtRJkNlcoi",
+      "name": "Produccion"
+    }
+  ]
+}

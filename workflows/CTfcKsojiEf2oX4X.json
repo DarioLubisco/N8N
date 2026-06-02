@@ -1,0 +1,68 @@
+{
+  "createdAt": "2026-04-26T00:51:08.296Z",
+  "updatedAt": "2026-04-29T18:00:13.699Z",
+  "id": "CTfcKsojiEf2oX4X",
+  "name": "Setup Postgres with pgvector",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "2f3c817c-09ba-4e7c-a68c-83be4af76e32",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "\n        CREATE EXTENSION IF NOT EXISTS vector;\n\n        CREATE TABLE IF NOT EXISTS document_vectors (\n            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n            content TEXT,\n            metadata JSONB,\n            embedding VECTOR(768)\n        );\n\n        CREATE TABLE IF NOT EXISTS chat_messages (\n            id SERIAL PRIMARY KEY,\n            session_id VARCHAR(255) NOT NULL,\n            message JSONB NOT NULL,\n            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n        );\n\n        CREATE INDEX IF NOT EXISTS idx_chat_session ON chat_messages(session_id);\n      ",
+        "options": {}
+      },
+      "id": "806329ac-e99c-4733-af78-e1e96b2855a8",
+      "name": "Setup PostgreSQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        544,
+        304
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Setup PostgreSQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "854413c5-7eb1-4255-9c80-e8a7889ccdc3",
+  "triggerCount": 0,
+  "tags": []
+}

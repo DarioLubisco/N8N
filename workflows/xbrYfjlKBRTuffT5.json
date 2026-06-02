@@ -1,0 +1,244 @@
+{
+  "createdAt": "2026-04-30T22:20:49.044Z",
+  "updatedAt": "2026-05-07T19:33:39.904Z",
+  "id": "xbrYfjlKBRTuffT5",
+  "name": "[PROD] [Inventario] - ETL Inventario Insuaminca M",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "d41951f0-0b73-4fda-ae21-944549b5e3ec",
+      "name": "Ejecutar cada 30 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -400,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "path": "/Inventario.txt",
+        "binaryPropertyName": "inventario_raw",
+        "options": {}
+      },
+      "id": "db51d46d-f698-425b-8487-5885e94f97f1",
+      "name": "Descargar Inventario",
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        -272
+      ],
+      "credentials": {
+        "ftp": {
+          "id": "a7IUimySoFeL9RLt",
+          "name": "[PROD] FTP - Insuaminca"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "inventario_raw",
+        "options": {}
+      },
+      "id": "809ad047-4959-4013-8561-4a37dc065191",
+      "name": "📄 Convertir a Texto",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        48,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "command": "python3 /opt/scripts/droguerias/insuaminca.py --sucursal M"
+      },
+      "id": "31694e06-6ac7-4c58-945b-e5f1bcf5216d",
+      "name": "Cargar Datos",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        272,
+        -272
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "{{ $json.stdout }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              },
+              "rightValue": "OK"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c5178ef6-f85b-4ab5-8a2a-d145e9ce766f",
+      "name": "Verificar Éxito",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        496,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\n        const output = $input.first().json.stdout || '';\n        const match = output.match(/ROWS:(\\d+)/);\n        const rows = match ? parseInt(match[1]) : 0;\n\n        return [{\n          json: {\n            status: 'success',\n            proveedor: 'Insuaminca M',\n            archivo: 'inventario.txt',\n            registros_procesados: rows,\n            timestamp: new Date().toISOString()\n          }\n        }];\n      "
+      },
+      "id": "64ad8529-af05-44f1-9a71-454441f1a6a6",
+      "name": "📊 Formatear Resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -368
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\n        const stderr = $input.first().json.stderr || 'Sin detalles';\n        const stdout = $input.first().json.stdout || '';\n\n        return [{\n          json: {\n            status: 'error',\n            proveedor: 'Insuaminca M',\n            archivo: 'inventario.txt',\n            error_detail: stderr || stdout,\n            timestamp: new Date().toISOString()\n          }\n        }];\n      "
+      },
+      "id": "87d9c75d-8673-46a0-8db5-63b84b7a9f2e",
+      "name": "❌ Preparar Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Insuaminca M ETL falló: {{ $json.error_detail }}"
+      },
+      "id": "3da09ccd-9bae-47bc-888f-c1a58a059bef",
+      "name": "Lanzar Error",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        928,
+        -144
+      ]
+    }
+  ],
+  "connections": {
+    "Ejecutar cada 30 min": {
+      "main": [
+        [
+          {
+            "node": "Descargar Inventario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar Inventario": {
+      "main": [
+        [
+          {
+            "node": "📄 Convertir a Texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 Convertir a Texto": {
+      "main": [
+        [
+          {
+            "node": "Cargar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar Datos": {
+      "main": [
+        [
+          {
+            "node": "Verificar Éxito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Éxito": {
+      "main": [
+        [
+          {
+            "node": "📊 Formatear Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Preparar Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "❌ Preparar Error": {
+      "main": [
+        [
+          {
+            "node": "Lanzar Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "staticData": {
+    "node:Ejecutar cada 30 min": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "e8d9ffb6-ec61-425c-b1b5-e23a3f319b34",
+  "triggerCount": 1,
+  "tags": []
+}

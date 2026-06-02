@@ -1,0 +1,78 @@
+{
+  "createdAt": "2026-05-01T01:46:33.600Z",
+  "updatedAt": "2026-05-01T01:54:59.044Z",
+  "id": "GaRldu7FfKiWeGJL",
+  "name": "Ingesta Email Nueva",
+  "active": false,
+  "nodes": [
+    {
+      "id": "63ae48b8-d8c6-461c-9d86-087ff1e5359e",
+      "name": "Email Trigger (IMAP)",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "id": "6977beab-5e2d-4987-8ff4-4b027803fed8",
+      "name": "Save Attachment to Disk",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ]
+    },
+    {
+      "id": "79bbc946-4a2e-446e-beb8-eda894810489",
+      "name": "Execute Python Script (SSH)",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Save Attachment to Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Attachment to Disk": {
+      "main": [
+        [
+          {
+            "node": "Execute Python Script (SSH)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "fcdb45ad-4bc4-4d00-8903-677f92355c13",
+  "triggerCount": 0,
+  "tags": []
+}

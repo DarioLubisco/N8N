@@ -1,0 +1,87 @@
+{
+  "createdAt": "2026-05-01T01:41:04.407Z",
+  "updatedAt": "2026-05-01T01:42:49.879Z",
+  "id": "Cb6aAKbuCKnlTp6P",
+  "name": "[PROD] Ingesta_Inventarios_Email",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "postProcessAction": "nothing",
+        "downloadAttachments": true,
+        "options": {}
+      },
+      "name": "Email Trigger (IMAP)",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        -240
+      ],
+      "id": "53638c32-2c78-4a18-822e-ee666a2b2386"
+    },
+    {
+      "parameters": {
+        "fileName": "=/tmp/attachments/{{ $json.fileName }}",
+        "options": {
+          "append": false
+        }
+      },
+      "name": "Save Attachment to Disk",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -240
+      ],
+      "id": "a8530354-de9e-4b5c-b20c-8f5d6c8c512c"
+    },
+    {
+      "parameters": {
+        "command": "=python3 /opt/scripts/droguerias/email_parser.py --legacy-mode --file \"/tmp/attachments/{{ $json.fileName }}\""
+      },
+      "name": "Execute Python Script (SSH)",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        480,
+        -240
+      ],
+      "id": "1dd55efa-836b-4cfc-b294-4610a3f62cb0"
+    }
+  ],
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Save Attachment to Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Attachment to Disk": {
+      "main": [
+        [
+          {
+            "node": "Execute Python Script (SSH)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "b5898e32-77be-47e0-ba68-f7e354fa63b0",
+  "triggerCount": 0,
+  "tags": []
+}
