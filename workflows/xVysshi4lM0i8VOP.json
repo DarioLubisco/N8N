@@ -1,9 +1,9 @@
 {
   "createdAt": "2026-05-06T08:02:08.266Z",
-  "updatedAt": "2026-05-28T05:28:27.374Z",
+  "updatedAt": "2026-06-04T00:15:54.603Z",
   "id": "xVysshi4lM0i8VOP",
   "name": "[PROD] Watchdog de Latencia y Disponibilidad - OpenRouter API",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "id": "30a9316b-0d97-4275-af0c-d678f02d32d6",

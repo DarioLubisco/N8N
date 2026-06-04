@@ -1,9 +1,9 @@
 {
   "createdAt": "2026-04-28T01:27:40.307Z",
-  "updatedAt": "2026-05-29T04:54:01.208Z",
+  "updatedAt": "2026-06-04T00:15:52.082Z",
   "id": "R0GNsexEiQLZr01K",
   "name": "[PROD] [Finanzas] - Monitorear DolarToday (4h)",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "parameters": {
