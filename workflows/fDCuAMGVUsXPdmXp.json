@@ -1,0 +1,176 @@
+{
+  "createdAt": "2026-06-12T04:17:47.448Z",
+  "updatedAt": "2026-06-12T04:55:22.557Z",
+  "id": "fDCuAMGVUsXPdmXp",
+  "name": "[PROD] [Vikunja] - Ruteo de Inbox con IA Dify",
+  "active": true,
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Trigger Cada 30 Minutos",
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "parameters": {
+        "options": {},
+        "path": "test-vikunja-router",
+        "responseMode": "lastNode"
+      },
+      "position": [
+        0,
+        -150
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "23e89d1e-2bf4-4714-a48a-632d400ebcd9"
+    },
+    {
+      "id": "procesar-ruteo",
+      "name": "Procesar Ruteo con IA",
+      "parameters": {
+        "jsCode": "const headers = {\n  \"Authorization\": \"Bearer tk_64eae1632788ad2e1a68bc13f5ba2c959943d2f4\"\n};\n\ntry {\n  const projects = await this.helpers.httpRequest({\n    method: 'GET',\n    url: 'http://10.147.18.4:3456/api/v1/projects',\n    headers,\n    json: true\n  });\n\n  const tasks = await this.helpers.httpRequest({\n    method: 'GET',\n    url: 'http://10.147.18.4:3456/api/v1/projects/3/tasks',\n    headers,\n    json: true\n  });\n\n  if (!tasks || tasks.length === 0) {\n    return [];\n  }\n\n  const results = [];\n  for (const task of tasks) {\n    try {\n      const difyResponse = await this.helpers.httpRequest({\n        method: 'POST',\n        url: 'https://dify.farmaciaamericana.es/v1/workflows/run',\n        headers: {\n          \"Authorization\": \"Bearer app-rnKhjfFeCmOrbeUYpouf5nzO\"\n        },\n        body: {\n          inputs: {\n            titulo: task.title,\n            descripcion: task.description,\n            lista_proyectos: JSON.stringify(projects)\n          },\n          response_mode: 'blocking',\n          user: 'n8n-system'\n        },\n        json: true\n      });\n\n      const text = difyResponse.data?.outputs?.text || '';\n      const parsed = JSON.parse(text.trim());\n\n      results.push({\n        json: {\n          task_id: task.id,\n          title: task.title,\n          project_id: Number(parsed.project_id),\n          confidence: Number(parsed.confidence)\n        }\n      });\n    } catch (e) {\n      results.push({\n        json: {\n          task_id: task.id,\n          title: task.title,\n          error: \"Error procesando con Dify: \" + e.message,\n          confidence: 0\n        }\n      });\n    }\n  }\n\n  return results;\n} catch (error) {\n  throw new Error('Error en el flujo de Vikunja/Dify: ' + error.message);\n}"
+      },
+      "position": [
+        200,
+        -70
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "3",
+      "name": "Validar Confianza >= 85",
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "operation": "largerEqual",
+              "value1": "={{ $json.confidence }}",
+              "value2": 85
+            },
+            {
+              "operation": "notEqual",
+              "value1": "={{ $json.project_id }}",
+              "value2": 3
+            }
+          ]
+        }
+      },
+      "position": [
+        450,
+        -70
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1
+    },
+    {
+      "id": "4",
+      "name": "Mover Tarea en Vikunja",
+      "parameters": {
+        "contentType": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer tk_64eae1632788ad2e1a68bc13f5ba2c959943d2f4"
+            }
+          ]
+        },
+        "jsonBody": "={{ { project_id: $json.project_id } }}",
+        "method": "POST",
+        "options": {},
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "specifyHeaders": "keypair",
+        "url": "=http://10.147.18.4:3456/api/v1/tasks/{{ $json.task_id }}"
+      },
+      "position": [
+        700,
+        -150
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1
+    }
+  ],
+  "connections": {
+    "Procesar Ruteo con IA": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Validar Confianza >= 85",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Trigger Cada 30 Minutos": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Procesar Ruteo con IA",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Validar Confianza >= 85": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Mover Tarea en Vikunja",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Procesar Ruteo con IA",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "staticData": {
+    "node:Trigger Cada 30 Minutos": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "fcfffce0-d52a-440f-93eb-a50667746917",
+  "triggerCount": 2,
+  "tags": []
+}
