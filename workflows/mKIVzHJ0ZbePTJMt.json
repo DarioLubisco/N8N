@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-29T23:38:21.289Z",
-  "updatedAt": "2026-04-29T23:41:31.298Z",
+  "updatedAt": "2026-06-14T13:55:35.238Z",
   "id": "mKIVzHJ0ZbePTJMt",
   "name": "[UTILITY] Network Router",
   "active": false,
@@ -13,7 +13,8 @@
       "position": [
         100,
         300
-      ]
+      ],
+      "parameters": {}
     },
     {
       "id": "14653dde-0ed0-4279-b1d8-138629864250",
@@ -25,7 +26,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "\n/**\n * 🛰️ CONFIGURACIÓN MAESTRA DE RED\n * Cambia 'ZT' por 'LAN' o 'TS' para redirigir todo el tráfico de n8n.\n */\nconst RED_ACTIVA = 'ZT'; \n\nconst networkDictionary = {\n  \"DEBIAN\": {\n    \"LAN\": \"10.200.8.197\",\n    \"ZT\": \"10.147.18.4\",\n    \"TS\": \"100.123.98.5\"\n  },\n  \"SQL\": {\n    \"LAN\": \"10.200.8.5\",\n    \"ZT\": \"10.147.18.192\",\n    \"TS\": \"100.125.8.80\"\n  },\n  \"PC_DARIO\": {\n    \"LAN\": \"10.200.8.114\",\n    \"ZT\": \"10.147.18.43\",\n    \"TS\": \"100.121.167.114\" // Extraída de synapse_credentials.md (iphone-dario-16 o similar)\n  }\n};\n\n// Normalización y Fallback\nconst mode = RED_ACTIVA.toUpperCase();\n\nreturn {\n  network: mode,\n  DEBIAN: networkDictionary.DEBIAN[mode] || networkDictionary.DEBIAN.ZT,\n  SQL: networkDictionary.SQL[mode] || networkDictionary.SQL.ZT,\n  PC_DARIO: networkDictionary.PC_DARIO[mode] || networkDictionary.PC_DARIO.ZT\n};"
+        "jsCode": "\n/**\n * 🛰️ CONFIGURACIÓN MAESTRA DE RED\n * Cambia 'ZT' por 'LAN' o 'TS' para redirigir todo el tráfico de n8n.\n */\nconst RED_ACTIVA = 'ZT'; \n\nconst networkDictionary = {\n  \"DEBIAN\": {\n    \"LAN\": \"10.200.8.197\",\n    \"ZT\": \"10.147.18.4\",\n    \"TS\": \"100.123.98.5\"\n  },\n  \"SQL\": {\n    \"LAN\": \"10.200.8.5\",\n    \"ZT\": \"10.147.18.192\",\n    \"TS\": \"100.125.8.80\"\n  },\n  \"PC_DARIO\": {\n    \"LAN\": \"10.200.8.114\",\n    \"ZT\": \"10.147.18.63\",\n    \"TS\": \"100.126.220.118\" // Extraída de synapse_credentials.md (dario-desktop)\n  }\n};\n\n// Normalización y Fallback\nconst mode = RED_ACTIVA.toUpperCase();\n\nreturn {\n  network: mode,\n  DEBIAN: networkDictionary.DEBIAN[mode] || networkDictionary.DEBIAN.ZT,\n  SQL: networkDictionary.SQL[mode] || networkDictionary.SQL.ZT,\n  PC_DARIO: networkDictionary.PC_DARIO[mode] || networkDictionary.PC_DARIO.ZT\n};"
       }
     }
   ],
@@ -43,15 +44,14 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "availableInMCP": true
+    "executionOrder": "v1"
   },
   "staticData": null,
   "meta": {
     "aiBuilderAssisted": true
   },
   "pinData": null,
-  "versionId": "b09ead5e-6d7d-42d3-96ed-e7f92f8c765f",
+  "versionId": "30ab22bc-e11f-4a41-8516-8aa2a0269685",
   "triggerCount": 0,
   "tags": []
 }
