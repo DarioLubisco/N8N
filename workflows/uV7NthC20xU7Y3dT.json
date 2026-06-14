@@ -3,7 +3,7 @@
   "updatedAt": "2026-04-29T15:48:32.604Z",
   "id": "uV7NthC20xU7Y3dT",
   "name": "[PROD] Archivador Episodico (Sub-workflow)",
-  "active": true,
+  "active": false,
   "nodes": [
     {
       "parameters": {},

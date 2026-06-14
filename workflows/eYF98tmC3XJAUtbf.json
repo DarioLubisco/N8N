@@ -1,9 +1,9 @@
 {
   "createdAt": "2026-04-30T15:25:48.782Z",
-  "updatedAt": "2026-05-07T22:39:50.486Z",
+  "updatedAt": "2026-06-13T23:13:28.362Z",
   "id": "eYF98tmC3XJAUtbf",
   "name": "[PROD] Telegram Mute Handler",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "parameters": {
@@ -55,6 +55,18 @@
               "name": "message_id",
               "value": "={{ $json.message?.message_id || $('Telegram Callback').first()?.json?.message?.message_id }}",
               "type": "string"
+            },
+            {
+              "id": "ServiceName-id",
+              "name": "ServiceName",
+              "value": "={{ (() => { \n  const d = $json.callback_query?.data || $('Telegram Callback').first()?.json?.callback_query?.data; \n  if(!d) return \"WindowsMonitor\"; \n  const match = d.match(/^mute_\\d+_(.*)/);\n  if (match) return match[1];\n  return \"WindowsMonitor\"; \n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "MuteUntil-id",
+              "name": "MuteUntil",
+              "value": "={{ (() => { \n  const h = (() => { \n    const d = $json.callback_query?.data || $('Telegram Callback').first()?.json?.callback_query?.data; \n    if(!d) return 1; \n    const match = d.match(/^mute_(\\d+)_/);\n    if (match) return parseInt(match[1], 10);\n    if(d===\"mute_1h\") return 1; \n    if(d===\"mute_4h\") return 4; \n    if(d===\"mute_12h\") return 12; \n    return 1; \n  })(); \n  if(h === 0) return $now.minus({ hours: 1 }).toISO(); \n  return $now.plus({ hours: h }).toISO(); \n})() }}",
+              "type": "string"
             }
           ]
         },
@@ -71,40 +83,30 @@
     },
     {
       "parameters": {
-        "operation": "upsert",
-        "dataTableId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "SAv7NkTUX9oYd4v3"
-        },
-        "matchType": "allConditions",
-        "filters": {
-          "conditions": [
-            {
-              "keyName": "ServiceName",
-              "keyValue": "={{ $json.ServiceName }}"
-            }
-          ]
-        },
-        "columns": {
-          "mappingMode": "autoMapInputData",
-          "value": {}
-        },
+        "operation": "executeQuery",
+        "query": "=INSERT INTO service_mutes (service_name, mute_until) VALUES ('{{$json.ServiceName}}', '{{$json.MuteUntil}}') ON CONFLICT (service_name) DO UPDATE SET mute_until = EXCLUDED.mute_until;",
         "options": {}
       },
       "id": "b8da007b-f57a-4c27-9aae-cdd23c26a261",
       "name": "Update Mutes Table",
-      "type": "n8n-nodes-base.dataTable",
-      "typeVersion": 1.1,
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.1,
       "position": [
         560,
         304
-      ]
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "[PROD] Postgres - Synapse DB"
+        }
+      }
     },
     {
       "parameters": {
         "conditions": {
           "options": {
+            "version": 2,
             "caseSensitive": true,
             "leftValue": "",
             "typeValidation": "strict"
@@ -116,8 +118,7 @@
               "rightValue": "WindowsMonitor",
               "operator": {
                 "type": "string",
-                "operation": "equals",
-                "singleValue": true
+                "operation": "equals"
               }
             }
           ],
@@ -343,16 +344,14 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "availableInMCP": true,
-    "binaryMode": "separate"
+    "executionOrder": "v1"
   },
   "staticData": null,
   "meta": {
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "42876dfe-629b-4924-a644-97591f0325c7",
+  "versionId": "5c17bcf6-1e61-4b70-b8ad-bbcc38555cd5",
   "triggerCount": 1,
   "tags": []
 }

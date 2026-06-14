@@ -1,4 +1,6 @@
 {
+  "createdAt": "2026-06-13T23:49:36.750Z",
+  "updatedAt": "2026-06-14T01:16:18.879Z",
   "id": "RecovNotifSyst",
   "name": "[PROD] Recovery Notification System",
   "active": true,
@@ -163,5 +165,10 @@
     "saveDataSuccessExecution": "all",
     "timezone": "America/Caracas"
   },
-  "versionId": "a1b2c3d4-e5f6-7890-abcd-1234567890ab"
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "49403b52-5832-451a-a249-63ae2bbf3580",
+  "triggerCount": 0,
+  "tags": []
 }

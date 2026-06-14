@@ -3,7 +3,7 @@
   "updatedAt": "2026-05-03T23:41:22.558Z",
   "id": "pi2vfdgAY40Mh850",
   "name": "[PROD] [Logistica] - Procesar Excel WhatsApp",
-  "active": true,
+  "active": false,
   "nodes": [
     {
       "parameters": {},

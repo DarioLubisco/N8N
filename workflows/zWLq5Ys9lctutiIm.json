@@ -7,7 +7,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "### 📦 Ingesta de Fatture (Docling + OpenRouter)\\n- **Docling:** Corre localmente en Debian (IP 10.147.18.204)\\n- **Cerebro:** Gemini 3.1 Flash Lite\\n- **Destino:** JSON compatible con `safact` e `saitemfac`",
+        "content": "### 📦 Ingesta de Fatture (Docling + OpenRouter)\\n- **Docling:** Corre localmente en Debian (IP 10.147.18.4)\\n- **Cerebro:** Gemini 3.1 Flash Lite\\n- **Destino:** JSON compatible con `safact` e `saitemfac`",
         "height": 200,
         "width": 1180,
         "color": 4

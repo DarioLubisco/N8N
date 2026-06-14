@@ -88,7 +88,7 @@
     },
     {
       "parameters": {
-        "content": "### 📈 Sales Forecaster\n- **Host**: Debian (10.147.18.204)\n- **Script**: sales_forecaster.py\n- **DB**: EnterpriseAdmin_AMC",
+        "content": "### 📈 Sales Forecaster\n- **Host**: Debian (10.147.18.4)\n- **Script**: sales_forecaster.py\n- **DB**: EnterpriseAdmin_AMC",
         "width": 300
       },
       "id": "aead3d65-e19c-4410-8d6b-3c8d8e9dc023",

@@ -36,7 +36,7 @@
               "id": "3",
               "name": "EVOLUTION_API_BASE",
               "type": "string",
-              "value": "http://10.147.18.204:8088"
+              "value": "http://10.147.18.4:8088"
             },
             {
               "id": "4",
@@ -48,7 +48,7 @@
               "id": "5",
               "name": "DEBIAN_HOST_IP",
               "type": "string",
-              "value": "10.147.18.204"
+              "value": "10.147.18.4"
             },
             {
               "id": "07bf9659-53d8-4eac-a788-aaa38cc02688",

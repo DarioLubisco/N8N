@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-23T23:31:35.943Z",
-  "updatedAt": "2026-06-14T00:03:21.559Z",
+  "updatedAt": "2026-06-14T01:27:54.253Z",
   "id": "zLtMDgsc7OSXyXrp",
   "name": "[PROD] Error Notification System",
   "active": true,
@@ -351,6 +351,9 @@
           }
         ]
       ]
+    },
+    "Set Error Status": {
+      "main": []
     }
   },
   "settings": {
@@ -361,61 +364,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "e5ddea2f-abc8-4989-9284-8abf0f7398a6",
+  "versionId": "5b78c742-0f75-4333-9958-fac47bebb754",
   "triggerCount": 0,
-  "shared": [
-    {
-      "createdAt": "2026-04-23T23:31:35.943Z",
-      "updatedAt": "2026-04-23T23:31:35.943Z",
-      "role": "workflow:owner",
-      "workflowId": "zLtMDgsc7OSXyXrp",
-      "projectId": "229NyZp0afAhCtOe",
-      "project": {
-        "createdAt": "2026-04-23T15:48:09.202Z",
-        "updatedAt": "2026-04-23T17:03:42.069Z",
-        "id": "229NyZp0afAhCtOe",
-        "name": "Dario Lubisco <dario.lubisco@gmail.com>",
-        "type": "personal",
-        "icon": null,
-        "projectRelations": [
-          {
-            "createdAt": "2026-04-23T15:48:09.202Z",
-            "updatedAt": "2026-04-23T15:48:09.202Z",
-            "role": "project:personalOwner",
-            "userId": "0826022f-c1e7-4bbb-9570-229133922b29",
-            "projectId": "229NyZp0afAhCtOe",
-            "user": {
-              "createdAt": "2026-04-23T15:48:04.505Z",
-              "updatedAt": "2026-05-19T04:10:37.696Z",
-              "id": "0826022f-c1e7-4bbb-9570-229133922b29",
-              "email": "dario.lubisco@gmail.com",
-              "firstName": "Dario",
-              "lastName": "Lubisco",
-              "personalizationAnswers": {
-                "version": "v4",
-                "personalization_survey_submitted_at": "2026-04-23T17:03:48.393Z",
-                "personalization_survey_n8n_version": "2.15.1"
-              },
-              "settings": {
-                "userActivated": true,
-                "firstSuccessfulWorkflowId": "J2ePJNem9vUKHwle",
-                "userActivatedAt": 1776975900155,
-                "easyAIWorkflowOnboarded": true,
-                "npsSurvey": {
-                  "responded": true,
-                  "lastShownAt": 1777239893220
-                }
-              },
-              "role": "global:owner",
-              "disabled": false,
-              "mfaEnabled": false,
-              "isPending": false,
-              "isOwner": true
-            }
-          }
-        ]
-      }
-    }
-  ],
   "tags": []
 }

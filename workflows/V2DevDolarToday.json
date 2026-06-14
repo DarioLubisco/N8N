@@ -1,9 +1,9 @@
 {
   "createdAt": "2026-05-29T04:14:56.432Z",
-  "updatedAt": "2026-06-01T21:21:18.989Z",
+  "updatedAt": "2026-06-13T23:52:38.469Z",
   "id": "V2DevDolarToday",
   "name": "[DEV] [Finanzas] - Monitorear DolarToday V2 Paralelo",
-  "active": true,
+  "active": false,
   "nodes": [
     {
       "parameters": {},
@@ -140,20 +140,19 @@
     "executionOrder": "v1",
     "saveDataErrorExecution": "all",
     "saveDataSuccessExecution": "all",
-    "saveManualExecutions": "true",
-    "callerPolicy": "workflowsFromSameOwner",
+    "saveManualExecutions": true,
     "errorWorkflow": "zLtMDgsc7OSXyXrp"
   },
   "staticData": {
     "node:Schedule Trigger": {
       "recurrenceRules": [
-        0
+        16
       ]
     }
   },
   "meta": null,
   "pinData": null,
-  "versionId": "1fe0e5ff-319f-4760-aead-d68abff5468d",
+  "versionId": "60e43a17-845e-4084-ad51-dfb65fb5e05d",
   "triggerCount": 1,
   "tags": []
 }

@@ -3,7 +3,7 @@
   "updatedAt": "2026-05-07T19:33:39.904Z",
   "id": "xbrYfjlKBRTuffT5",
   "name": "[PROD] [Inventario] - ETL Inventario Insuaminca M",
-  "active": true,
+  "active": false,
   "nodes": [
     {
       "parameters": {

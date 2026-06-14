@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-29T23:11:00.963Z",
-  "updatedAt": "2026-05-06T02:40:20.558Z",
+  "updatedAt": "2026-06-14T01:26:24.743Z",
   "id": "4hS1QB91qEeHWYBB",
   "name": "[PROD] Monitor de Infraestructura Global",
   "active": true,
@@ -416,11 +416,7 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true,
-    "binaryMode": "separate",
-    "timeSavedMode": "fixed",
-    "errorWorkflow": "zLtMDgsc7OSXyXrp",
-    "callerPolicy": "workflowsFromSameOwner"
+    "errorWorkflow": "zLtMDgsc7OSXyXrp"
   },
   "staticData": {
     "node:Every 30 Minutes": {
@@ -431,7 +427,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "ea858725-c110-44e5-80fa-6d69710edc90",
+  "versionId": "b8ec808a-f85a-4e09-8d1f-b6758ba89c0f",
   "triggerCount": 1,
   "tags": []
 }

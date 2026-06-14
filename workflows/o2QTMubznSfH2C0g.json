@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-16T21:44:27.892Z",
-  "updatedAt": "2026-05-17T00:00:50.489Z",
+  "updatedAt": "2026-06-14T01:18:11.160Z",
   "id": "o2QTMubznSfH2C0g",
   "name": "[PROD] [Config] - Orquestador SQL y Webhook",
   "active": true,
@@ -194,11 +194,7 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true,
-    "binaryMode": "separate",
-    "timeSavedMode": "fixed",
-    "errorWorkflow": "zLtMDgsc7OSXyXrp",
-    "callerPolicy": "workflowsFromSameOwner"
+    "errorWorkflow": "zLtMDgsc7OSXyXrp"
   },
   "staticData": {
     "node:Revisar Tareas": {
@@ -209,7 +205,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": null,
-  "versionId": "f1e86a56-7a29-45c3-9485-e02b6f9de9fb",
+  "versionId": "c3c35158-31dd-45a7-b0dc-b0fcfa883f6b",
   "triggerCount": 2,
   "tags": []
 }

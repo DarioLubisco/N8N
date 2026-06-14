@@ -46,7 +46,7 @@
       "credentials": {
         "sshPassword": {
           "id": "q9XQyJD7Uu17tWSl",
-          "name": "SSH Password account"
+          "name": "[PROD] SSH - Debian WebServices"
         }
       }
     },
@@ -60,7 +60,7 @@
         50
       ],
       "parameters": {
-        "content": "### 📦 Sync AppSheet - Inventory\n- **Host**: Debian (10.147.18.204)\n- **Script**: load_sql_to_gsheets.py\n- **Dir**: /opt/synapse/sync_appsheet",
+        "content": "### 📦 Sync AppSheet - Inventory\n- **Host**: Debian (10.147.18.4)\n- **Script**: load_sql_to_gsheets.py\n- **Dir**: /opt/synapse/sync_appsheet",
         "height": 160,
         "width": 300
       }

@@ -178,7 +178,7 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "http://10.147.18.204:5678/webhook/pedidos-orchestrator",
+        "url": "http://localhost:5678/webhook/pedidos-orchestrator",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"drogueria_code\": \"DROCERCA\",\n  \"metodo_envio\": \"FTP\",\n  \"pedido_id\": {{ $json.PropuestaID }}\n}"

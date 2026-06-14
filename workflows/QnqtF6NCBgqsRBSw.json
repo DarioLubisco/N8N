@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-28T03:10:13.631Z",
-  "updatedAt": "2026-05-04T00:15:40.683Z",
+  "updatedAt": "2026-06-14T01:17:24.941Z",
   "id": "QnqtF6NCBgqsRBSw",
   "name": "[PROD] [Finanzas] - Reporte de Compras Diarias",
   "active": true,
@@ -179,15 +179,14 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true,
-    "binaryMode": "separate",
-    "timeSavedMode": "fixed",
     "errorWorkflow": "zLtMDgsc7OSXyXrp",
-    "callerPolicy": "workflowsFromSameOwner",
     "timezone": "America/Caracas"
   },
   "staticData": {
     "node:Schedule (8am-7pm)": {
+      "recurrenceRules": []
+    },
+    "node:Disparador (Cada 20m)": {
       "recurrenceRules": []
     }
   },
@@ -195,20 +194,20 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "66ae16fb-70d8-4715-a44b-2b95ef6d8b6e",
+  "versionId": "1bbdbfba-11dd-4421-b2a9-56d1280e09d2",
   "triggerCount": 1,
   "tags": [
-    {
-      "createdAt": "2026-04-29T18:47:49.915Z",
-      "updatedAt": "2026-04-29T18:47:49.915Z",
-      "id": "zfDPQy3ToLGJHzFZ",
-      "name": "Proveedores-Híbridos"
-    },
     {
       "createdAt": "2026-04-29T15:41:30.813Z",
       "updatedAt": "2026-04-29T15:41:30.813Z",
       "id": "ar7VkyPtRJkNlcoi",
       "name": "Produccion"
+    },
+    {
+      "createdAt": "2026-04-29T18:47:49.915Z",
+      "updatedAt": "2026-04-29T18:47:49.915Z",
+      "id": "zfDPQy3ToLGJHzFZ",
+      "name": "Proveedores-Híbridos"
     }
   ]
 }

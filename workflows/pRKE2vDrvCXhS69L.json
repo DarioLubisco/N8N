@@ -107,7 +107,7 @@
         450
       ],
       "parameters": {
-        "errorMessage": "=🚨 CRÍTICO (Primer Grado): Fallo en Ingesta Dronena\n🖥️ Entidad Origen: Servidor Debian Webservices (IP: 10.147.18.204)\n🎯 Entidad Destino: Servidor Windows SRV-DC-AMC (IP: 10.200.8.5)\n🔌 Servicio Afectado: ETL Python / MSSQL (Dronena)\n\n📝 Diagnóstico: El script de ingesta falló durante la ejecución SSH.\n🔍 Detalles: {{ $json.error_detail }}"
+        "errorMessage": "=🚨 CRÍTICO (Primer Grado): Fallo en Ingesta Dronena\n🖥️ Entidad Origen: Servidor Debian Webservices (IP: 10.147.18.4)\n🎯 Entidad Destino: Servidor Windows SRV-DC-AMC (IP: 10.200.8.5)\n🔌 Servicio Afectado: ETL Python / MSSQL (Dronena)\n\n📝 Diagnóstico: El script de ingesta falló durante la ejecución SSH.\n🔍 Detalles: {{ $json.error_detail }}"
       }
     }
   ],

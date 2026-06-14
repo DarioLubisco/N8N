@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-16T05:58:13.018Z",
-  "updatedAt": "2026-05-16T07:01:11.794Z",
+  "updatedAt": "2026-06-14T01:17:59.250Z",
   "id": "hVVDsYKZy8HNl3Pk",
   "name": "Synapse Portero Gemini 2.0",
   "active": true,
@@ -253,18 +253,14 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "availableInMCP": true,
-    "binaryMode": "separate",
-    "timeSavedMode": "fixed",
-    "callerPolicy": "workflowsFromSameOwner"
+    "executionOrder": "v1"
   },
   "staticData": null,
   "meta": {
     "aiBuilderAssisted": true
   },
   "pinData": null,
-  "versionId": "723c64d2-e0c6-409c-ab5e-e004519a60c8",
+  "versionId": "1eb20b80-2ba9-42a5-b2f1-90d84d5fd415",
   "triggerCount": 1,
   "tags": []
 }

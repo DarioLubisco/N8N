@@ -33,7 +33,7 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "=http://10.147.18.204:3000/api/v1/accounts/{{ $json.accountId }}/conversations",
+        "url": "=http://10.147.18.4:3000/api/v1/accounts/{{ $json.accountId }}/conversations",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
