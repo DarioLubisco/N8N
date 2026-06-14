@@ -40,7 +40,7 @@
           "name": "[PROD] Postgres - Synapse DB"
         }
       },
-      "typeVersion": 2.6,
+      "typeVersion": 2.1,
       "alwaysOutputData": true
     },
     {
@@ -102,7 +102,7 @@
           "name": "[PROD] OpenRouter - Cuenta Principal"
         }
       },
-      "typeVersion": 4.4
+      "typeVersion": 4.1
     },
     {
       "id": "9070f696-160a-4237-aa78-0fa3104cd2ee",
@@ -136,7 +136,7 @@
           "name": "[PROD] Postgres - Synapse DB"
         }
       },
-      "typeVersion": 2.6
+      "typeVersion": 2.1
     },
     {
       "id": "8479dce1-7574-49eb-a1bd-80d0262802c5",
@@ -156,7 +156,7 @@
           "name": "[PROD] Postgres - Synapse DB"
         }
       },
-      "typeVersion": 2.6
+      "typeVersion": 2.1
     },
     {
       "id": "316e2a38-c2e0-4734-b510-29b6248058a9",

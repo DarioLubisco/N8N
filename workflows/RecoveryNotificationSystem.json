@@ -1,0 +1,167 @@
+{
+  "id": "RecovNotifSyst",
+  "name": "[PROD] Recovery Notification System",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "e4a2b2f0-1234-5678-abcd-111111111111",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT status FROM service_status WHERE service_name = '{{ $json.service_name }}';"
+      },
+      "id": "e4a2b2f0-1234-5678-abcd-222222222222",
+      "name": "Get Previous Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.1,
+      "position": [
+        400,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "[PROD] Postgres - Synapse DB"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cond-1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "ERROR",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "e4a2b2f0-1234-5678-abcd-333333333333",
+      "name": "Was it in ERROR?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        600,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE service_status SET status = 'OK', last_updated = NOW() WHERE service_name = '{{ $('Execute Workflow Trigger').item.json.service_name }}';"
+      },
+      "id": "e4a2b2f0-1234-5678-abcd-444444444444",
+      "name": "Update to OK",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "[PROD] Postgres - Synapse DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "-1003531406167",
+        "text": "=✅ <b>RECOVERY EXITOSO</b>\n\nEl servicio <b>{{ $('Execute Workflow Trigger').item.json.service_name }}</b> ha restaurado su conectividad o funcionamiento normal.",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "e4a2b2f0-1234-5678-abcd-555555555555",
+      "name": "Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1000,
+        200
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Previous Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Previous Status": {
+      "main": [
+        [
+          {
+            "node": "Was it in ERROR?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Was it in ERROR?": {
+      "main": [
+        [
+          {
+            "node": "Update to OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update to OK": {
+      "main": [
+        [
+          {
+            "node": "Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "timezone": "America/Caracas"
+  },
+  "versionId": "a1b2c3d4-e5f6-7890-abcd-1234567890ab"
+}

@@ -49,7 +49,7 @@
       "id": "89eae71d-683f-40a2-a736-054200e5fc63",
       "name": "Disparar Python",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
+      "typeVersion": 4.1,
       "position": [
         400,
         0
@@ -83,7 +83,7 @@
       "id": "e66e6863-0d3b-4bda-ae8e-ae9d1525b7bd",
       "name": "Extraer Resultados",
       "type": "n8n-nodes-base.itemLists",
-      "typeVersion": 3.2,
+      "typeVersion": 3,
       "position": [
         200,
         200

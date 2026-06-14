@@ -88,18 +88,25 @@
               "leftValue": "{{ $json.stdout }}",
               "operator": {
                 "type": "string",
-                "operation": "contains"
+                "operation": "contains",
+                "singleValue": false
               },
               "rightValue": "OK"
             }
-          ]
+          ],
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          }
         },
         "options": {}
       },
       "id": "c5178ef6-f85b-4ab5-8a2a-d145e9ce766f",
       "name": "Verificar Éxito",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "typeVersion": 2.2,
       "position": [
         496,
         -272

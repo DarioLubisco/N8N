@@ -62,7 +62,7 @@
       "id": "68e5d756-09f3-45e0-9206-0ce122c615ec",
       "name": "Obtener Catalogo iCompras",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
+      "typeVersion": 4.1,
       "position": [
         464,
         304
@@ -113,7 +113,7 @@
       "id": "2bffdf54-50ba-4437-932d-e7054dc41aba",
       "name": "Subir Lotes a iCompras",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
+      "typeVersion": 4.1,
       "position": [
         1184,
         304

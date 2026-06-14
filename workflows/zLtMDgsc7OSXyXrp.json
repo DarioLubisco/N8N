@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-23T23:31:35.943Z",
-  "updatedAt": "2026-05-07T02:46:07.761Z",
+  "updatedAt": "2026-06-14T00:03:21.559Z",
   "id": "zLtMDgsc7OSXyXrp",
   "name": "[PROD] Error Notification System",
   "active": true,
@@ -8,36 +8,29 @@
     {
       "id": "5d6b9ea3-4741-492f-9cc0-f8c020e82ffa",
       "name": "Error Trigger",
-      "type": "n8n-nodes-base.errorTrigger",
-      "typeVersion": 1,
+      "parameters": {},
       "position": [
         200,
         300
       ],
-      "parameters": {}
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1
     },
     {
       "id": "5cf238f6-dd3d-4c85-bc80-f5b022da0688",
       "name": "Manual Trigger",
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1,
+      "parameters": {},
       "position": [
         200,
         500
       ],
-      "parameters": {}
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1
     },
     {
       "id": "10b4a759-915a-4bef-841c-50d400ed407b",
       "name": "Format Alert Data",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        400,
-        300
-      ],
       "parameters": {
-        "mode": "manual",
         "assignments": {
           "assignments": [
             {
@@ -50,165 +43,185 @@
               "id": "2",
               "name": "alert_body",
               "type": "string",
-              "value": "={{ $json.execution?.error?.message || \"⚠️ ERROR DESCONOCIDO\\n\\nNo se capturó un mensaje de error específico.\" }}"
+              "value": "={{ $json.execution?.error?.messages?.[0] || $json.trigger?.error?.messages?.[0] || $json.error?.messages?.[0] || $json.execution?.error?.message || $json.trigger?.error?.message || $json.error?.message || \"⚠️ ERROR DESCONOCIDO\\n\\nNo se capturó un mensaje de error específico.\" }}"
             },
             {
               "id": "3",
               "name": "execution_url",
               "type": "string",
-              "value": "={{ $json.execution?.url }}"
+              "value": "={{ $json.execution?.url || ('https://n8n.farmaciaamericana.es/workflow/' + ($json.workflow?.id || $json.workflow_id)) }}"
             },
             {
               "id": "4",
               "name": "workflow_id",
               "type": "string",
-              "value": "={{ $json.workflow?.id }}"
+              "value": "={{ $json.workflow?.id || $json.workflow_id }}"
+            },
+            {
+              "id": "5",
+              "name": "service_name",
+              "type": "string",
+              "value": "={{ (($json.execution?.error?.messages?.[0] || $json.trigger?.error?.messages?.[0] || $json.error?.messages?.[0] || $json.execution?.error?.message || $json.trigger?.error?.message || $json.error?.message || '').match(/Servicio Afectado:\\s*([^\\n\\r]+)/) || [])[1]?.trim() || $json.workflow?.name || $json.workflow?.id || $json.workflow_id }}"
             }
           ]
-        }
-      }
+        },
+        "mode": "manual"
+      },
+      "position": [
+        400,
+        300
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
     },
     {
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "[PROD] Postgres - Synapse DB"
+        }
+      },
       "id": "ed57e2dc-21f5-4b77-99c4-5d368714c243",
       "name": "Check Mute Status",
-      "type": "n8n-nodes-base.dataTable",
-      "typeVersion": 1.1,
+      "parameters": {
+        "alwaysOutputData": true,
+        "operation": "executeQuery",
+        "options": {},
+        "query": "=SELECT mute_until AS \"MuteUntil\" FROM service_mutes WHERE service_name = '{{ $(\"Format Alert Data\").item.json.service_name }}';"
+      },
       "position": [
         600,
         300
       ],
-      "parameters": {
-        "resource": "row",
-        "operation": "get",
-        "dataTableId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "SAv7NkTUX9oYd4v3"
-        },
-        "returnAll": true,
-        "filters": {
-          "conditions": [
-            {
-              "keyName": "ServiceName",
-              "condition": "eq",
-              "keyValue": "={{ $json.workflow_id }}"
-            }
-          ]
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.1
+    },
+    {
+      "credentials": {
+        "postgres": {
+          "id": "TIT6b60mPms0nTQp",
+          "name": "[PROD] Postgres - Synapse DB"
         }
       },
-      "alwaysOutputData": true
+      "id": "e4c5f9b8-1234-5678-abcd-8f5b022da000",
+      "name": "Set Error Status",
+      "parameters": {
+        "operation": "executeQuery",
+        "options": {},
+        "query": "=INSERT INTO service_status (service_name, status, last_updated) VALUES ('{{ $(\"Format Alert Data\").item.json.service_name }}', 'ERROR', NOW()) ON CONFLICT (service_name) DO UPDATE SET status = 'ERROR', last_updated = NOW();"
+      },
+      "position": [
+        600,
+        500
+      ],
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.1
     },
     {
       "id": "5048a721-af5e-456f-951b-ba1dd916ef6e",
       "name": "Is Muted?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        800,
-        300
-      ],
       "parameters": {
         "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict"
-          },
+          "combinator": "and",
           "conditions": [
             {
               "id": "d9b350f5-3006-44b4-ad0c-b26a6dbb01ab",
               "leftValue": "={{ $json.MuteUntil ? (DateTime.fromISO($json.MuteUntil) > DateTime.now()) : false }}",
-              "rightValue": "",
               "operator": {
-                "type": "boolean",
                 "operation": "true",
-                "singleValue": true
-              }
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
             }
           ],
-          "combinator": "and"
-        }
-      }
-    },
-    {
-      "id": "df42f65a-b8db-48cb-b94d-5320a891ec7f",
-      "name": "Send Telegram Alert",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        1100,
-        400
-      ],
-      "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
-        "chatId": "-1003531406167",
-        "text": "={{ $(\"Format Alert Data\").item.json.alert_body }}\\n\\n<a href=\"{{ $(\"Format Alert Data\").item.json.execution_url }}\">🔍 Ver detalles de ejecución en n8n</a>",
-        "additionalFields": {
-          "parse_mode": "HTML",
-          "appendAttribution": false
-        },
-        "replyMarkup": "inlineKeyboard",
-        "inlineKeyboard": {
-          "rows": [
-            {
-              "row": {
-                "buttons": [
-                  {
-                    "text": "🔕 1h",
-                    "additionalFields": {
-                      "callback_data": "={{ \"mute_1_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
-                    }
-                  },
-                  {
-                    "text": "🔕 4h",
-                    "additionalFields": {
-                      "callback_data": "={{ \"mute_4_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
-                    }
-                  },
-                  {
-                    "text": "🔕 12h",
-                    "additionalFields": {
-                      "callback_data": "={{ \"mute_12_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "row": {
-                "buttons": [
-                  {
-                    "text": "🔊 Desilenciar",
-                    "additionalFields": {
-                      "callback_data": "={{ \"mute_0_\" + $(\"Format Alert Data\").item.json.workflow_id }}"
-                    }
-                  }
-                ]
-              }
-            }
-          ]
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
         }
       },
+      "position": [
+        800,
+        300
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
       "credentials": {
         "telegramApi": {
           "id": "RkijxthBpMtc1pDO",
           "name": "[PROD] Telegram - Bot Pago Movil"
         }
       },
-      "webhookId": "e92a863d-21c9-40e8-a05d-18c44568cc5f"
+      "id": "df42f65a-b8db-48cb-b94d-5320a891ec7f",
+      "name": "Send Telegram Alert",
+      "parameters": {
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        },
+        "chatId": "-1003531406167",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "additionalFields": {
+                      "callback_data": "={{ \"mute_1_\" + $(\"Format Alert Data\").item.json.service_name }}"
+                    },
+                    "text": "🔕 1h"
+                  },
+                  {
+                    "additionalFields": {
+                      "callback_data": "={{ \"mute_4_\" + $(\"Format Alert Data\").item.json.service_name }}"
+                    },
+                    "text": "🔕 4h"
+                  },
+                  {
+                    "additionalFields": {
+                      "callback_data": "={{ \"mute_12_\" + $(\"Format Alert Data\").item.json.service_name }}"
+                    },
+                    "text": "🔕 12h"
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "additionalFields": {
+                      "callback_data": "={{ \"mute_0_\" + $(\"Format Alert Data\").item.json.service_name }}"
+                    },
+                    "text": "🔊 Desilenciar"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "operation": "sendMessage",
+        "replyMarkup": "inlineKeyboard",
+        "resource": "message",
+        "text": "={{ $(\"Format Alert Data\").item.json.alert_body }}\\n\\n<a href=\"{{ $(\"Format Alert Data\").item.json.execution_url }}\">🔍 Ver detalles de ejecución en n8n</a>",
+        "webhookId": "e92a863d-21c9-40e8-a05d-18c44568cc5f"
+      },
+      "position": [
+        1100,
+        400
+      ],
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2
     },
     {
       "id": "fcaafa1a-56ae-4c4f-b8a1-171ffe7b31f8",
       "name": "Preparar Payload para Hermes",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        1225,
-        600
-      ],
       "parameters": {
-        "mode": "manual",
         "assignments": {
           "assignments": [
             {
@@ -224,38 +237,56 @@
               "value": "-1003531406167"
             }
           ]
-        }
-      }
+        },
+        "mode": "manual"
+      },
+      "position": [
+        1225,
+        600
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
     },
     {
       "id": "4eedf55f-421e-4874-bceb-dd6028e9d0ad",
       "name": "Llamar a Hermes",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "parameters": {
+        "mode": "each",
+        "options": {},
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1HuvD04gTSdwdYqw"
+        }
+      },
       "position": [
         1350,
         600
       ],
-      "parameters": {
-        "source": "database",
-        "workflowId": {
-          "__rl": true,
-          "value": "1HuvD04gTSdwdYqw",
-          "mode": "id"
-        },
-        "mode": "each",
-        "options": {}
-      }
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1
     }
   ],
   "connections": {
-    "Manual Trigger": {
+    "Check Mute Status": {
       "main": [
         [
           {
+            "index": 0,
+            "node": "Is Muted?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
             "node": "Format Alert Data",
-            "type": "main",
-            "index": 0
+            "type": "main"
           }
         ]
       ]
@@ -264,20 +295,14 @@
       "main": [
         [
           {
+            "index": 0,
             "node": "Check Mute Status",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check Mute Status": {
-      "main": [
-        [
+            "type": "main"
+          },
           {
-            "node": "Is Muted?",
-            "type": "main",
-            "index": 0
+            "index": 0,
+            "node": "Set Error Status",
+            "type": "main"
           }
         ]
       ]
@@ -287,20 +312,20 @@
         [],
         [
           {
+            "index": 0,
             "node": "Send Telegram Alert",
-            "type": "main",
-            "index": 0
+            "type": "main"
           }
         ]
       ]
     },
-    "Send Telegram Alert": {
+    "Manual Trigger": {
       "main": [
         [
           {
-            "node": "Preparar Payload para Hermes",
-            "type": "main",
-            "index": 0
+            "index": 0,
+            "node": "Format Alert Data",
+            "type": "main"
           }
         ]
       ]
@@ -309,25 +334,88 @@
       "main": [
         [
           {
+            "index": 0,
             "node": "Llamar a Hermes",
-            "type": "main",
-            "index": 0
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Send Telegram Alert": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Preparar Payload para Hermes",
+            "type": "main"
           }
         ]
       ]
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "availableInMCP": true,
-    "binaryMode": "separate"
+    "executionOrder": "v1"
   },
   "staticData": null,
   "meta": {
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "5b9394f8-fd64-4ae4-862d-73bdb4164da7",
+  "versionId": "e5ddea2f-abc8-4989-9284-8abf0f7398a6",
   "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2026-04-23T23:31:35.943Z",
+      "updatedAt": "2026-04-23T23:31:35.943Z",
+      "role": "workflow:owner",
+      "workflowId": "zLtMDgsc7OSXyXrp",
+      "projectId": "229NyZp0afAhCtOe",
+      "project": {
+        "createdAt": "2026-04-23T15:48:09.202Z",
+        "updatedAt": "2026-04-23T17:03:42.069Z",
+        "id": "229NyZp0afAhCtOe",
+        "name": "Dario Lubisco <dario.lubisco@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "projectRelations": [
+          {
+            "createdAt": "2026-04-23T15:48:09.202Z",
+            "updatedAt": "2026-04-23T15:48:09.202Z",
+            "role": "project:personalOwner",
+            "userId": "0826022f-c1e7-4bbb-9570-229133922b29",
+            "projectId": "229NyZp0afAhCtOe",
+            "user": {
+              "createdAt": "2026-04-23T15:48:04.505Z",
+              "updatedAt": "2026-05-19T04:10:37.696Z",
+              "id": "0826022f-c1e7-4bbb-9570-229133922b29",
+              "email": "dario.lubisco@gmail.com",
+              "firstName": "Dario",
+              "lastName": "Lubisco",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2026-04-23T17:03:48.393Z",
+                "personalization_survey_n8n_version": "2.15.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "J2ePJNem9vUKHwle",
+                "userActivatedAt": 1776975900155,
+                "easyAIWorkflowOnboarded": true,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1777239893220
+                }
+              },
+              "role": "global:owner",
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false,
+              "isOwner": true
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }
