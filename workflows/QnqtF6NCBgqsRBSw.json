@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-28T03:10:13.631Z",
-  "updatedAt": "2026-06-14T01:17:24.941Z",
+  "updatedAt": "2026-06-15T02:21:11.512Z",
   "id": "QnqtF6NCBgqsRBSw",
   "name": "[PROD] [Finanzas] - Reporte de Compras Diarias",
   "active": true,
@@ -86,7 +86,10 @@
           "id": "oCKBzGZBl1xETeZa",
           "name": "[PROD] MSSQL - Saint Enterprise"
         }
-      }
+      },
+      "maxTries": 3,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -194,7 +197,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "1bbdbfba-11dd-4421-b2a9-56d1280e09d2",
+  "versionId": "5c33587e-46ce-4d3a-833d-dd4ceb72aadc",
   "triggerCount": 1,
   "tags": [
     {

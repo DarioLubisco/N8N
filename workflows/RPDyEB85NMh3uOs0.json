@@ -1,19 +1,13 @@
 {
   "createdAt": "2026-05-06T00:40:54.550Z",
-  "updatedAt": "2026-05-06T00:40:54.550Z",
+  "updatedAt": "2026-06-15T04:28:39.986Z",
   "id": "RPDyEB85NMh3uOs0",
   "name": "[CRON] Snapshot Diario de Mercado",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "id": "3df745e2-d03d-4133-847c-7d97d97c5d09",
       "name": "Every Day at 6 AM",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        240,
-        300
-      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -24,27 +18,33 @@
             }
           ]
         }
-      }
-    },
-    {
-      "id": "f1ca1ee9-9b66-4d66-a5dd-fb0b9f24b5ae",
-      "name": "Ejecutar SP Snapshot",
-      "type": "n8n-nodes-base.microsoftSql",
-      "typeVersion": 1.1,
+      },
       "position": [
-        460,
+        240,
         300
       ],
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "EXEC [Analitica].[SP_Snapshot_Mercado];"
-      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1
+    },
+    {
       "credentials": {
         "microsoftSql": {
           "id": "oCKBzGZBl1xETeZa",
           "name": "[PROD] MSSQL - Saint Enterprise"
         }
-      }
+      },
+      "id": "f1ca1ee9-9b66-4d66-a5dd-fb0b9f24b5ae",
+      "name": "Ejecutar SP Snapshot",
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "EXEC [Analitica].[SP_Snapshot_Mercado];"
+      },
+      "position": [
+        460,
+        300
+      ],
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1
     }
   ],
   "connections": {
@@ -52,24 +52,27 @@
       "main": [
         [
           {
+            "index": 0,
             "node": "Ejecutar SP Snapshot",
-            "type": "main",
-            "index": 0
+            "type": "main"
           }
         ]
       ]
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "availableInMCP": true
+    "executionOrder": "v1"
   },
-  "staticData": null,
+  "staticData": {
+    "node:Every Day at 6 AM": {
+      "recurrenceRules": []
+    }
+  },
   "meta": {
     "aiBuilderAssisted": true
   },
   "pinData": null,
-  "versionId": "3b9a946d-3823-4d52-afe0-41522ac19ce8",
-  "triggerCount": 0,
+  "versionId": "d06dbffa-392b-4ddb-91c7-ce2821fc4322",
+  "triggerCount": 1,
   "tags": []
 }
