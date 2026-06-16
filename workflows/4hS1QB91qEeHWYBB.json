@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-29T23:11:00.963Z",
-  "updatedAt": "2026-06-15T02:21:14.290Z",
+  "updatedAt": "2026-06-15T18:09:15.811Z",
   "id": "4hS1QB91qEeHWYBB",
   "name": "[PROD] Monitor de Infraestructura Global",
   "active": true,
@@ -183,7 +183,7 @@
     },
     {
       "parameters": {
-        "jsCode": "return [\n  { json: { service_name: 'MSSQL Server (Instancia: Saint)' } },\n  { json: { service_name: 'Conectividad Externa' } },\n  { json: { service_name: '[PROD] Monitor de Infraestructura Global' } }\n];"
+        "jsCode": "return [\n  { json: { service_name: 'MSSQL Server (Instancia: Saint)' } },\n  { json: { service_name: 'Conectividad Externa' } },\n  { json: { service_name: 'Synapse API (Pedidos & CxP)' } },\n  { json: { service_name: '[PROD] Monitor de Infraestructura Global' } }\n];"
       },
       "id": "set-service-name-id",
       "name": "Set Service Name",
@@ -218,6 +218,69 @@
         112,
         460
       ]
+    },
+    {
+      "id": "54685d7b-cb2e-49db-88f5-6b0e670dc986",
+      "name": "Check Remote API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        752,
+        304
+      ],
+      "parameters": {
+        "onError": "continueErrorOutput",
+        "options": {
+          "timeout": 5000
+        },
+        "url": "http://synapse-api:8000/api/health"
+      }
+    },
+    {
+      "id": "3a20fada-1b50-41b7-8f33-3b6d2e1f21e8",
+      "name": "If API Error",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        944,
+        304
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "api-error-cond",
+              "leftValue": "={{ $json.error }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "object"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          }
+        }
+      }
+    },
+    {
+      "id": "a088b7b1-7bc9-4eee-bb42-a28a432fcb05",
+      "name": "Stop and Error (API)",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        400
+      ],
+      "parameters": {
+        "errorMessage": "={{ `⚠️ ADVERTENCIA (2do Grado): API Remota Caída\n🖥️ Entidad Origen: Servidor Debian Webservices (IP ZeroTier: 10.147.18.4)\n🎯 Entidad Destino: Contenedor synapse-api (Puerto: 8000)\n🔌 Servicio Afectado: Synapse API (Pedidos & CxP)\n\n📝 Diagnóstico: No se pudo conectar al servicio web en el puerto 8000.\n🔍 Causas Probables: El contenedor synapse-api está detenido o el proceso uvicorn falló.\n🛠️ Log Nativo (n8n): ${$json.error?.message || 'Error de conexión o timeout'}` }}"
+      }
     }
   ],
   "connections": {
@@ -253,6 +316,11 @@
           },
           {
             "node": "Check Internet (Google)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Remote API",
             "type": "main",
             "index": 0
           }
@@ -338,6 +406,35 @@
           }
         ]
       ]
+    },
+    "Check Remote API": {
+      "main": [
+        [
+          {
+            "node": "If API Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If API Error": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error (API)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge All",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -353,7 +450,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "51c94031-9563-46a5-9220-e623b5d1c26c",
+  "versionId": "d7a01911-0b33-46ba-a49b-f490273fd3ce",
   "triggerCount": 1,
   "tags": []
 }
