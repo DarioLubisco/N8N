@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-29T23:11:00.963Z",
-  "updatedAt": "2026-06-15T18:09:15.811Z",
+  "updatedAt": "2026-06-17T14:55:14.301Z",
   "id": "4hS1QB91qEeHWYBB",
   "name": "[PROD] Monitor de Infraestructura Global",
   "active": true,
@@ -74,9 +74,9 @@
         }
       },
       "onError": "continueErrorOutput",
-      "maxTries": 3,
+      "maxTries": 4,
       "retryOnFail": true,
-      "waitBetweenTries": 5000
+      "waitBetweenTries": 60000
     },
     {
       "parameters": {
@@ -93,7 +93,10 @@
         560,
         464
       ],
-      "onError": "continueErrorOutput"
+      "onError": "continueErrorOutput",
+      "maxTries": 4,
+      "retryOnFail": true,
+      "waitBetweenTries": 60000
     },
     {
       "parameters": {
@@ -234,7 +237,10 @@
           "timeout": 5000
         },
         "url": "http://synapse-api:8000/api/health"
-      }
+      },
+      "maxTries": 4,
+      "retryOnFail": true,
+      "waitBetweenTries": 60000
     },
     {
       "id": "3a20fada-1b50-41b7-8f33-3b6d2e1f21e8",
@@ -450,7 +456,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "d7a01911-0b33-46ba-a49b-f490273fd3ce",
+  "versionId": "63a34c69-6830-409e-902a-acae910fead7",
   "triggerCount": 1,
   "tags": []
 }
