@@ -17,8 +17,13 @@ docker exec -i n8n n8n export:workflow --backup --output=/home/node/.n8n/workflo
 # Copy to the git tracking directory
 cp /home/synapse/docker/n8n/data/workflows_backup/*.json /home/synapse/source/N8N/workflows/
 
-# Sanitize OpenRouter API Keys (to bypass GitHub push protection)
+# Sanitize secrets (to bypass GitHub push protection)
 sed -i 's/sk-or-v1-[a-zA-Z0-9]*/sk-or-v1-REDACTED/g' /home/synapse/source/N8N/workflows/*.json
+sed -i 's/ntn_[a-zA-Z0-9]*/ntn_REDACTED/g' /home/synapse/source/N8N/workflows/*.json
+sed -i 's/tk_[a-zA-Z0-9]*/tk_REDACTED/g' /home/synapse/source/N8N/workflows/*.json
+sed -i 's/app-[a-zA-Z0-9]*/app-REDACTED/g' /home/synapse/source/N8N/workflows/*.json
+sed -i 's/[0-9]\{8,11\}:[a-zA-Z0-9_-]*/BOT_TOKEN_REDACTED/g' /home/synapse/source/N8N/workflows/*.json
+
 
 # Git operations
 cd /home/synapse/source/N8N
