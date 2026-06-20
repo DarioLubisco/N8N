@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-30T22:23:13.806Z",
-  "updatedAt": "2026-05-04T03:46:15.349Z",
+  "updatedAt": "2026-06-20T00:53:52.999Z",
   "id": "INcRiBMwnxdVk4CF",
   "name": "Lanzar Error",
   "active": false,
@@ -224,16 +224,16 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate",
-    "timeSavedMode": "fixed",
-    "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": true
+    "executionOrder": "v1"
   },
-  "staticData": null,
+  "staticData": {
+    "node:Activar Flujo": {
+      "recurrenceRules": []
+    }
+  },
   "meta": null,
   "pinData": {},
-  "versionId": "09a1940c-6b0f-4972-b531-05ef8225b97e",
-  "triggerCount": 0,
+  "versionId": "78bb1b90-78a7-458b-8311-9a8de0916d1a",
+  "triggerCount": 1,
   "tags": []
 }

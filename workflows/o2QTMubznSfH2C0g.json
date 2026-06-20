@@ -3,7 +3,7 @@
   "updatedAt": "2026-06-14T01:18:11.160Z",
   "id": "o2QTMubznSfH2C0g",
   "name": "[PROD] [Config] - Orquestador SQL y Webhook",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "id": "e3ece93a-cbb0-480e-8b80-f2ae1d6a1cc8",

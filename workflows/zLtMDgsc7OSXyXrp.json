@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-23T23:31:35.943Z",
-  "updatedAt": "2026-06-20T00:11:48.362Z",
+  "updatedAt": "2026-06-20T00:40:52.240Z",
   "id": "zLtMDgsc7OSXyXrp",
   "name": "[PROD] Error Notification System",
   "active": true,
@@ -75,6 +75,26 @@
       "typeVersion": 3.4
     },
     {
+      "id": "4b4112ac-3c69-4f1c-b4b2-7660ca60ec56",
+      "name": "Get Global Config",
+      "parameters": {
+        "mode": "once",
+        "options": {},
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "erJNzpR2KR2oB4Lq"
+        }
+      },
+      "position": [
+        560,
+        300
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1
+    },
+    {
       "credentials": {
         "postgres": {
           "id": "TIT6b60mPms0nTQp",
@@ -90,7 +110,7 @@
         "query": "=SELECT mute_until AS \"MuteUntil\" FROM service_mutes WHERE service_name = '{{ $(\"Format Alert Data\").item.json.service_name }}';"
       },
       "position": [
-        600,
+        720,
         300
       ],
       "type": "n8n-nodes-base.postgres",
@@ -111,7 +131,7 @@
         "query": "=INSERT INTO service_status (service_name, status, last_updated) VALUES ('{{ $(\"Format Alert Data\").item.json.service_name }}', 'ERROR', NOW()) ON CONFLICT (service_name) DO UPDATE SET status = 'ERROR', last_updated = NOW();"
       },
       "position": [
-        600,
+        720,
         500
       ],
       "type": "n8n-nodes-base.postgres",
@@ -144,7 +164,7 @@
         }
       },
       "position": [
-        800,
+        880,
         300
       ],
       "type": "n8n-nodes-base.if",
@@ -164,7 +184,7 @@
           "appendAttribution": false,
           "parse_mode": "HTML"
         },
-        "chatId": "-1003531406167",
+        "chatId": "={{ $('Get Global Config').item.json.ERROR_CHAT_ID }}",
         "inlineKeyboard": {
           "rows": [
             {
@@ -212,7 +232,7 @@
         "webhookId": "e92a863d-21c9-40e8-a05d-18c44568cc5f"
       },
       "position": [
-        1100,
+        1080,
         400
       ],
       "type": "n8n-nodes-base.telegram",
@@ -234,14 +254,14 @@
               "id": "2",
               "name": "chat_id",
               "type": "string",
-              "value": "-1003531406167"
+              "value": "={{ $('Get Global Config').item.json.ERROR_CHAT_ID }}"
             }
           ]
         },
         "mode": "manual"
       },
       "position": [
-        1225,
+        1240,
         600
       ],
       "type": "n8n-nodes-base.set",
@@ -261,7 +281,7 @@
         }
       },
       "position": [
-        1350,
+        1400,
         600
       ],
       "type": "n8n-nodes-base.executeWorkflow",
@@ -292,6 +312,17 @@
       ]
     },
     "Format Alert Data": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Get Global Config",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Get Global Config": {
       "main": [
         [
           {
@@ -364,7 +395,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "8f990d5b-8c73-49cf-9e04-642171c4996d",
+  "versionId": "94ddf2ef-d7e0-4d39-b762-47eb439b1551",
   "triggerCount": 0,
   "tags": []
 }
