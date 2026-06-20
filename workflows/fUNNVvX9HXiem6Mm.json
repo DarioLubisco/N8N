@@ -92,7 +92,7 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "https://api.telegram.org/bot8645482282:AAGqzeZPtgSJYTZMTiRYDX9uHvf7cr6DzEw/sendMessage",
+        "url": "https://api.telegram.org/botBOT_TOKEN_REDACTED/sendMessage",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({\n        chat_id: \"-1003531406167\",\n        text: $json.text,\n        parse_mode: \"markdown\",\n        reply_markup: $json.reply_markup\n      }) }}"

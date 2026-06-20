@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-23T23:31:35.943Z",
-  "updatedAt": "2026-06-14T01:27:54.253Z",
+  "updatedAt": "2026-06-20T00:11:48.362Z",
   "id": "zLtMDgsc7OSXyXrp",
   "name": "[PROD] Error Notification System",
   "active": true,
@@ -43,7 +43,7 @@
               "id": "2",
               "name": "alert_body",
               "type": "string",
-              "value": "={{ $json.execution?.error?.messages?.[0] || $json.trigger?.error?.messages?.[0] || $json.error?.messages?.[0] || $json.execution?.error?.message || $json.trigger?.error?.message || $json.error?.message || \"⚠️ ERROR DESCONOCIDO\\n\\nNo se capturó un mensaje de error específico.\" }}"
+              "value": "={{ (() => { const rawError = $json.execution?.error?.messages?.[0] || $json.trigger?.error?.messages?.[0] || $json.error?.messages?.[0] || $json.execution?.error?.message || $json.trigger?.error?.message || $json.error?.message || \"⚠️ ERROR DESCONOCIDO\"; if (rawError.includes(\"Servicio Afectado\") || rawError.includes(\"Entidad Origen\")) { return rawError; } const wfName = $json.workflow?.name || \"Desconocido\"; const nodeName = $json.execution?.lastNodeExecuted || \"Desconocido\"; const execId = $json.execution?.id || \"N/A\"; const errorMsg = $json.execution?.error?.message || $json.execution?.error?.description || $json.error?.message || \"Sin mensaje específico\"; return `🚨 <b>FALLO EN FLUJO DE TRABAJO</b>\\n\\n📋 <b>Flujo:</b> ${wfName}\\n⚙️ <b>Nodo:</b> ${nodeName}\\n🆔 <b>Ejecución:</b> #${execId}\\n\\n❌ <b>Error:</b> <code>${errorMsg}</code>`; })() }}"
             },
             {
               "id": "3",
@@ -364,7 +364,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "5b78c742-0f75-4333-9958-fac47bebb754",
+  "versionId": "8f990d5b-8c73-49cf-9e04-642171c4996d",
   "triggerCount": 0,
   "tags": []
 }

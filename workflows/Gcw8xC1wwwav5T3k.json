@@ -42,7 +42,7 @@
     },
     {
       "parameters": {
-        "content": "## Configuración del Cuarto Pilar\n1. Ve a la pestaña **Credentials** en n8n.\n2. Crea una nueva credencial de tipo **Telegram API**.\n3. Cámbiale el nombre a: `AMC Notification Bot`.\n4. Pega el Token: `8795593743:AAEebBKpsAlITvv72Fb8BaQNbfwPdVjP-3s`.\n5. Ejecuta este flujo para probar la conexión.",
+        "content": "## Configuración del Cuarto Pilar\n1. Ve a la pestaña **Credentials** en n8n.\n2. Crea una nueva credencial de tipo **Telegram API**.\n3. Cámbiale el nombre a: `AMC Notification Bot`.\n4. Pega el Token: `BOT_TOKEN_REDACTED`.\n5. Ejecuta este flujo para probar la conexión.",
         "height": 200,
         "width": 300,
         "color": 4

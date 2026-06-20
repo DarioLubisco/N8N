@@ -130,7 +130,7 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "https://api.telegram.org/bot8645482282:AAGqzeZPtgSJYTZMTiRYDX9uHvf7cr6DzEw/sendMessage",
+        "url": "https://api.telegram.org/botBOT_TOKEN_REDACTED/sendMessage",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({\n        chat_id: $json.chat_id,\n        text: $json.text,\n        parse_mode: \"markdown\",\n        reply_markup: $json.reply_markup\n      }) }}"
@@ -195,7 +195,7 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "https://api.telegram.org/bot8645482282:AAGqzeZPtgSJYTZMTiRYDX9uHvf7cr6DzEw/editMessageText",
+        "url": "https://api.telegram.org/botBOT_TOKEN_REDACTED/editMessageText",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({\n        chat_id: $json.chat_id,\n        message_id: $json.message_id,\n        text: \"✅ *Pedido #\" + $json.PropuestaID + \" Enviado Exitosamente por FTP al Orquestador.*\",\n        parse_mode: \"markdown\"\n      }) }}"

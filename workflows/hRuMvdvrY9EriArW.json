@@ -1,0 +1,230 @@
+{
+  "createdAt": "2026-06-19T03:04:20.217Z",
+  "updatedAt": "2026-06-19T20:47:44.101Z",
+  "id": "hRuMvdvrY9EriArW",
+  "name": "[PROD] Telegram Task Router (Notion/Vikunja)",
+  "active": true,
+  "nodes": [
+    {
+      "id": "telegram-trigger",
+      "name": "TelegramTrigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "iuR6zCiGanHgiCdq",
+          "name": "[PROD] Telegram - Mi Agente Inteligente (Hermes)"
+        }
+      }
+    },
+    {
+      "id": "filter-loop",
+      "name": "Filter Non-Bots & Auth",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        220,
+        200
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.from.is_bot }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "false"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Valid Message"
+            }
+          ]
+        },
+        "fallbackOutput": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "is-voice",
+      "name": "Is Voice Message?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "voice-cond",
+              "leftValue": "={{ $json.message.voice }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "audio-cond",
+              "leftValue": "={{ $json.message.audio }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "gemini-stt",
+      "name": "Gemini Audio to Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        100
+      ],
+      "parameters": {
+        "jsCode": "const msg = $('TelegramTrigger').first().json.message;\nconst fileId = msg.voice?.file_id || msg.audio?.file_id;\nif (!fileId) {\n  return [{ json: { error: 'No audio file_id found' } }];\n}\n\nconst BOT_TOKEN = 'BOT_TOKEN_REDACTED';\n\n// Step 1: Get file path from Telegram\nconst fileData = await this.helpers.httpRequest({\n  method: 'GET',\n  url: 'https://api.telegram.org/bot' + BOT_TOKEN + '/getFile',\n  qs: { file_id: fileId },\n  json: true\n});\nif (!fileData.ok) {\n  return [{ json: { error: 'Telegram getFile failed', details: fileData } }];\n}\nconst filePath = fileData.result.file_path;\n\n// Step 2: Download the audio binary\nconst audioBuffer = await this.helpers.httpRequest({\n  method: 'GET',\n  url: 'https://api.telegram.org/file/bot' + BOT_TOKEN + '/' + filePath,\n  encoding: 'arraybuffer',\n  returnFullResponse: false\n});\nconst audioBase64 = Buffer.from(audioBuffer).toString('base64');\n\n// Step 3: Send to OpenRouter (Gemini 2.5 Flash) for transcription\nconst OPENROUTER_KEY = 'sk-or-v1-REDACTED';\nconst sttData = await this.helpers.httpRequest({\n  method: 'POST',\n  url: 'https://openrouter.ai/api/v1/chat/completions',\n  headers: {\n    'Authorization': 'Bearer ' + OPENROUTER_KEY,\n    'Content-Type': 'application/json'\n  },\n  body: {\n    model: 'google/gemini-2.5-flash',\n    messages: [{\n      role: 'user',\n      content: [\n        { type: 'text', text: 'Por favor transcribe exactamente lo que se dice en este audio. Respeta la mezcla de espanol e ingles (Spanglish) y los terminos tecnicos. Solo devuelve la transcripcion directa, sin comentarios.' },\n        { type: 'input_audio', input_audio: { data: audioBase64, format: 'ogg' } }\n      ]\n    }]\n  },\n  json: true\n});\n\nconst transcription = sttData?.choices?.[0]?.message?.content || '';\nreturn [{ json: { candidates: [{ content: { parts: [{ text: transcription }] } }] } }];"
+      }
+    },
+    {
+      "id": "normalize-inputs",
+      "name": "Normalize Inputs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        200
+      ],
+      "parameters": {
+        "jsCode": "let text = \"\";\nconst trig = $('TelegramTrigger').first().json.message;\n\ntry {\n  const geminiOut = $('Gemini Audio to Text').first()?.json;\n  if (geminiOut && geminiOut.candidates && geminiOut.candidates[0].content.parts[0].text) {\n    text = geminiOut.candidates[0].content.parts[0].text;\n  }\n} catch (e) {}\n\nif (!text) {\n  text = trig.text || \"\";\n}\n\nreturn {\n  json: {\n    user_input: text,\n    chat_id: trig.chat.id,\n    message_id: trig.message_id,\n    is_bot: trig.from.is_bot || false\n  }\n};"
+      }
+    },
+    {
+      "id": "process-execute",
+      "name": "Process & Execute Task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        200
+      ],
+      "parameters": {
+        "jsCode": "const notionToken = \"ntn_REDACTED\";\nconst notionHeaders = {\n  \"Authorization\": `Bearer ${notionToken}`,\n  \"Notion-Version\": \"2022-06-28\",\n  \"Content-Type\": \"application/json\"\n};\n\nconst vikunjaToken = \"tk_REDACTED\";\nconst vikunjaHeaders = {\n  \"Authorization\": `Bearer ${vikunjaToken}`,\n  \"Content-Type\": \"application/json\"\n};\n\nconst telegramToken = \"BOT_TOKEN_REDACTED\";\n\n// 1. Extract inputs\nconst item = $input.first().json;\nconst userInput = item.user_input || \"\";\nconst chatId = item.chat_id;\nconst messageId = item.message_id;\nconst isBot = item.is_bot || false;\n\n// Whitelist checks (allow positive user IDs and known groups)\nconst isAllowedChat = chatId > 0 || chatId === -1003531406167 || chatId === -5130651596;\n\nif (isBot || !isAllowedChat || !userInput.trim()) {\n  return { json: { status: \"ignored\", reason: \"Bot message, unauthorized chat, or empty input\" } };\n}\n\n// 2. Fetch context\nlet vikunjaProjects = [];\ntry {\n  const resp = await this.helpers.httpRequest({\n    method: 'GET',\n    url: 'http://10.147.18.4:3456/api/v1/projects',\n    headers: { \"Authorization\": `Bearer ${vikunjaToken}` },\n    json: true\n  });\n  vikunjaProjects = resp.map(p => ({ id: p.id, name: p.title }));\n} catch (e) {\n  console.error(\"Error fetching Vikunja projects:\", e);\n}\n\nlet notionEpics = [];\ntry {\n  const resp = await this.helpers.httpRequest({\n    method: 'POST',\n    url: 'https://api.notion.com/v1/databases/381c22d5-8177-8159-a848-e2ece2dde69b/query',\n    headers: notionHeaders,\n    json: true\n  });\n  notionEpics = resp.results.map(page => {\n    const nameProp = page.properties.Name || {};\n    const name = nameProp.title && nameProp.title[0] ? nameProp.title[0].plain_text : \"Untitled\";\n    return { id: page.id, name };\n  });\n} catch (e) {\n  console.error(\"Error fetching Notion Epics:\", e);\n}\n\nlet notionSprints = [];\nlet activeSprintId = null;\ntry {\n  const resp = await this.helpers.httpRequest({\n    method: 'POST',\n    url: 'https://api.notion.com/v1/databases/381c22d5-8177-813a-9613-d1fa2d06b676/query',\n    headers: notionHeaders,\n    json: true\n  });\n  notionSprints = resp.results.map(page => {\n    const nameProp = page.properties.Name || {};\n    const name = nameProp.title && nameProp.title[0] ? nameProp.title[0].plain_text : \"Untitled\";\n    const status = page.properties.Estado?.status?.name || \"\";\n    if (status === \"In progress\") {\n      activeSprintId = page.id;\n    }\n    return { id: page.id, name, status };\n  });\n} catch (e) {\n  console.error(\"Error fetching Notion Sprints:\", e);\n}\n\nconst contextObj = {\n  notion_epics: notionEpics,\n  notion_sprints: notionSprints,\n  vikunja_projects: vikunjaProjects,\n  vikunja_users: [\n    { id: 1, name: \"Dario\", role: \"Gerencia General\" },\n    { id: 2, name: \"Lourdes\", role: \"Administración / Gastos\" },\n    { id: 3, name: \"Yumaira\", role: \"Administración Externa / Contable\" },\n    { id: 4, name: \"Yasmibel\", role: \"Supervisión / Ventas / Caja\" },\n    { id: 5, name: \"Ariany\", role: \"Ventas / Operaciones / Cadena de frío\" }\n  ]\n};\n\n// 3. Call Dify\nlet difyResult = null;\ntry {\n  const difyResponse = await this.helpers.httpRequest({\n    method: 'POST',\n    url: 'https://dify.farmaciaamericana.es/v1/workflows/run',\n    headers: {\n      \"Authorization\": \"Bearer app-REDACTED\",\n      \"Content-Type\": \"application/json\"\n    },\n    body: {\n      inputs: {\n        user_input: userInput,\n        context_json: JSON.stringify(contextObj),\n        // Adding backward compatibility fields so Dify doesn't throw 400\n        titulo: userInput.substring(0, 50) + \"...\",\n        descripcion: userInput,\n        lista_proyectos: JSON.stringify(contextObj)\n      },\n      response_mode: 'blocking',\n      user: 'n8n-system'\n    },\n    json: true\n  });\n\n  const text = difyResponse.data?.outputs?.text || difyResponse.data?.outputs?.result || '{}';\n  difyResult = JSON.parse(text.trim());\n} catch (e) {\n  console.error(\"Error calling Dify:\", e);\n  let errorMsg = e.message;\n  if (e.response && e.response.data) {\n    errorMsg = JSON.stringify(e.response.data);\n  }\n  await this.helpers.httpRequest({\n    method: 'POST',\n    url: `https://api.telegram.org/bot${telegramToken}/sendMessage`,\n    body: {\n      chat_id: chatId,\n      text: `❌ *Error técnico*: No se pudo clasificar la tarea con Dify.\n_${errorMsg}_`,\n      parse_mode: \"Markdown\",\n      reply_to_message_id: messageId\n    },\n    json: true\n  });\n  throw e;\n}\n\n// Resilient parsing: if Dify gives the old format (only project_id), default to Vikunja\nconst target = difyResult.target || \"Vikunja\";\nlet projectId = difyResult.project_id;\nconst assigneeName = difyResult.assignee_id || \"Dario\";\nconst title = difyResult.title || userInput.substring(0, 40) + \"...\";\nconst description = difyResult.description_enhanced || userInput;\nconst createNewEntity = difyResult.create_new_entity || false;\nconst newEntityName = difyResult.new_entity_name || \"\";\n\nlet feedbackMessage = \"\";\n\nif (target === \"Notion\") {\n  if (createNewEntity && newEntityName) {\n    try {\n      const newEpic = await this.helpers.httpRequest({\n        method: 'POST',\n        url: 'https://api.notion.com/v1/pages',\n        headers: notionHeaders,\n        body: {\n          parent: { database_id: \"381c22d5-8177-8159-a848-e2ece2dde69b\" },\n          properties: {\n            Name: { title: [{ text: { content: newEntityName } }] }\n          }\n        },\n        json: true\n      });\n      projectId = newEpic.id;\n      feedbackMessage += `🆕 *Épica Creada*: ${newEntityName}\\n`;\n    } catch (e) {\n      console.error(\"Error creating Notion Epic:\", e);\n      feedbackMessage += `⚠️ *Fallo al crear Épica*: ${newEntityName} (usando Epic default)\\n`;\n    }\n  }\n\n  try {\n    const properties = {\n      Name: { title: [{ text: { content: title } }] }\n    };\n    if (projectId) {\n      properties[\"Épica\"] = { relation: [{ id: projectId }] };\n    }\n    if (activeSprintId) {\n      properties[\"Sprint\"] = { relation: [{ id: activeSprintId }] };\n    }\n    properties[\"Estado\"] = { status: { name: \"Not started\" } };\n\n    const notionPage = await this.helpers.httpRequest({\n      method: 'POST',\n      url: 'https://api.notion.com/v1/pages',\n      headers: notionHeaders,\n      body: {\n        parent: { database_id: \"381c22d5-8177-81fb-89ee-e34715f74d63\" },\n        properties: properties,\n        children: [\n          {\n            object: 'block',\n            type: 'paragraph',\n            paragraph: {\n              rich_text: [{ type: 'text', text: { content: description } }]\n            }\n          }\n        ]\n      },\n      json: true\n    });\n\n    feedbackMessage += `✅ *Tarea Creada en Notion (Software Dev)*\\n`;\n    feedbackMessage += `📌 *Título*: ${title}\\n`;\n    if (projectId) {\n      const epicName = notionEpics.find(e => e.id === projectId)?.name || newEntityName || \"Asociada\";\n      feedbackMessage += `📁 *Épica*: ${epicName}\\n`;\n    }\n    feedbackMessage += `👤 *Asignado*: ${assigneeName}\\n`;\n  } catch (e) {\n    console.error(\"Error creating Notion task:\", e);\n    throw new Error(\"Failed to create Notion task: \" + e.message);\n  }\n\n} else if (target === \"Vikunja\") {\n  if (createNewEntity && newEntityName) {\n    try {\n      const newProj = await this.helpers.httpRequest({\n        method: 'PUT',\n        url: 'http://10.147.18.4:3456/api/v1/projects',\n        headers: {\n          \"Authorization\": `Bearer ${vikunjaToken}`,\n          \"Content-Type\": \"application/json\"\n        },\n        body: { title: newEntityName },\n        json: true\n      });\n      projectId = newProj.id;\n      feedbackMessage += `🆕 *Proyecto Creado*: ${newEntityName}\\n`;\n    } catch (e) {\n      console.error(\"Error creating Vikunja project:\", e);\n      feedbackMessage += `⚠️ *Fallo al crear Proyecto*: ${newEntityName} (usando default)\\n`;\n    }\n  }\n\n  const finalProjectId = projectId || 3;\n\n  let assigneeId = null;\n  let enhancedDescription = description;\n  if (assigneeName.toLowerCase().includes(\"dario\")) {\n    assigneeId = 1;\n  } else {\n    enhancedDescription = `[Asignado a: ${assigneeName}]\\n\\n${description}`;\n  }\n\n  try {\n    const task = await this.helpers.httpRequest({\n      method: 'PUT',\n      url: `http://10.147.18.4:3456/api/v1/projects/${finalProjectId}/tasks`,\n      headers: {\n        \"Authorization\": `Bearer ${vikunjaToken}`,\n        \"Content-Type\": \"application/json\"\n      },\n      body: {\n        title: title,\n        description: enhancedDescription\n      },\n      json: true\n    });\n\n    const taskId = task.id;\n\n    if (assigneeId) {\n      try {\n        await this.helpers.httpRequest({\n          method: 'PUT',\n          url: `http://10.147.18.4:3456/api/v1/tasks/${taskId}/assignees`,\n          headers: {\n            \"Authorization\": `Bearer ${vikunjaToken}`,\n            \"Content-Type\": \"application/json\"\n          },\n          body: { user_id: assigneeId },\n          json: true\n        });\n      } catch (ae) {\n        console.error(\"Error assigning task:\", ae);\n      }\n    }\n\n    feedbackMessage += `✅ *Tarea Creada en Vikunja (Operaciones)*\\n`;\n    feedbackMessage += `📌 *Título*: ${title}\\n`;\n    const projName = vikunjaProjects.find(p => p.id === finalProjectId)?.name || newEntityName || \"Operaciones\";\n    feedbackMessage += `📁 *Proyecto*: ${projName}\\n`;\n    feedbackMessage += `👤 *Asignado*: ${assigneeName}\\n`;\n\n  } catch (e) {\n    console.error(\"Error creating Vikunja task:\", e);\n    throw new Error(\"Failed to create Vikunja task: \" + e.message);\n  }\n} else {\n  feedbackMessage = `⚠️ *Clasificación Desconocida*: El target '${target}' no es válido.`;\n}\n\ntry {\n  await this.helpers.httpRequest({\n    method: 'POST',\n    url: `https://api.telegram.org/bot${telegramToken}/sendMessage`,\n    body: {\n      chat_id: chatId,\n      text: feedbackMessage,\n      parse_mode: \"Markdown\",\n      reply_to_message_id: messageId\n    },\n    json: true\n  });\n} catch (te) {\n  console.error(\"Error sending Telegram feedback:\", te);\n}\n\nreturn {\n  json: {\n    status: \"success\",\n    target: target,\n    title: title,\n    project_id: projectId\n  }\n};"
+      }
+    }
+  ],
+  "connections": {
+    "TelegramTrigger": {
+      "main": [
+        [
+          {
+            "node": "Filter Non-Bots & Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Non-Bots & Auth": {
+      "main": [
+        [
+          {
+            "node": "Is Voice Message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Voice Message?": {
+      "main": [
+        [
+          {
+            "node": "Gemini Audio to Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Normalize Inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Audio to Text": {
+      "main": [
+        [
+          {
+            "node": "Normalize Inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Inputs": {
+      "main": [
+        [
+          {
+            "node": "Process & Execute Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "6a1e50d6-c03c-44ad-9f3e-d1331bada911",
+  "triggerCount": 1,
+  "tags": []
+}

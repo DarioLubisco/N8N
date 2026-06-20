@@ -1,0 +1,194 @@
+{
+  "createdAt": "2026-06-18T16:02:32.386Z",
+  "updatedAt": "2026-06-18T16:12:44.898Z",
+  "id": "xqqE3NBDl5O1hjTw",
+  "name": "[PROD] [DevOps] - GitHub Push → Notion Git Status",
+  "active": true,
+  "nodes": [
+    {
+      "id": "wh-node-01",
+      "name": "GitHub Webhook",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "github-push-notion",
+        "responseData": "allEntries",
+        "responseMode": "onReceived"
+      },
+      "position": [
+        200,
+        300
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "e10cf30c-c352-4547-91cf-33ca3f1b354f"
+    },
+    {
+      "id": "code-node-02",
+      "name": "Extract Task IDs from Commits",
+      "parameters": {
+        "jsCode": "const payload = $input.first().json;\nconst commits = payload.body?.commits || [];\n\nconst taskPattern = /TASK-\\d+/gi;\nconst foundTasks = new Set();\n\nfor (const commit of commits) {\n  const msg = commit.message || '';\n  const matches = msg.match(taskPattern);\n  if (matches) {\n    matches.forEach(t => foundTasks.add(t.toUpperCase()));\n  }\n}\n\nconst repoName = payload.body?.repository?.name || 'unknown';\nconst branch = (payload.body?.ref || '').replace('refs/heads/', '');\nconst pusher = payload.body?.pusher?.name || 'unknown';\n\nif (foundTasks.size === 0) {\n  return [{ json: { found: false, message: 'No TASK-XX references in commits', repoName, branch, pusher } }];\n}\n\nreturn Array.from(foundTasks).map(taskId => ({\n  json: { found: true, taskId, taskNumber: parseInt(taskId.replace('TASK-', '')), repoName, branch, pusher }\n}));"
+      },
+      "position": [
+        440,
+        300
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "if-node-03",
+      "name": "Filter - Only Found Tasks",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond-01",
+              "leftValue": "={{ $json.found }}",
+              "operator": {
+                "operation": "equals",
+                "type": "boolean"
+              },
+              "rightValue": true
+            }
+          ]
+        }
+      },
+      "position": [
+        680,
+        300
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2
+    },
+    {
+      "id": "http-node-04",
+      "name": "Search Task in Notion",
+      "parameters": {
+        "body": "={\"filter\":{\"property\":\"ID\",\"unique_id\":{\"equals\":{{$json.taskNumber}}}}}",
+        "contentType": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer ntn_REDACTED"
+            },
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "method": "POST",
+        "sendBody": true,
+        "sendHeaders": true,
+        "url": "https://api.notion.com/v1/databases/381c22d5-8177-81fb-89ee-e34715f74d63/query"
+      },
+      "position": [
+        920,
+        220
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4
+    },
+    {
+      "id": "http-node-05",
+      "name": "Update Git Status En GitHub",
+      "parameters": {
+        "body": "{\"properties\":{\"Git Status\":{\"select\":{\"name\":\"🟢 En GitHub\"}}}}",
+        "contentType": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer ntn_REDACTED"
+            },
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "sendBody": true,
+        "sendHeaders": true,
+        "url": "={{ 'https://api.notion.com/v1/pages/' + $json.results[0].id }}"
+      },
+      "position": [
+        1160,
+        220
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4
+    },
+    {
+      "id": "note-node-06",
+      "name": "Nota Flujo",
+      "parameters": {
+        "content": "## 🐙 GitHub Push → Notion Git Status\n\nCuando hagas git push, incluye TASK-XX en el mensaje:\n\ngit commit -m 'feat: optimizer MILP [TASK-14]'\n\nWebhook URL:\nhttps://n8n.farmaciaamericana.es/webhook/github-push-notion"
+      },
+      "position": [
+        100,
+        100
+      ],
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Extract Task IDs from Commits": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Filter - Only Found Tasks",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Filter - Only Found Tasks": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Search Task in Notion",
+            "type": "main"
+          }
+        ],
+        []
+      ]
+    },
+    "GitHub Webhook": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Extract Task IDs from Commits",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Search Task in Notion": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Update Git Status En GitHub",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "76740e76-e204-4ae4-a3f6-841ca3e98634",
+  "triggerCount": 1,
+  "tags": []
+}

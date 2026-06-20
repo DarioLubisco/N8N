@@ -161,7 +161,7 @@
   "staticData": {
     "node:Schedule": {
       "recurrenceRules": [
-        2
+        20
       ],
       "recurrencyRules": []
     }

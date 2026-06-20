@@ -29,7 +29,7 @@
         "url": "http://localhost:5678/api/v1/credentials",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "{\"name\":\"[PROD] Telegram - Mi Agente Inteligente (Hermes)\",\"type\":\"telegramApi\",\"data\":{\"accessToken\":\"8322313955:AAHwniwWZssrVuQBQGb1excjHKyZ2VQkkdE\"}}",
+        "jsonBody": "{\"name\":\"[PROD] Telegram - Mi Agente Inteligente (Hermes)\",\"type\":\"telegramApi\",\"data\":{\"accessToken\":\"BOT_TOKEN_REDACTED\"}}",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "n8nApi"
       }
