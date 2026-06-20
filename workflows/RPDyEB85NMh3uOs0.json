@@ -65,7 +65,9 @@
   },
   "staticData": {
     "node:Every Day at 6 AM": {
-      "recurrenceRules": []
+      "recurrenceRules": [
+        0
+      ]
     }
   },
   "meta": {

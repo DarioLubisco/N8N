@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-29T17:45:45.848Z",
-  "updatedAt": "2026-05-28T05:00:53.332Z",
+  "updatedAt": "2026-06-20T02:59:09.880Z",
   "id": "WSqDpWaAXQ427UQX",
   "name": "[PROD] [Inventario] - ETL Inventario Dronena",
   "active": true,
@@ -24,8 +24,8 @@
         "rule": {
           "interval": [
             {
-              "field": "hours",
-              "hoursInterval": 2
+              "field": "minutes",
+              "minutesInterval": 20
             }
           ]
         }
@@ -56,7 +56,10 @@
           "id": "q9XQyJD7Uu17tWSl",
           "name": "[PROD] SSH - Debian WebServices"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 9,
+      "waitBetweenTries": 75000
     },
     {
       "parameters": {},
@@ -107,11 +110,7 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true,
-    "binaryMode": "separate",
-    "timeSavedMode": "fixed",
-    "errorWorkflow": "zLtMDgsc7OSXyXrp",
-    "callerPolicy": "workflowsFromSameOwner"
+    "errorWorkflow": "LdkZneeq1ANGzv5Z"
   },
   "staticData": {
     "node:Schedule Trigger": {
@@ -121,7 +120,7 @@
     },
     "node:Disparador (Cada 2 Horas)": {
       "recurrenceRules": [
-        20
+        2
       ],
       "recurrencyRules": []
     }
@@ -130,20 +129,20 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "b1b3b693-2208-4b55-a891-c75208cc9fe5",
+  "versionId": "65b13cce-8339-41d4-87cc-74c81808af4d",
   "triggerCount": 1,
   "tags": [
-    {
-      "createdAt": "2026-04-29T18:47:49.915Z",
-      "updatedAt": "2026-04-29T18:47:49.915Z",
-      "id": "zfDPQy3ToLGJHzFZ",
-      "name": "Proveedores-Híbridos"
-    },
     {
       "createdAt": "2026-04-29T15:41:30.813Z",
       "updatedAt": "2026-04-29T15:41:30.813Z",
       "id": "ar7VkyPtRJkNlcoi",
       "name": "Produccion"
+    },
+    {
+      "createdAt": "2026-04-29T18:47:49.915Z",
+      "updatedAt": "2026-04-29T18:47:49.915Z",
+      "id": "zfDPQy3ToLGJHzFZ",
+      "name": "Proveedores-Híbridos"
     }
   ]
 }

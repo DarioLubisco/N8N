@@ -1,17 +1,17 @@
 {
-  "createdAt": "2026-05-07T14:29:43.051Z",
-  "updatedAt": "2026-06-20T02:59:09.301Z",
-  "id": "iRkJsrAulAqsK72G",
-  "name": "Ingesta: Mastranto (Híbrido)",
-  "active": true,
+  "createdAt": "2026-06-20T01:03:41.434Z",
+  "updatedAt": "2026-06-20T01:03:41.434Z",
+  "id": "zH6fSOoYWgPQWtwu",
+  "name": "Ingesta: Drocerca (Híbrido)",
+  "active": false,
   "nodes": [
     {
       "parameters": {
         "rule": {
           "interval": [
             {
-              "field": "minutes",
-              "minutesInterval": 20
+              "field": "hours",
+              "hoursInterval": 2
             }
           ]
         }
@@ -43,10 +43,7 @@
           "id": "Sn8EBtpGArKCjFIw",
           "name": "Mastranto FTP"
         }
-      },
-      "retryOnFail": true,
-      "maxTries": 9,
-      "waitBetweenTries": 75000
+      }
     },
     {
       "parameters": {
@@ -69,17 +66,14 @@
           "id": "B3MvaiaBeDRdgs3C",
           "name": "Debian SSH"
         }
-      },
-      "retryOnFail": true,
-      "maxTries": 9,
-      "waitBetweenTries": 75000
+      }
     },
     {
       "parameters": {
-        "command": "cat /tmp/mastranto.txt \n python3 /opt/scripts/droguerias/mastranto.py --sucursal CENTRO --tabla MastrantoC_Inventario"
+        "command": "python3 /opt/scripts/droguerias/drocerca.py"
       },
       "id": "0d0adca1-0a19-4733-99a8-aad1d54f788a",
-      "name": "Ejecutar Python Centro",
+      "name": "Ejecutar Python Drocerca",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
@@ -91,32 +85,7 @@
           "id": "B3MvaiaBeDRdgs3C",
           "name": "Debian SSH"
         }
-      },
-      "retryOnFail": true,
-      "maxTries": 9,
-      "waitBetweenTries": 75000
-    },
-    {
-      "parameters": {
-        "command": "cat /tmp/mastranto.txt \n python3 /opt/scripts/droguerias/mastranto.py --sucursal BARINAS --tabla MastrantoB_Inventario"
-      },
-      "id": "8e2359b0-244d-4922-a0f1-e03697933aea",
-      "name": "Ejecutar Python Barinas",
-      "type": "n8n-nodes-base.ssh",
-      "typeVersion": 1,
-      "position": [
-        912,
-        304
-      ],
-      "credentials": {
-        "sshPassword": {
-          "id": "B3MvaiaBeDRdgs3C",
-          "name": "Debian SSH"
-        }
-      },
-      "retryOnFail": true,
-      "maxTries": 9,
-      "waitBetweenTries": 75000
+      }
     }
   ],
   "connections": {
@@ -146,14 +115,14 @@
       "main": [
         [
           {
-            "node": "Ejecutar Python Centro",
+            "node": "Ejecutar Python Drocerca",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Ejecutar Python Centro": {
+    "Ejecutar Python Drocerca": {
       "main": [
         [
           {
@@ -167,12 +136,13 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "errorWorkflow": "LdkZneeq1ANGzv5Z"
+    "availableInMCP": true,
+    "binaryMode": "separate"
   },
   "staticData": {
     "node:Schedule": {
       "recurrenceRules": [
-        2
+        20
       ],
       "recurrencyRules": []
     }
@@ -182,7 +152,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "14efc924-92a4-45f3-9193-02df2797493d",
+  "versionId": "069a90a6-21e3-444c-92f2-f597770265e2",
   "triggerCount": 1,
   "tags": []
 }

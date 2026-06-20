@@ -1,0 +1,166 @@
+{
+  "createdAt": "2026-06-20T00:59:45.503Z",
+  "updatedAt": "2026-06-20T00:59:50.105Z",
+  "id": "qnuTAJdz82cfVgOY",
+  "name": "[PROD] Monitor de Frescura ETL",
+  "active": true,
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Schedule Trigger",
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "position": [
+        250,
+        300
+      ],
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1
+    },
+    {
+      "credentials": {
+        "microsoftSql": {
+          "id": "1",
+          "name": "EnterpriseAdmin_AMC"
+        }
+      },
+      "id": "2",
+      "name": "Query Stale Providers",
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT e.Proveedor, e.Workflow_ID, e.Tolerancia_Frescura_Horas, MAX(m.fecha_carga) as ultima_carga, DATEDIFF(hour, MAX(m.fecha_carga), GETDATE()) as horas_inactivo FROM Proveedores.ETL_Configuracion e LEFT JOIN Analitica.Mercado_Vivo m ON e.Proveedor_Alias = m.proveedor WHERE e.Activo = 1 GROUP BY e.Proveedor, e.Workflow_ID, e.Tolerancia_Frescura_Horas HAVING DATEDIFF(hour, MAX(m.fecha_carga), GETDATE()) > e.Tolerancia_Frescura_Horas"
+      },
+      "position": [
+        450,
+        300
+      ],
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1
+    },
+    {
+      "id": "3",
+      "name": "Any Stale?",
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.Proveedor ? true : false }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "position": [
+        650,
+        300
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1
+    },
+    {
+      "credentials": {
+        "telegramApi": {
+          "id": "1",
+          "name": "Telegram AMC_Notificacion_bot"
+        }
+      },
+      "id": "4",
+      "name": "Telegram Alert",
+      "parameters": {
+        "chatId": "-1003531406167",
+        "parseMode": "MarkdownV2",
+        "text": "=🚨 *ALERTA DE FRESCURA ETL* 🚨\nEl proveedor *{{ $json.Proveedor }}* está desactualizado.\nTolerancia: {{ $json.Tolerancia_Frescura_Horas }}h\nHoras inactivo: {{ $json.horas_inactivo }}h\nÚltima carga: {{ $json.ultima_carga }}\n\nIniciando re-ejecución del flujo ({{ $json.Workflow_ID }})..."
+      },
+      "position": [
+        850,
+        150
+      ],
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "5",
+      "name": "Trigger Provider Workflow",
+      "parameters": {
+        "workflowId": "={{ $json.Workflow_ID }}"
+      },
+      "position": [
+        1050,
+        150
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Any Stale?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Telegram Alert",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Query Stale Providers": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Any Stale?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Query Stale Providers",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Telegram Alert": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Trigger Provider Workflow",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "3a4ffd08-76a9-4ec8-ba81-10b0ac9d0f0e",
+  "triggerCount": 1,
+  "tags": []
+}

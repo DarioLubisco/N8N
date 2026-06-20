@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-07T14:29:23.143Z",
-  "updatedAt": "2026-05-28T05:00:53.657Z",
+  "updatedAt": "2026-06-20T02:59:09.722Z",
   "id": "o4HxmkefKceDYJWV",
   "name": "Ingesta: VitalClinic (Híbrido)",
   "active": true,
@@ -9,7 +9,10 @@
       "parameters": {
         "rule": {
           "interval": [
-            {}
+            {
+              "field": "minutes",
+              "minutesInterval": 20
+            }
           ]
         }
       },
@@ -40,7 +43,10 @@
           "id": "6d67u6BGhQbL0Cb5",
           "name": "VitalClinic FTP"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 9,
+      "waitBetweenTries": 75000
     },
     {
       "parameters": {
@@ -63,7 +69,10 @@
           "id": "B3MvaiaBeDRdgs3C",
           "name": "Debian SSH"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 9,
+      "waitBetweenTries": 75000
     },
     {
       "parameters": {
@@ -82,7 +91,10 @@
           "id": "B3MvaiaBeDRdgs3C",
           "name": "Debian SSH"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 9,
+      "waitBetweenTries": 75000
     }
   ],
   "connections": {
@@ -122,8 +134,7 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true,
-    "binaryMode": "separate"
+    "errorWorkflow": "LdkZneeq1ANGzv5Z"
   },
   "staticData": {
     "node:Schedule": {
@@ -136,7 +147,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "5a88a216-5311-4ab5-84c2-84946888a302",
+  "versionId": "de35d916-c6f8-44ee-8a33-252f463b3f2d",
   "triggerCount": 1,
   "tags": []
 }

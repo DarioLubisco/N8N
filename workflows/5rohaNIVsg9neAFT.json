@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-07T14:29:32.057Z",
-  "updatedAt": "2026-05-28T05:00:53.662Z",
+  "updatedAt": "2026-06-20T02:59:09.782Z",
   "id": "5rohaNIVsg9neAFT",
   "name": "Ingesta: Intercontinental (Híbrido)",
   "active": true,
@@ -10,8 +10,8 @@
         "rule": {
           "interval": [
             {
-              "field": "hours",
-              "hoursInterval": 2
+              "field": "minutes",
+              "minutesInterval": 20
             }
           ]
         }
@@ -43,7 +43,10 @@
           "id": "BX7NhT1lfL0pUowM",
           "name": "Intercontinental FTP"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 9,
+      "waitBetweenTries": 75000
     },
     {
       "parameters": {
@@ -66,7 +69,10 @@
           "id": "B3MvaiaBeDRdgs3C",
           "name": "Debian SSH"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 9,
+      "waitBetweenTries": 75000
     },
     {
       "parameters": {
@@ -85,7 +91,10 @@
           "id": "B3MvaiaBeDRdgs3C",
           "name": "Debian SSH"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 9,
+      "waitBetweenTries": 75000
     }
   ],
   "connections": {
@@ -125,13 +134,12 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true,
-    "binaryMode": "separate"
+    "errorWorkflow": "LdkZneeq1ANGzv5Z"
   },
   "staticData": {
     "node:Schedule": {
       "recurrenceRules": [
-        20
+        2
       ],
       "recurrencyRules": []
     }
@@ -141,7 +149,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "228c92fb-efc4-4082-bca6-f6d29c250648",
+  "versionId": "c86ca4e1-6a3e-41fa-99b6-ba4a3980409c",
   "triggerCount": 1,
   "tags": []
 }

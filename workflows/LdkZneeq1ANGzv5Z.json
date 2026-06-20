@@ -1,0 +1,98 @@
+{
+  "createdAt": "2026-06-20T01:09:49.316Z",
+  "updatedAt": "2026-06-20T01:09:53.960Z",
+  "id": "LdkZneeq1ANGzv5Z",
+  "name": "[PROD] Global Error Handler",
+  "active": false,
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "On_Error",
+      "parameters": {},
+      "position": [
+        100,
+        200
+      ],
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1
+    },
+    {
+      "id": "format",
+      "name": "Format_Alert_Data",
+      "parameters": {
+        "jsCode": "const rawError = $json.execution?.error?.messages?.[0] || $json.trigger?.error?.messages?.[0] || $json.error?.messages?.[0] || $json.execution?.error?.message || $json.trigger?.error?.message || $json.error?.message || \"⚠️ ERROR DESCONOCIDO\";\nif (rawError.includes(\"Servicio Afectado\") || rawError.includes(\"Entidad Origen\")) {\n  return { alert_body: rawError };\n}\nconst wfName = $json.workflow?.name || \"Desconocido\";\nconst nodeName = $json.execution?.lastNodeExecuted || \"Desconocido\";\nconst execId = $json.execution?.id || \"N/A\";\nconst errorMsg = $json.execution?.error?.message || $json.execution?.error?.description || $json.error?.message || \"Sin mensaje específico\";\nreturn { alert_body: `🚨 <b>FALLO EN FLUJO DE TRABAJO</b>\\n\\n📋 <b>Flujo:</b> ${wfName}\\n⚙️ <b>Nodo:</b> ${nodeName}\\n🆔 <b>Ejecución:</b> #${execId}\\n\\n❌ <b>Error:</b> <code>${errorMsg}</code>` };"
+      },
+      "position": [
+        300,
+        200
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1
+    },
+    {
+      "id": "telegram",
+      "name": "Send Telegram",
+      "parameters": {
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "-1003531406167"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.alert_body }}"
+            },
+            {
+              "name": "parse_mode",
+              "value": "HTML"
+            }
+          ]
+        },
+        "method": "POST",
+        "options": {},
+        "sendBody": true,
+        "url": "https://api.telegram.org/botBOT_TOKEN_REDACTED/sendMessage"
+      },
+      "position": [
+        500,
+        200
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Format_Alert_Data": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send Telegram",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "On_Error": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Format_Alert_Data",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "fb6ed4be-8fdb-4ecb-89ec-3f4c0324446e",
+  "triggerCount": 0,
+  "tags": []
+}
