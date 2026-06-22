@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-28T04:01:48.843Z",
-  "updatedAt": "2026-05-28T05:00:53.317Z",
+  "updatedAt": "2026-06-22T19:03:19.729Z",
   "id": "DLVFHJeA3Ar4UcJu",
   "name": "[PROD] Sync AppSheet - Inventory",
   "active": true,
@@ -41,7 +41,7 @@
       "parameters": {
         "resource": "command",
         "operation": "execute",
-        "command": "sg docker -c \"docker exec -i synapse-api python /app/sync_appsheet/load_sql_to_gsheets.py\""
+        "command": "sg docker -c \"docker exec -i synapse-api-Synapse python /app/sync_appsheet/load_sql_to_gsheets.py\""
       },
       "credentials": {
         "sshPassword": {
@@ -81,11 +81,7 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true,
-    "binaryMode": "separate",
-    "timeSavedMode": "fixed",
-    "errorWorkflow": "zLtMDgsc7OSXyXrp",
-    "callerPolicy": "workflowsFromSameOwner"
+    "errorWorkflow": "zLtMDgsc7OSXyXrp"
   },
   "staticData": {
     "node:Schedule Trigger": {
@@ -97,7 +93,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "e9e072c1-3c12-4f45-a6d0-7c1f598eea90",
+  "versionId": "1fc8a975-9d0e-4a47-99df-3beeaa1e2acf",
   "triggerCount": 1,
   "tags": [
     {

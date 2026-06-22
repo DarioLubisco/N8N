@@ -120,7 +120,7 @@
     },
     "node:Disparador (Cada 2 Horas)": {
       "recurrenceRules": [
-        2
+        22
       ],
       "recurrencyRules": []
     }

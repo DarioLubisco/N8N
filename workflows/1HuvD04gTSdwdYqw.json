@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-07T01:10:53.022Z",
-  "updatedAt": "2026-05-07T02:52:20.746Z",
+  "updatedAt": "2026-06-22T19:13:31.181Z",
   "id": "1HuvD04gTSdwdYqw",
   "name": "[PROD] Hermes SRE ChatOps",
   "active": false,
@@ -152,6 +152,24 @@
           "id": "q9XQyJD7Uu17tWSl",
           "name": "[PROD] SSH - Debian WebServices"
         }
+      },
+      "disabled": true,
+      "notes": "Desactivado porque Hermes ya no corre en un contenedor Docker, sino nativamente en el servidor como un servicio systemd (hermes-it.service). Las llamadas ahora deben realizarse vía API HTTP Request al puerto 8001.",
+      "notesInFlow": true
+    },
+    {
+      "id": "067666e8-5dd2-49a2-96bd-c6c9196e489c",
+      "name": "Nota de Desactivacion",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        800,
+        200
+      ],
+      "parameters": {
+        "content": "### ⚠️ NODO DESACTIVADO\nEste nodo se desactivó porque Hermes ya no corre en un contenedor Docker, sino nativamente como un servicio systemd (`hermes-it.service`).\n\nSi se reactiva este flujo en el futuro, debe ser reemplazado por un nodo **HTTP Request** apuntando a `http://127.0.0.1:8001/chat` en lugar de ejecutar `docker exec`.",
+        "height": 180,
+        "width": 320
       }
     }
   ],
@@ -202,19 +220,28 @@
           }
         ]
       ]
+    },
+    "Escuchar Respuestas Humanas": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "availableInMCP": true,
-    "binaryMode": "separate"
+    "executionOrder": "v1"
   },
   "staticData": null,
   "meta": {
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "5f28a5c1-523f-4c3e-9aa2-73c26d55db09",
+  "versionId": "a980ffbb-76a5-4d24-b125-adaf1d160d93",
   "triggerCount": 1,
   "tags": []
 }

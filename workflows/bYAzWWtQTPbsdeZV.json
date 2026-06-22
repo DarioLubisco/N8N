@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-28T01:39:09.852Z",
-  "updatedAt": "2026-06-02T04:43:33.137Z",
+  "updatedAt": "2026-06-22T18:54:51.061Z",
   "id": "bYAzWWtQTPbsdeZV",
   "name": "InventoryUpload360_Linux_V2",
   "active": true,
@@ -37,7 +37,7 @@
       "parameters": {
         "resource": "command",
         "operation": "execute",
-        "command": "docker exec -i synapse-api python3 /app/icompras360_linux.py",
+        "command": "docker exec -i synapse-api-Synapse python3 /app/icompras360_linux.py",
         "authentication": "password"
       },
       "credentials": {
@@ -101,7 +101,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": null,
-  "versionId": "39631493-d99f-4237-b391-4422e6876673",
+  "versionId": "e7d50edb-efba-427b-bef5-c6258c147873",
   "triggerCount": 1,
   "tags": []
 }
