@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-06-20T01:03:38.413Z",
-  "updatedAt": "2026-06-20T02:59:06.570Z",
+  "updatedAt": "2026-06-22T22:40:13.758Z",
   "id": "Nqh7OX7UAmfxDb64",
   "name": "Ingesta: Cristmedical (Híbrido)",
   "active": true,
@@ -76,7 +76,7 @@
     },
     {
       "parameters": {
-        "command": "python3 /opt/scripts/droguerias/cristmedical.py"
+        "command": "cmd=\"python3 /opt/scripts/droguerias/cristmedical.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "0d0adca1-0a19-4733-99a8-aad1d54f788a",
       "name": "Ejecutar Python Cristmedical",
@@ -149,7 +149,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "e873cb00-4e25-4d1c-8173-73154c7b870b",
+  "versionId": "c3b999c1-a14e-4407-b5d0-af6d0291cfc2",
   "triggerCount": 1,
   "tags": []
 }

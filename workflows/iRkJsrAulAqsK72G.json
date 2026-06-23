@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-07T14:29:43.051Z",
-  "updatedAt": "2026-06-20T02:59:09.301Z",
+  "updatedAt": "2026-06-22T22:40:14.265Z",
   "id": "iRkJsrAulAqsK72G",
   "name": "Ingesta: Mastranto (Híbrido)",
   "active": true,
@@ -76,7 +76,7 @@
     },
     {
       "parameters": {
-        "command": "cat /tmp/mastranto.txt \n python3 /opt/scripts/droguerias/mastranto.py --sucursal CENTRO --tabla MastrantoC_Inventario"
+        "command": "cmd=\"cat /tmp/mastranto.txt \n | python3 /opt/scripts/droguerias/mastranto.py --sucursal CENTRO --tabla MastrantoC_Inventario\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "0d0adca1-0a19-4733-99a8-aad1d54f788a",
       "name": "Ejecutar Python Centro",
@@ -98,7 +98,7 @@
     },
     {
       "parameters": {
-        "command": "cat /tmp/mastranto.txt \n python3 /opt/scripts/droguerias/mastranto.py --sucursal BARINAS --tabla MastrantoB_Inventario"
+        "command": "cmd=\"cat /tmp/mastranto.txt \n | python3 /opt/scripts/droguerias/mastranto.py --sucursal BARINAS --tabla MastrantoB_Inventario\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "8e2359b0-244d-4922-a0f1-e03697933aea",
       "name": "Ejecutar Python Barinas",
@@ -182,7 +182,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "14efc924-92a4-45f3-9193-02df2797493d",
+  "versionId": "ac27b821-636d-46a0-b6d5-04965f2b016c",
   "triggerCount": 1,
   "tags": []
 }

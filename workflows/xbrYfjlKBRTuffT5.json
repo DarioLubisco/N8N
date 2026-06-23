@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-30T22:20:49.044Z",
-  "updatedAt": "2026-05-07T19:33:39.904Z",
+  "updatedAt": "2026-06-22T22:40:12.632Z",
   "id": "xbrYfjlKBRTuffT5",
   "name": "[PROD] [Inventario] - ETL Inventario Insuaminca M",
   "active": false,
@@ -11,7 +11,7 @@
           "interval": [
             {
               "field": "minutes",
-              "minutesInterval": 30
+              "minutesInterval": 20
             }
           ]
         }
@@ -63,7 +63,7 @@
     },
     {
       "parameters": {
-        "command": "python3 /opt/scripts/droguerias/insuaminca.py --sucursal M"
+        "command": "cmd=\"python3 /opt/scripts/droguerias/insuaminca.py --sucursal M\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "31694e06-6ac7-4c58-945b-e5f1bcf5216d",
       "name": "Cargar Datos",
@@ -245,7 +245,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "e8d9ffb6-ec61-425c-b1b5-e23a3f319b34",
+  "versionId": "618a9afa-52d3-4c6f-a8ab-2b248adeb7a3",
   "triggerCount": 1,
   "tags": []
 }

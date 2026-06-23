@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-07T14:29:23.143Z",
-  "updatedAt": "2026-06-20T02:59:09.722Z",
+  "updatedAt": "2026-06-22T22:40:14.370Z",
   "id": "o4HxmkefKceDYJWV",
   "name": "Ingesta: VitalClinic (Híbrido)",
   "active": true,
@@ -76,7 +76,7 @@
     },
     {
       "parameters": {
-        "command": "cat /tmp/vitalclinic.txt \n python3 /opt/scripts/droguerias/generic_inventario.py --proveedor VITALCLINIC --tabla VitalClinic_Inventario"
+        "command": "cmd=\"cat /tmp/vitalclinic.txt \n | python3 /opt/scripts/droguerias/generic_inventario.py --proveedor VITALCLINIC --tabla VitalClinic_Inventario\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "0d0a08f6-9af3-4c81-a507-c0dc63b28a9f",
       "name": "Ejecutar Python",
@@ -147,7 +147,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "de35d916-c6f8-44ee-8a33-252f463b3f2d",
+  "versionId": "b6b30f39-e3d4-4afe-99a0-eaee1e54385e",
   "triggerCount": 1,
   "tags": []
 }

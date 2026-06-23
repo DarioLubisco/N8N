@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-05T23:22:32.758Z",
-  "updatedAt": "2026-05-05T23:22:32.758Z",
+  "updatedAt": "2026-06-22T22:40:12.332Z",
   "id": "pRKE2vDrvCXhS69L",
   "name": "[PROD] [Proveedores-Híbridos] - Ingesta Dronena",
   "active": false,
@@ -18,8 +18,8 @@
         "rule": {
           "interval": [
             {
-              "field": "hours",
-              "hoursInterval": 2
+              "field": "minutes",
+              "minutesInterval": 20
             }
           ]
         }
@@ -35,7 +35,7 @@
         300
       ],
       "parameters": {
-        "command": "python3 \"/opt/scripts/Dronena/Imp_Inv_Dronena.py\""
+        "command": "cmd=\"python3 \"/opt/scripts/droguerias/nena.py\"\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "credentials": {
         "sshPassword": {
@@ -173,7 +173,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": null,
-  "versionId": "600e35cb-0d42-4151-ac07-fa98cdc4ffcc",
+  "versionId": "a8a7a85d-7030-41b2-a2f7-8f6663d19369",
   "triggerCount": 0,
   "tags": []
 }

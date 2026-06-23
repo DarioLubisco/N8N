@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-08T02:25:47.096Z",
-  "updatedAt": "2026-05-08T02:25:47.096Z",
+  "updatedAt": "2026-06-22T22:40:13.033Z",
   "id": "1l5j6azOF5UxuqjC",
   "name": "[ETL] Sub-Workflow: Procesar Proveedor V4",
   "active": false,
@@ -71,7 +71,7 @@
         50
       ],
       "parameters": {
-        "command": "curl -s -u GAMA@electrodomotica.com.ve:SK1OiDJaTKtT ftp://ftp.electrodomotica.com.ve/Inventario/INVENTARIO.Txt | python3 /opt/scripts/droguerias/gama.py"
+        "command": "cmd=\"curl -s -u GAMA@electrodomotica.com.ve:SK1OiDJaTKtT ftp://ftp.electrodomotica.com.ve/Inventario/INVENTARIO.Txt | python3 /opt/scripts/droguerias/gama.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "credentials": {
         "sshPassword": {
@@ -90,7 +90,7 @@
         200
       ],
       "parameters": {
-        "command": "curl -s -u c344-foraneo:c2wi6yl1 ftp://ftp.dronena.com/Maracay/C344/Inventario.txt | python3 /opt/scripts/droguerias/nena.py"
+        "command": "cmd=\"curl -s -u c344-foraneo:c2wi6yl1 ftp://ftp.dronena.com/Maracay/C344/Inventario.txt | python3 /opt/scripts/droguerias/nena.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "credentials": {
         "sshPassword": {
@@ -153,7 +153,7 @@
         350
       ],
       "parameters": {
-        "command": "cat /tmp/biogenetica_raw.txt | python3 /opt/scripts/droguerias/biogenetica.py"
+        "command": "cmd=\"cat /tmp/biogenetica_raw.txt | python3 /opt/scripts/droguerias/biogenetica.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "credentials": {
         "sshPassword": {
@@ -172,7 +172,7 @@
         500
       ],
       "parameters": {
-        "command": "curl -s -u C0005r:008376238 ftp://drocerca.proteoerp.org/inventario.txt | python3 /opt/scripts/droguerias/drocerca.py"
+        "command": "cmd=\"curl -s -u C0005r:008376238 ftp://drocerca.proteoerp.org/inventario.txt | python3 /opt/scripts/droguerias/drocerca.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "credentials": {
         "sshPassword": {
@@ -191,7 +191,7 @@
         650
       ],
       "parameters": {
-        "command": "=echo \"Proveedor genérico {{ $json.nombre }} sin configuración FTP específica\""
+        "command": "cmd=\"=echo \"Proveedor genérico {{ $json.nombre }} sin configuración FTP específica\"\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "credentials": {
         "sshPassword": {
@@ -284,7 +284,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": null,
-  "versionId": "33440d2d-7106-4c0d-b875-f11bb100bc81",
+  "versionId": "f576af73-048f-45fd-aa19-7840aff3457c",
   "triggerCount": 0,
   "tags": []
 }

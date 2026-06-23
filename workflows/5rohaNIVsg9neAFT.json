@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-07T14:29:32.057Z",
-  "updatedAt": "2026-06-20T02:59:09.782Z",
+  "updatedAt": "2026-06-22T22:40:14.468Z",
   "id": "5rohaNIVsg9neAFT",
   "name": "Ingesta: Intercontinental (Híbrido)",
   "active": true,
@@ -76,7 +76,7 @@
     },
     {
       "parameters": {
-        "command": "cat /tmp/intercontinental.txt \n python3 /opt/scripts/droguerias/intercontinental.py"
+        "command": "cmd=\"cat /tmp/intercontinental.txt \n | python3 /opt/scripts/droguerias/intercontinental.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "c587df47-e100-4f1c-a929-786b8cd31d1f",
       "name": "Ejecutar Python",
@@ -149,7 +149,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "c86ca4e1-6a3e-41fa-99b6-ba4a3980409c",
+  "versionId": "6b475add-4694-42da-a0ce-cde74f7a208d",
   "triggerCount": 1,
   "tags": []
 }

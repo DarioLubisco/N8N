@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-06-20T01:03:47.311Z",
-  "updatedAt": "2026-06-20T02:59:07.574Z",
+  "updatedAt": "2026-06-22T22:40:13.953Z",
   "id": "FiNfBmGmIRtIhndG",
   "name": "Ingesta: Insuaminca (Híbrido)",
   "active": true,
@@ -76,7 +76,7 @@
     },
     {
       "parameters": {
-        "command": "python3 /opt/scripts/droguerias/insuaminca.py"
+        "command": "cmd=\"python3 /opt/scripts/droguerias/insuaminca.py --sucursal M\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "0d0adca1-0a19-4733-99a8-aad1d54f788a",
       "name": "Ejecutar Python Insuaminca",
@@ -149,7 +149,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "ab83f897-7cd5-4da6-a857-d3ec7866cd3c",
+  "versionId": "cc17d3b9-6161-4a10-b3a9-65a6346791c1",
   "triggerCount": 1,
   "tags": []
 }

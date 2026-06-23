@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-29T17:45:45.848Z",
-  "updatedAt": "2026-06-20T02:59:09.880Z",
+  "updatedAt": "2026-06-22T22:40:14.578Z",
   "id": "WSqDpWaAXQ427UQX",
   "name": "[PROD] [Inventario] - ETL Inventario Dronena",
   "active": true,
@@ -41,7 +41,7 @@
     },
     {
       "parameters": {
-        "command": "python3 \"/opt/scripts/Dronena/Imp_Inv_Dronena.py\""
+        "command": "cmd=\"python3 \"/opt/scripts/droguerias/nena.py\"\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "aeb86541-0470-4d65-8c90-0f134e368723",
       "name": "Ejecutar Script Python",
@@ -129,7 +129,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "65b13cce-8339-41d4-87cc-74c81808af4d",
+  "versionId": "e0f80bb0-461a-45e8-b46b-1ea397e8935e",
   "triggerCount": 1,
   "tags": [
     {

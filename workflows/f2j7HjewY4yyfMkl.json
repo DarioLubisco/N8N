@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-10T16:18:43.769Z",
-  "updatedAt": "2026-05-16T04:25:32.641Z",
+  "updatedAt": "2026-06-22T22:40:13.341Z",
   "id": "f2j7HjewY4yyfMkl",
   "name": "[ETL] Sub-Workflow: Procesar Proveedor (Nativo V2)",
   "active": true,
@@ -65,7 +65,7 @@
     },
     {
       "parameters": {
-        "command": "={{ $(\"Resolver Comando\").first().json.command }}"
+        "command": "cmd=\"={{ $(\"Resolver Comando\").first().json.command }}\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "a3962412-f177-4b1c-9656-569a4b243e5e",
       "name": "Ejecutar ETL Python",
@@ -292,7 +292,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "2fc8667d-28ff-44cc-89a5-171281a4508e",
+  "versionId": "cf5a8796-afe0-463a-9f52-c7bc3e7593fc",
   "triggerCount": 0,
   "tags": []
 }

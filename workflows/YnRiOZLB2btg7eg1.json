@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-06-20T01:03:35.458Z",
-  "updatedAt": "2026-06-20T02:59:06.037Z",
+  "updatedAt": "2026-06-22T22:40:13.660Z",
   "id": "YnRiOZLB2btg7eg1",
   "name": "Ingesta: Biogenetica (Híbrido)",
   "active": true,
@@ -76,7 +76,7 @@
     },
     {
       "parameters": {
-        "command": "python3 /opt/scripts/droguerias/biogenetica.py"
+        "command": "cmd=\"python3 /opt/scripts/droguerias/biogenetica.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "0d0adca1-0a19-4733-99a8-aad1d54f788a",
       "name": "Ejecutar Python Biogenetica",
@@ -149,7 +149,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "6775110a-4b23-485d-9c4f-3ded23ea8db2",
+  "versionId": "f6cbd214-87bd-4d4e-8d09-f106ab01d58a",
   "triggerCount": 1,
   "tags": []
 }

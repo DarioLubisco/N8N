@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-06-20T01:03:44.421Z",
-  "updatedAt": "2026-06-20T02:59:07.155Z",
+  "updatedAt": "2026-06-22T22:40:13.855Z",
   "id": "9HkJetiUfQt7JhgM",
   "name": "Ingesta: Gama (Híbrido)",
   "active": true,
@@ -76,7 +76,7 @@
     },
     {
       "parameters": {
-        "command": "python3 /opt/scripts/droguerias/gama.py"
+        "command": "cmd=\"python3 /opt/scripts/droguerias/gama.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "0d0adca1-0a19-4733-99a8-aad1d54f788a",
       "name": "Ejecutar Python Gama",
@@ -149,7 +149,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "94902542-7e5f-43aa-bece-1ad045a7ec5e",
+  "versionId": "b08a4ef9-d22d-4e12-a1ef-793a7e9d7f3c",
   "triggerCount": 1,
   "tags": []
 }

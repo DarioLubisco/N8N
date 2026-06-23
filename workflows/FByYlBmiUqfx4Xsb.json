@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-06-20T01:03:50.452Z",
-  "updatedAt": "2026-06-20T02:59:08.130Z",
+  "updatedAt": "2026-06-22T22:40:14.053Z",
   "id": "FByYlBmiUqfx4Xsb",
   "name": "Ingesta: Zakipharma (Híbrido)",
   "active": true,
@@ -76,7 +76,7 @@
     },
     {
       "parameters": {
-        "command": "python3 /opt/scripts/droguerias/zakipharma.py"
+        "command": "cmd=\"python3 /opt/scripts/droguerias/zakipharma.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "0d0adca1-0a19-4733-99a8-aad1d54f788a",
       "name": "Ejecutar Python Zakipharma",
@@ -149,7 +149,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "d169ffc6-bbd2-4eef-a24e-a24cbc6d9502",
+  "versionId": "aa754fdd-4454-4bbd-915d-ddf0ce243447",
   "triggerCount": 1,
   "tags": []
 }

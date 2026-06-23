@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-01T01:41:04.407Z",
-  "updatedAt": "2026-05-01T01:42:49.879Z",
+  "updatedAt": "2026-06-22T22:40:11.061Z",
   "id": "Cb6aAKbuCKnlTp6P",
   "name": "[PROD] Ingesta_Inventarios_Email",
   "active": false,
@@ -38,7 +38,7 @@
     },
     {
       "parameters": {
-        "command": "=python3 /opt/scripts/droguerias/email_parser.py --legacy-mode --file \"/tmp/attachments/{{ $json.fileName }}\""
+        "command": "cmd=\"=python3 /opt/scripts/droguerias/email_parser.py --legacy-mode --file \"/tmp/attachments/{{ $json.fileName }}\"\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "name": "Execute Python Script (SSH)",
       "type": "n8n-nodes-base.ssh",
@@ -81,7 +81,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "b5898e32-77be-47e0-ba68-f7e354fa63b0",
+  "versionId": "25a200a3-cd22-4290-8436-a76e909d977f",
   "triggerCount": 0,
   "tags": []
 }

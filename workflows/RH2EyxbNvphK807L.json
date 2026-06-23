@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-05T22:45:35.862Z",
-  "updatedAt": "2026-05-05T22:50:12.042Z",
+  "updatedAt": "2026-06-22T22:40:12.237Z",
   "id": "RH2EyxbNvphK807L",
   "name": "[PROD] [Proveedores-Híbridos] - Ingesta Zakipharma",
   "active": false,
@@ -11,7 +11,7 @@
           "interval": [
             {
               "field": "minutes",
-              "minutesInterval": 30
+              "minutesInterval": 20
             }
           ]
         }
@@ -64,7 +64,7 @@
     },
     {
       "parameters": {
-        "command": "python3 /opt/scripts/droguerias/zakipharma.py"
+        "command": "cmd=\"python3 /opt/scripts/droguerias/zakipharma.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "37e6f1f3-8588-43bf-842d-cc8b0befb856",
       "name": "🐍 SSH — Parsear y cargar en SQL",
@@ -233,7 +233,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "49301dd3-d7bd-4a48-bd74-ba3f74c57f2a",
+  "versionId": "2f9927ad-3360-464c-b282-eabe813b6a2f",
   "triggerCount": 0,
   "tags": []
 }

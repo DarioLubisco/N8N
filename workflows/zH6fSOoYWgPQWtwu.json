@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-06-20T01:03:41.434Z",
-  "updatedAt": "2026-06-20T01:03:41.434Z",
+  "updatedAt": "2026-06-22T22:40:13.447Z",
   "id": "zH6fSOoYWgPQWtwu",
   "name": "Ingesta: Drocerca (Híbrido)",
   "active": false,
@@ -10,8 +10,8 @@
         "rule": {
           "interval": [
             {
-              "field": "hours",
-              "hoursInterval": 2
+              "field": "minutes",
+              "minutesInterval": 20
             }
           ]
         }
@@ -70,7 +70,7 @@
     },
     {
       "parameters": {
-        "command": "python3 /opt/scripts/droguerias/drocerca.py"
+        "command": "cmd=\"python3 /opt/scripts/droguerias/drocerca.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "0d0adca1-0a19-4733-99a8-aad1d54f788a",
       "name": "Ejecutar Python Drocerca",
@@ -152,7 +152,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "069a90a6-21e3-444c-92f2-f597770265e2",
+  "versionId": "22aa0c59-fb3f-4e11-9212-068aac2f7d0b",
   "triggerCount": 1,
   "tags": []
 }

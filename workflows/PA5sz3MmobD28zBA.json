@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-29T20:39:21.414Z",
-  "updatedAt": "2026-05-10T02:38:12.624Z",
+  "updatedAt": "2026-06-22T22:40:13.130Z",
   "id": "PA5sz3MmobD28zBA",
   "name": "[PROD] Orquestador de Inventarios",
   "active": false,
@@ -18,8 +18,8 @@
         "rule": {
           "interval": [
             {
-              "field": "hours",
-              "hoursInterval": 2
+              "field": "minutes",
+              "minutesInterval": 20
             }
           ]
         }
@@ -189,7 +189,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "139a49e5-66e4-4fa3-ac0e-dc1090d638bd",
+  "versionId": "369a0a4f-fba5-4c0d-b881-e405501db2cb",
   "triggerCount": 0,
   "tags": []
 }

@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-30T22:21:18.051Z",
-  "updatedAt": "2026-05-04T05:24:11.912Z",
+  "updatedAt": "2026-06-22T22:40:11.489Z",
   "id": "R18AA3uhmQS2sMzd",
   "name": "[PROD] [Inventario] - ETL Inventario Intercontinental",
   "active": false,
@@ -11,7 +11,7 @@
           "interval": [
             {
               "field": "minutes",
-              "minutesInterval": 30
+              "minutesInterval": 20
             }
           ]
         }
@@ -56,7 +56,7 @@
     },
     {
       "parameters": {
-        "command": "python3 /opt/scripts/droguerias/intercontinental.py"
+        "command": "cmd=\"python3 /opt/scripts/droguerias/intercontinental.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "id": "46ed8be3-ef89-4105-9591-440b93881184",
       "name": "Cargar Datos",
@@ -233,7 +233,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "ae4b007c-848b-4e02-a6a4-7098e215b411",
+  "versionId": "0f6cfc5e-d1b0-43b9-9817-2a0930217e85",
   "triggerCount": 0,
   "tags": []
 }

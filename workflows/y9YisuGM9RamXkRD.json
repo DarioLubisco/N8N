@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-01T01:43:14.434Z",
-  "updatedAt": "2026-05-04T03:36:36.514Z",
+  "updatedAt": "2026-06-22T22:40:11.377Z",
   "id": "y9YisuGM9RamXkRD",
   "name": "[PROD] [Inventario] - ETL Inventario Coface",
   "active": false,
@@ -59,7 +59,7 @@
     },
     {
       "parameters": {
-        "command": "python3 /opt/scripts/droguerias/email_parser.py --legacy-mode --file \"/tmp/attachments/inventario.xlsx\""
+        "command": "cmd=\"python3 /opt/scripts/droguerias/email_parser.py --legacy-mode --file \"/tmp/attachments/inventario.xlsx\"\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -114,7 +114,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "4f3dcb8b-7061-4b9e-b526-f001ce29928e",
+  "versionId": "59d07c29-dc7d-43da-bcfc-cf342546072d",
   "triggerCount": 0,
   "tags": []
 }

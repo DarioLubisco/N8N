@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-05-06T20:48:18.471Z",
-  "updatedAt": "2026-05-06T20:59:11.066Z",
+  "updatedAt": "2026-06-22T22:40:12.430Z",
   "id": "iTe05F8vHyZgDs3F",
   "name": "[PROD] [Proveedores-Híbridos] - Ingesta Mastranto",
   "active": false,
@@ -19,7 +19,7 @@
           "interval": [
             {
               "field": "minutes",
-              "minutesInterval": 30
+              "minutesInterval": 20
             }
           ]
         }
@@ -127,7 +127,7 @@
         100
       ],
       "parameters": {
-        "command": "python3 /opt/scripts/droguerias/mastranto.py --sucursal CENTRO --tabla MastrantoC_Inventario"
+        "command": "cmd=\"python3 /opt/scripts/droguerias/mastranto.py --sucursal CENTRO --tabla MastrantoC_Inventario\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "credentials": {
         "sshPassword": {
@@ -235,7 +235,7 @@
         500
       ],
       "parameters": {
-        "command": "python3 /opt/scripts/droguerias/mastranto.py --sucursal BARINAS --tabla MastrantoB_Inventario"
+        "command": "cmd=\"python3 /opt/scripts/droguerias/mastranto.py --sucursal BARINAS --tabla MastrantoB_Inventario\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
       },
       "credentials": {
         "sshPassword": {
@@ -434,7 +434,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": null,
-  "versionId": "c34212cc-c6ae-40fb-976f-d6aed2abd4fb",
+  "versionId": "71711fc2-bab8-4f84-8ec1-fb3067a90e97",
   "triggerCount": 0,
   "tags": []
 }
