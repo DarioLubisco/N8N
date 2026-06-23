@@ -1,0 +1,73 @@
+{
+  "createdAt": "2026-06-23T23:11:41.176Z",
+  "updatedAt": "2026-06-23T23:11:41.176Z",
+  "id": "usomJ1mmioYkiedJ",
+  "name": "[RUNBOOK] Protocolo Factor Cero SQL",
+  "active": false,
+  "nodes": [
+    {
+      "id": "b8c4c794-27da-4e05-9e6e-c8f94d9b23b1",
+      "name": "Sticky Note",
+      "parameters": {
+        "content": "## Protocolo de Recuperación: Factor Cero (DolarToday)\n\n**Síntoma:** Los precios en `SAPROD` se disparan a montos astronómicos (millones de bolívares). \n\n**Causa:** La API de DolarToday devuelve 0, y `Custom_Lotes` calcula el `CostPror$` usando el costo en bolívares como si fuesen dólares. Luego al aplicar el `dolar_activo`, el precio en bolívares explota multiplicándose nuevamente por 600+.\n\n### Pasos para Reparar:\n\n1. **Verificar y corregir la tabla dolartoday:**\n```sql\nSELECT * FROM dolartoday ORDER BY id DESC;\n-- Si hay un 0 en dolarbcv, actualizarlo a la tasa real (ej. 617.6388):\n-- UPDATE dolartoday SET dolarbcv = 617.6388 WHERE id = [ID];\n```\n\n2. **Verificar y corregir SACOMP:**\n```sql\n-- Revisar si las facturas de compra heredaron el factor 0:\nSELECT NumeroD, Factor FROM SACOMP WHERE Factor = 0;\n-- Actualizarlas a la tasa del día:\n-- UPDATE SACOMP SET Factor = 617.6388 WHERE Factor = 0 AND FechaE >= '2026-06-22';\n```\n\n3. **Restaurar precios en SAPROD:**\n```sql\n-- Ejecutar el procedimiento de Saint para recalcular precios con base en la vista Custom_Lotes (que ahora usará la tasa correcta y dividirá bien):\nEXEC EnterpriseAdmin_AMC.dbo.UpdatePrices;\n```\n\n4. **Validación:**\n```sql\n-- Confirmar que no queden precios millonarios. Todo debe lucir normal:\nSELECT TOP 5 CodProd, Precio1, PrecioI1 FROM SAPROD ORDER BY PrecioI1 DESC;\n```\n\n**Prevención:** El nodo de proceso en N8N (Flujo DolarToday 4h) ya cuenta con un `throw new Error()` que aborta la inserción si la tasa BCV/Paralelo es `<= 0`.",
+        "height": 580,
+        "width": 800
+      },
+      "position": [
+        200,
+        200
+      ],
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1
+    },
+    {
+      "id": "d9282305-1a2f-48d9-a78b-d54e3d64c1e4",
+      "name": "When clicking \"Test Workflow\"",
+      "parameters": {},
+      "position": [
+        280,
+        360
+      ],
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1
+    },
+    {
+      "id": "d9282305-1a2f-48d9-a78b-d54e3d64c1e5",
+      "name": "Runbook Info",
+      "notes": "Lee la Sticky Note superior para ver el protocolo de Factor Cero.",
+      "parameters": {},
+      "position": [
+        500,
+        360
+      ],
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "When clicking \"Test Workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Runbook Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "1df9468e-aaf4-4794-ab82-13dabf009b01",
+  "triggerCount": 0,
+  "tags": []
+}
