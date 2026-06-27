@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-29T23:11:00.963Z",
-  "updatedAt": "2026-06-17T14:55:14.301Z",
+  "updatedAt": "2026-06-26T14:17:24.274Z",
   "id": "4hS1QB91qEeHWYBB",
   "name": "[PROD] Monitor de Infraestructura Global",
   "active": true,
@@ -101,25 +101,25 @@
     {
       "parameters": {
         "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "f551c747-2844-4deb-9c22-b17dbca4ad97",
+              "leftValue": "={{ $node[\"Check SQL Connection\"].isError }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
           "options": {
             "version": 2,
             "leftValue": "",
             "caseSensitive": true,
             "typeValidation": "strict"
-          },
-          "conditions": [
-            {
-              "id": "f551c747-2844-4deb-9c22-b17dbca4ad97",
-              "leftValue": "={{ $json.error }}",
-              "rightValue": "",
-              "operator": {
-                "type": "object",
-                "operation": "notEmpty",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
+          }
         },
         "options": {}
       },
@@ -456,7 +456,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "63a34c69-6830-409e-902a-acae910fead7",
+  "versionId": "20da4212-5ad5-4f7b-9798-aad660c1e92e",
   "triggerCount": 1,
   "tags": []
 }
