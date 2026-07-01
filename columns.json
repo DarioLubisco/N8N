@@ -1,0 +1,202 @@
+[
+  {
+    "COLUMN_NAME": "descrip1art",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 1000
+  },
+  {
+    "COLUMN_NAME": "codbarras",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 255
+  },
+  {
+    "COLUMN_NAME": "principio_activo",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "concentracion",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "forma_farmaceutica",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "blister",
+    "DATA_TYPE": "bit",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "origen",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "generico",
+    "DATA_TYPE": "bit",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "fabricante",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "cantidad_presentacion",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "PA_Alter_FF",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 255
+  },
+  {
+    "COLUMN_NAME": "LastUpdated",
+    "DATA_TYPE": "datetime2",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "principio_activo_Des",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 255
+  },
+  {
+    "COLUMN_NAME": "concentracion_Des",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 500
+  },
+  {
+    "COLUMN_NAME": "forma_farmaceutica_Des",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 255
+  },
+  {
+    "COLUMN_NAME": "origen_Des",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 100
+  },
+  {
+    "COLUMN_NAME": "fabricante_Des",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 255
+  },
+  {
+    "COLUMN_NAME": "origen_dato",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 50
+  },
+  {
+    "COLUMN_NAME": "codigo_atc",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "requiere_recipe",
+    "DATA_TYPE": "bit",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "marca",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "marca_Des",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 255
+  },
+  {
+    "COLUMN_NAME": "contenido_neto",
+    "DATA_TYPE": "float",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "codigo_atc_Des",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 50
+  },
+  {
+    "COLUMN_NAME": "segmento_etario",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 50
+  },
+  {
+    "COLUMN_NAME": "es_medicamento",
+    "DATA_TYPE": "bit",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "clasificacion_insumo_Des",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 255
+  },
+  {
+    "COLUMN_NAME": "elasticidad_demanda",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "contenido_neto_unidad_Des",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 100
+  },
+  {
+    "COLUMN_NAME": "contenido_neto_unidad",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "clasificacion_insumo",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "ciclos_reproceso",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "score_calidad",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "estado_ciclo",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 20
+  },
+  {
+    "COLUMN_NAME": "observaciones_ia",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": 1000
+  },
+  {
+    "COLUMN_NAME": "id_taxonomia",
+    "DATA_TYPE": "int",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "imagen_urls",
+    "DATA_TYPE": "varchar",
+    "CHARACTER_MAXIMUM_LENGTH": -1
+  },
+  {
+    "COLUMN_NAME": "descripcion_mercado_concat",
+    "DATA_TYPE": "nvarchar",
+    "CHARACTER_MAXIMUM_LENGTH": -1
+  },
+  {
+    "COLUMN_NAME": "procesado_fase1",
+    "DATA_TYPE": "bit",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  },
+  {
+    "COLUMN_NAME": "procesado_fase2",
+    "DATA_TYPE": "bit",
+    "CHARACTER_MAXIMUM_LENGTH": null
+  }
+]

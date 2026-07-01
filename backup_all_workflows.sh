@@ -12,7 +12,7 @@ rm -rf /home/synapse/docker/n8n/data/workflows_backup/*
 rm -rf /home/synapse/source/N8N/workflows/*
 
 # Export ALL workflows (active and inactive) from N8N database natively
-docker exec -i n8n n8n export:workflow --backup --output=/home/node/.n8n/workflows_backup/
+docker exec -i n8n-N8N n8n export:workflow --backup --output=/home/node/.n8n/workflows_backup/
 
 # Copy to the git tracking directory
 cp /home/synapse/docker/n8n/data/workflows_backup/*.json /home/synapse/source/N8N/workflows/

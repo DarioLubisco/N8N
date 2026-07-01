@@ -1,0 +1,312 @@
+{
+  "descrip1art": {
+    "SP": false,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "codbarras": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "principio_activo": {
+    "SP": false,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "concentracion": {
+    "SP": false,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "forma_farmaceutica": {
+    "SP": false,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "blister": {
+    "SP": false,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "origen": {
+    "SP": false,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "generico": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "fabricante": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "cantidad_presentacion": {
+    "SP": false,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "usuario": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "status": {
+    "SP": true,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "usuario_root": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "status2": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "PA_Alter_FF": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "PA_Alter_CON": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "LastUpdated": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "timestamp2": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "timestamp1": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "principio_activo_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "concentracion_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "forma_farmaceutica_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "origen_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "fabricante_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "principio_activo_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "concentracion_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "forma_farmaceutica_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "blister_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "origen_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "generico_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "fabricante_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "cantidad_presentacion_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "Score_Final": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "blister_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "generico_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "cantidad_presentacion_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "patrocinador": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "patrocinador_Des": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "patrocinador_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "origen_dato": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "codigo_atc": {
+    "SP": false,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "indicaciones": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "contraindicaciones": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "almacenamiento": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "requiere_recipe": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "marca": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "marca_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "marca_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "contenido_neto": {
+    "SP": false,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "contenido_neto_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "contenido_neto_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "codigo_atc_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "codigo_atc_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "requiere_recipe_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "requiere_recipe_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "segmento_etario": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "segmento_etario_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "segmento_etario_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "es_medicamento": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "es_medicamento_Score": {
+    "SP": false,
+    "Analytics": false,
+    "Scrapper": false
+  },
+  "url_imagen": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  },
+  "clasificacion_insumo_Des": {
+    "SP": true,
+    "Analytics": true,
+    "Scrapper": true
+  }
+}

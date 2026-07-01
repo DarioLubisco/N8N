@@ -1,0 +1,68 @@
+{
+  "startData": {},
+  "resultData": {
+    "runData": {
+      "Webhook Trigger": [
+        {
+          "hints": [],
+          "startTime": 1781488045596,
+          "executionTime": 0,
+          "source": [],
+          "executionStatus": "success",
+          "data": {
+            "main": [
+              [
+                {
+                  "json": {
+                    "headers": {
+                      "host": "localhost:5678",
+                      "user-agent": "curl/7.88.1",
+                      "accept": "*/*"
+                    },
+                    "params": {},
+                    "query": {},
+                    "body": {},
+                    "webhookUrl": "https://n8n.farmaciaamericana.es/webhook/test-vikunja-router",
+                    "executionMode": "production"
+                  },
+                  "pairedItem": {
+                    "item": 0
+                  }
+                }
+              ]
+            ]
+          }
+        }
+      ],
+      "Procesar Ruteo con IA": [
+        {
+          "hints": [
+            {
+              "message": "To make sure expressions after this node work, return the input items that produced each output item. <a target=\"_blank\" href=\"https://docs.n8n.io/data/data-mapping/data-item-linking/item-linking-code-node/\">More info</a>",
+              "location": "outputPane"
+            }
+          ],
+          "startTime": 1781488045606,
+          "executionTime": 2812,
+          "source": [
+            {
+              "previousNode": "Webhook Trigger"
+            }
+          ],
+          "executionStatus": "success",
+          "data": {
+            "main": [
+              []
+            ]
+          }
+        }
+      ]
+    },
+    "lastNodeExecuted": "Procesar Ruteo con IA"
+  },
+  "executionData": {
+    "contextData": {},
+    "nodeExecutionStack": [],
+    "waitingExecution": {}
+  }
+}
