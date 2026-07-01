@@ -1,0 +1,63 @@
+{
+  "mcpServers": {
+    "tavily-mcp": {
+      "command": "npx",
+      "args": ["-y", "tavily-mcp@latest"],
+      "env": {
+        "TAVILY_API_KEY": "${env:TAVILY_API_KEY}"
+      }
+    },
+    "exa": {
+      "url": "https://mcp.exa.ai/mcp",
+      "headers": {
+        "x-api-key": "${env:EXA_API_KEY}"
+      }
+    },
+    "firecrawl-mcp": {
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp"],
+      "env": {
+        "FIRECRAWL_API_KEY": "${env:FIRECRAWL_API_KEY}"
+      }
+    },
+    "mssql": {
+      "command": "npx",
+      "args": ["-y", "mssql-mcp@latest"],
+      "env": {
+        "DB_SERVER": "${env:MSSQL_SERVER}",
+        "DB_DATABASE": "${env:MSSQL_DATABASE}",
+        "DB_USER": "${env:MSSQL_USER}",
+        "DB_PASSWORD": "${env:MSSQL_PASSWORD}",
+        "DB_PORT": "1433",
+        "DB_TRUST_SERVER_CERTIFICATE": "true"
+      }
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "${env:POSTGRES_CONNECTION_STRING}"
+      ]
+    },
+    "MCP_DOCKER": {
+      "command": "docker",
+      "args": ["mcp", "gateway", "run"]
+    },
+    "n8n-mcp": {
+      "command": "npx",
+      "args": ["-y", "n8n-mcp"],
+      "env": {
+        "MCP_MODE": "stdio",
+        "LOG_LEVEL": "error",
+        "DISABLE_CONSOLE_OUTPUT": "true",
+        "N8N_API_URL": "${env:N8N_API_URL}",
+        "N8N_API_KEY": "${env:N8N_API_KEY}"
+      }
+    },
+    "gitkraken": {
+      "command": "gk",
+      "args": ["mcp"]
+    }
+  }
+}
