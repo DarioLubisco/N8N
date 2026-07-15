@@ -1,0 +1,216 @@
+{
+  "createdAt": "2026-07-14T21:13:04.067Z",
+  "updatedAt": "2026-07-14T21:13:04.067Z",
+  "id": "OT0jRt0imM3Oz1MM",
+  "name": "[PROD] [Config] - Orquestador SQL y Webhook",
+  "active": true,
+  "nodes": [
+    {
+      "id": "e3ece93a-cbb0-480e-8b80-f2ae1d6a1cc8",
+      "name": "Revisar Tareas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "dfbe5986-9a6a-4016-85ab-84a2f8e5d885",
+      "name": "Buscar Tareas SQL",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        200,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM Config.AutomationTriggers WHERE IsActive = 1 AND ActionCommand IS NOT NULL;"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "89eae71d-683f-40a2-a736-054200e5fc63",
+      "name": "Disparar Pipeline Local",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.147.18.204:8012/api/orquestador/start",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "id": "3d6ba3ba-a3fa-42ef-b84d-63bcee080c8f",
+      "name": "Webhook Resultados",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "osint-resultados",
+        "responseMode": "onReceived"
+      },
+      "webhookId": "13f9b4b2-c45f-4522-8435-b8daddee670a"
+    },
+    {
+      "id": "e66e6863-0d3b-4bda-ae8e-ae9d1525b7bd",
+      "name": "Extraer Resultados",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3.2,
+      "position": [
+        200,
+        200
+      ],
+      "parameters": {
+        "operation": "splitOutItems",
+        "fieldToSplitOut": "body.data",
+        "options": {}
+      }
+    },
+    {
+      "id": "95cd0b0c-de79-466e-bd48-86f63fd5cde3",
+      "name": "MERGE Resultados V11",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        200
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=MERGE Procurement.por_aprobacion_equivalencias AS target\nUSING (\n    SELECT\n        '{{ $json.codbarras }}' AS codbarras,\n        {{ $json.principio_activo_Des ? \"'\" + String($json.principio_activo_Des).replace(/'/g, \"''\") + \"'\" : 'NULL' }} AS principio_activo_Des,\n        {{ $json.concentracion_Des ? \"'\" + String($json.concentracion_Des).replace(/'/g, \"''\") + \"'\" : 'NULL' }} AS concentracion_Des,\n        {{ $json.forma_farmaceutica_Des ? \"'\" + String($json.forma_farmaceutica_Des).replace(/'/g, \"''\") + \"'\" : 'NULL' }} AS forma_farmaceutica_Des,\n        {{ $json.codigo_atc_Des ? \"'\" + String($json.codigo_atc_Des).replace(/'/g, \"''\") + \"'\" : 'NULL' }} AS codigo_atc_Des,\n        {{ $json.codigo_atc_profundo_Des ? \"'\" + String($json.codigo_atc_profundo_Des).replace(/'/g, \"''\") + \"'\" : 'NULL' }} AS codigo_atc_profundo_Des,\n        {{ $json.modelo_ia_Des ? \"'\" + String($json.modelo_ia_Des).replace(/'/g, \"''\") + \"'\" : 'NULL' }} AS modelo_ia_Des,\n        {{ $json.requiere_recipe_Des ?? 0 }} AS requiere_recipe_Des,\n        {{ $json.generico_Des ?? 0 }} AS generico_Des,\n        {{ $json.segmento_etario_Des ? \"'\" + String($json.segmento_etario_Des).replace(/'/g, \"''\") + \"'\" : 'NULL' }} AS segmento_etario_Des,\n        {{ $json.origen_Des ? \"'\" + String($json.origen_Des).replace(/'/g, \"''\") + \"'\" : 'NULL' }} AS origen_Des,\n        {{ $json.fabricante_Des ? \"'\" + String($json.fabricante_Des).replace(/'/g, \"''\") + \"'\" : 'NULL' }} AS fabricante_Des,\n        {{ $json.marca_Des ? \"'\" + String($json.marca_Des).replace(/'/g, \"''\") + \"'\" : 'NULL' }} AS marca_Des,\n        {{ $json.contenido_neto_Des ? \"'\" + String($json.contenido_neto_Des).replace(/'/g, \"''\") + \"'\" : 'NULL' }} AS contenido_neto_Des,\n        {{ $json.cantidad_presentacion_Des !== null && $json.cantidad_presentacion_Des !== undefined && $json.cantidad_presentacion_Des !== '' ? $json.cantidad_presentacion_Des : 'NULL' }} AS cantidad_presentacion_Des,\n        {{ $json.score_calidad ?? 0 }} AS score_calidad,\n        '{{ $json.estado_ciclo || \"ABIERTO\" }}' AS estado_ciclo,\n        {{ $json.ciclos_reproceso ?? 0 }} AS ciclos_reproceso,\n        {{ $json.observaciones_ia ? \"'\" + String($json.observaciones_ia).replace(/'/g, \"''\") + \"'\" : 'NULL' }} AS observaciones_ia,\n        '{{ $json.origen_dato || \"IA_INVESTIGATED_V11_ORCHESTRATOR\" }}' AS origen_dato,\n        {{ $json.es_medicamento ?? 1 }} AS es_medicamento\n) AS source\nON target.codbarras = source.codbarras\nWHEN MATCHED THEN\n    UPDATE SET\n        principio_activo_Des = source.principio_activo_Des,\n        concentracion_Des = source.concentracion_Des,\n        forma_farmaceutica_Des = source.forma_farmaceutica_Des,\n        codigo_atc_Des = source.codigo_atc_Des,\n        codigo_atc_profundo_Des = source.codigo_atc_profundo_Des,\n        modelo_ia_Des = source.modelo_ia_Des,\n        requiere_recipe_Des = source.requiere_recipe_Des,\n        generico_Des = source.generico_Des,\n        segmento_etario_Des = source.segmento_etario_Des,\n        origen_Des = source.origen_Des,\n        fabricante_Des = source.fabricante_Des,\n        marca_Des = source.marca_Des,\n        contenido_neto_Des = source.contenido_neto_Des,\n        cantidad_presentacion_Des = source.cantidad_presentacion_Des,\n        score_calidad = source.score_calidad,\n        estado_ciclo = source.estado_ciclo,\n        ciclos_reproceso = source.ciclos_reproceso,\n        observaciones_ia = source.observaciones_ia,\n        origen_dato = source.origen_dato,\n        es_medicamento = source.es_medicamento;"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    },
+    {
+      "id": "ffc530e4-e586-4400-8254-02f0d8ccd9f0",
+      "name": "Marcar Tarea Lista",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        600,
+        200
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE Config.AutomationTriggers SET LastTriggered = GETDATE() WHERE TriggerID = {{ $('Webhook Resultados').item.json.body.TriggerID }};"
+      },
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Revisar Tareas": {
+      "main": [
+        [
+          {
+            "node": "Buscar Tareas SQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Tareas SQL": {
+      "main": [
+        [
+          {
+            "node": "Disparar Pipeline Local",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Resultados": {
+      "main": [
+        [
+          {
+            "node": "Extraer Resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer Resultados": {
+      "main": [
+        [
+          {
+            "node": "MERGE Resultados V11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE Resultados V11": {
+      "main": [
+        [
+          {
+            "node": "Marcar Tarea Lista",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Revisar Tareas": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "a6636986-0995-4c19-8127-05a4484f98b0",
+  "triggerCount": 0,
+  "tags": []
+}
