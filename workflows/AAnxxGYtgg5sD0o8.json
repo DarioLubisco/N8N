@@ -6,6 +6,22 @@
   "active": false,
   "nodes": [
     {
+      "id": "a1f3c7d2-9e40-4b8a-a6f1-3c5e7b9d2a14",
+      "name": "Ejecución por Orquestador",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        150
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": []
+        }
+      }
+    },
+    {
       "id": "207b75a7-61e3-4164-8cc9-6f47cd0a596d",
       "name": "Trigger Diario (08:00 AM)",
       "type": "n8n-nodes-base.scheduleTrigger",
@@ -71,7 +87,7 @@
       "parameters": {
         "resource": "command",
         "operation": "execute",
-        "command": "python3 /opt/scripts/Agente_Clasificador.py"
+        "command": "cd /opt/scripts/mdm && python3 orquestador_n8n.py --sync --trigger-json '{\"TriggerID\": 1, \"ProcessName\": \"FARMACEUTICO\"}'"
       },
       "credentials": {
         "sshPassword": {
@@ -132,6 +148,17 @@
     }
   ],
   "connections": {
+    "Ejecución por Orquestador": {
+      "main": [
+        [
+          {
+            "node": "Check Pendientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Trigger Diario (08:00 AM)": {
       "main": [
         [
@@ -190,7 +217,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": null,
   "meta": {

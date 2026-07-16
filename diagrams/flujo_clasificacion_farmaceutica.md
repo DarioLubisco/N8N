@@ -1,0 +1,151 @@
+# Flujo de Clasificacion Farmaceutica
+
+Diagrama del pipeline completo: triggers n8n, SSH a Python, IA, MERGE a MSSQL y conciliacion MDM.
+
+
+
+```mermaid
+%%{init: { "flowchart": { "htmlLabels": false } }}%%
+flowchart TD
+    subgraph "n8n - Orquestador SQL y Webhook"
+        Cron["Cron cada 5 min \n Revisar Tareas"]
+        SQL1["Buscar Tareas SQL \n SELECT AutomationTriggers \n WHERE IsActive = 1"]
+        ExecWF["Ejecutar Clasificador \n executeWorkflow"]
+        Webhook["Webhook osint-resultados \n POST resultados"]
+        Extract["Extraer Resultados \n splitOutItems"]
+        MergeDB["MERGE Resultados V11 \n por_aprobacion_equivalencias"]
+        MarkDone["Marcar Tarea Lista \n UPDATE LastTriggered"]
+        PipelineDisabled["Disparar Pipeline Local \n HTTP 8012 \n DESACTIVADO en desuso"]
+    end
+
+    subgraph "n8n - Agente Clasificador Automatico"
+        TriggerCron["Trigger Diario 08 00 \n scheduleTrigger"]
+        TriggerExec["Ejecucion por Orquestador \n executeWorkflowTrigger"]
+        CheckPend["Check Pendientes SQL \n COUNT WHERE origen_dato IS NULL"]
+        HayReg{"Hay Registros \n Pendientes mayor 0"}
+        SSH["Ejecutar Agente Python \n SSH Debian \n python3 orquestador_n8n.py"]
+        Validar["Validar Ejecucion \n code igual 0"]
+        ErrTrigger["Error Trigger"]
+        Telegram["Notificar Error Telegram"]
+        Fin1(["Fin sin pendientes"])
+        Fin2(["Fin clasificacion OK"])
+    end
+
+    subgraph "Python - Pipeline Clasificacion /opt/scripts/mdm/"
+        OrchN8N["orquestador_n8n.py \n Filtra y reelabora datos"]
+        FetchAbiertos["fetch_productos_abiertos \n SELECT TOP 5 WHERE estado_ciclo ABIERTO"]
+        Scraper["orquestador_scraper.py \n Busca web y extrae fuentes \n Pre-clasifica MED vs INSUMO"]
+        Evaluate["evaluate_local.py \n Motor IA OCR imagenes LLM \n Extrae atributos farmaceuticos"]
+        Limpiador["limpiador_farmaceutico_regex.py \n Normaliza principio_activo \n y concentracion"]
+        AtribSQL["atributos_a_fila_sql \n Calcula score_calidad \n Decide CERRADO AGOTADO ABIERTO"]
+        PostWebhook["post_webhook \n POST filas a n8n"]
+        GenerarSQL["generar_sql_resultados.py \n Standalone JSON a UPDATE SQL"]
+    end
+
+    subgraph "MSSQL - EnterpriseAdmin_AMC"
+        DBTriggers[("Config.AutomationTriggers")]
+        DBEquiv[("Procurement por_aprobacion_equivalencias")]
+        DBImg[("Procurement Imagenes_Productos_Crudas")]
+    end
+
+    subgraph "MDM - Conciliacion Catalogos"
+        MDMFuzzy["MDM_Fuzzy_Mapper.py \n principio_activo_Des a ID"]
+        MDMUnified["MDM_Unified_Mapper.py \n Todos los catalogos \n rapidfuzz"]
+        ValATC["validador_atc_hibrido.py \n Valida codigo ATC \n fuzzy LLM fallback"]
+    end
+
+    subgraph "IA Externa APIs"
+        OpenRouter["OpenRouter \n Gemini Flash Vision OCR"]
+        ZAI["Z.ai \n GLM-4.7 Texto LLM"]
+        DeepSeekC["DeepSeek V4 \n Texto only"]
+    end
+
+    Cron --> SQL1
+    SQL1 --> ExecWF
+    ExecWF -.-> TriggerExec
+
+    TriggerCron --> CheckPend
+    TriggerExec --> CheckPend
+    CheckPend --> HayReg
+    HayReg -- "Si" --> SSH
+    HayReg -- "No" --> Fin1
+    SSH --> Validar
+    Validar -- "OK" --> Fin2
+    Validar -- "Fallo" --> ErrTrigger
+    ErrTrigger --> Telegram
+
+    SSH --> OrchN8N
+    OrchN8N --> FetchAbiertos
+    FetchAbiertos --> Scraper
+    Scraper --> Evaluate
+    Evaluate --> Limpiador
+    Limpiador --> AtribSQL
+    AtribSQL --> PostWebhook
+
+    Evaluate --> OpenRouter
+    Evaluate --> ZAI
+    Evaluate --> DeepSeekC
+
+    PostWebhook -- "POST filas JSON" --> Webhook
+    Webhook --> Extract
+    Extract --> MergeDB
+    MergeDB --> MarkDone
+
+    DBTriggers --> SQL1
+    FetchAbiertos --> DBEquiv
+    MergeDB --> DBEquiv
+    GenerarSQL --> DBEquiv
+    GenerarSQL --> DBImg
+
+    AtribSQL --> MDMFuzzy
+    AtribSQL --> MDMUnified
+    AtribSQL --> ValATC
+
+    style Cron fill:#E8F5E9,stroke:#81C784,color:#2E7D32,stroke-width:2px
+    style TriggerCron fill:#E8F5E9,stroke:#81C784,color:#2E7D32,stroke-width:2px
+    style TriggerExec fill:#E8F5E9,stroke:#81C784,color:#2E7D32,stroke-width:2px
+    style Fin1 fill:#E8F5E9,stroke:#81C784,color:#2E7D32,stroke-width:2px
+    style Fin2 fill:#E8F5E9,stroke:#81C784,color:#2E7D32,stroke-width:2px
+    style SQL1 fill:#ECEFF1,stroke:#90A4AE,color:#37474F,stroke-width:2px
+    style CheckPend fill:#ECEFF1,stroke:#90A4AE,color:#37474F,stroke-width:2px
+    style DBTriggers fill:#ECEFF1,stroke:#90A4AE,color:#37474F,stroke-width:2px
+    style DBEquiv fill:#ECEFF1,stroke:#90A4AE,color:#37474F,stroke-width:2px
+    style DBImg fill:#ECEFF1,stroke:#90A4AE,color:#37474F,stroke-width:2px
+    style ExecWF fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style Webhook fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style Extract fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style MergeDB fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style MarkDone fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style SSH fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style Validar fill:#F3E5F5,stroke:#BA68C8,color:#6A1B9A,stroke-width:2px
+    style OrchN8N fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style FetchAbiertos fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style Scraper fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style Evaluate fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style Limpiador fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style AtribSQL fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style PostWebhook fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style GenerarSQL fill:#E3F2FD,stroke:#64B5F6,color:#1565C0,stroke-width:2px
+    style HayReg fill:#FFF3E0,stroke:#FFB74D,color:#E65100,stroke-width:2px
+    style PipelineDisabled fill:#FFF3E0,stroke:#FFB74D,color:#E65100,stroke-width:2px
+    style ErrTrigger fill:#FFF3E0,stroke:#FFB74D,color:#E65100,stroke-width:2px
+    style Telegram fill:#FFF3E0,stroke:#FFB74D,color:#E65100,stroke-width:2px
+    style MDMFuzzy fill:#F3E5F5,stroke:#BA68C8,color:#6A1B9A,stroke-width:2px
+    style MDMUnified fill:#F3E5F5,stroke:#BA68C8,color:#6A1B9A,stroke-width:2px
+    style ValATC fill:#F3E5F5,stroke:#BA68C8,color:#6A1B9A,stroke-width:2px
+    style OpenRouter fill:#ECEFF1,stroke:#90A4AE,color:#37474F,stroke-width:2px
+    style ZAI fill:#ECEFF1,stroke:#90A4AE,color:#37474F,stroke-width:2px
+    style DeepSeekC fill:#ECEFF1,stroke:#90A4AE,color:#37474F,stroke-width:2px
+```
+
+
+
+## Leyenda de colores
+
+| Color | Significado |
+|-------|-------------|
+| Verde | Triggers y puntos de entrada/salida |
+| Azul | Procesamiento principal n8n y Python |
+| Morado | Validaciones y conciliacion MDM |
+| Naranja | Desactivado, errores y alertas |
+| Gris | Bases de datos y APIs externas |
