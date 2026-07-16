@@ -87,7 +87,7 @@
       "parameters": {
         "resource": "command",
         "operation": "execute",
-        "command": "cd /opt/scripts/mdm && python3 orquestador_n8n.py --sync --trigger-json '{\"TriggerID\": 1, \"ProcessName\": \"FARMACEUTICO\"}'"
+        "command": "cd /home/synapse/clasificacion && python3 orquestador_produccion.py --sync --trigger-json '{\"TriggerID\": 1, \"ProcessName\": \"FARMACEUTICO\"}'"
       },
       "credentials": {
         "sshPassword": {
