@@ -51,8 +51,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        500,
-        120
+        400,
+        0
       ],
       "parameters": {
         "method": "POST",
@@ -64,23 +64,6 @@
         "options": {
           "timeout": 30000
         }
-      },
-      "disabled": true,
-      "notes": "EN DESUSO - Pipeline local deprecado. Python se encarga de todo. Reconectar cuando se reactive."
-    },
-    {
-      "id": "b7c2e4f1-3a8d-4c6b-9e2f-1d5a7b8c3e09",
-      "name": "Ejecutar Clasificador Farmacéutico",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 0.2,
-      "position": [
-        400,
-        0
-      ],
-      "parameters": {
-        "workflowId": "AAnxxGYtgg5sD0o8",
-        "mode": "once",
-        "options": {}
       }
     },
     {
@@ -171,7 +154,7 @@
       "main": [
         [
           {
-            "node": "Ejecutar Clasificador Farmacéutico",
+            "node": "Disparar Pipeline Local",
             "type": "main",
             "index": 0
           }
