@@ -1,9 +1,9 @@
 {
   "createdAt": "2026-05-06T00:40:54.550Z",
-  "updatedAt": "2026-06-15T04:28:39.986Z",
+  "updatedAt": "2026-07-16T18:45:18.948Z",
   "id": "RPDyEB85NMh3uOs0",
   "name": "[CRON] Snapshot Diario de Mercado",
-  "active": true,
+  "active": false,
   "nodes": [
     {
       "id": "3df745e2-d03d-4133-847c-7d97d97c5d09",
@@ -74,7 +74,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": null,
-  "versionId": "d06dbffa-392b-4ddb-91c7-ce2821fc4322",
+  "versionId": "b6459852-6899-4513-8c44-e0bb312615da",
   "triggerCount": 1,
   "tags": []
 }
