@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-30T22:22:40.364Z",
-  "updatedAt": "2026-07-18T17:12:22.581Z",
+  "updatedAt": "2026-07-19T17:26:10.815Z",
   "id": "iwGP7AAVElhWT4Ob",
   "name": "[PROD] [Inventario] - ETL Inventario ITS",
   "active": true,
@@ -134,7 +134,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "38acd59a-cf40-4055-847d-3306978e6cc0",
+  "versionId": "0735bb76-4eca-4942-9407-e024c0f33001",
   "triggerCount": 1,
   "shared": [
     {
@@ -190,15 +190,5 @@
       }
     }
   ],
-  "tags": [],
-  "scopes": [
-    "workflow:create",
-    "workflow:delete",
-    "workflow:execute",
-    "workflow:list",
-    "workflow:move",
-    "workflow:read",
-    "workflow:share",
-    "workflow:update"
-  ]
+  "tags": []
 }

@@ -42,71 +42,10 @@
           "name": "[PROD] SSH - Debian WebServices"
         }
       },
-      "id": "351f4799-132c-4da2-890d-3e77917374f4"
-    },
-    {
-      "name": "✅ ¿Éxito?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        650,
-        300
-      ],
-      "parameters": {
-        "conditions": {
-          "conditions": [
-            {
-              "leftValue": "={{ $json.code }}",
-              "operator": {
-                "type": "number",
-                "operation": "equals"
-              },
-              "rightValue": 0
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-    },
-    {
-      "name": "📊 Formatear Resultado",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        900,
-        200
-      ],
-      "parameters": {
-        "jsCode": "const output = $input.first().json.stdout || '';\nconst rowsMatch = output.match(/ROWS:(\\d+)/i);\nconst skipped = /SALTADO|SKIP|NO_NEW/i.test(output);\nconst rows = rowsMatch ? parseInt(rowsMatch[1], 10) : 0;\n\nreturn [{\n  json: {\n    status: skipped ? 'skipped' : 'success',\n    proveedor: 'ITS',\n    archivo: '0722_inventario.txt',\n    registros_procesados: rows,\n    timestamp: new Date().toISOString()\n  }\n}];"
-      },
-      "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
-    },
-    {
-      "name": "❌ Preparar Error",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        900,
-        420
-      ],
-      "parameters": {
-        "jsCode": "const item = $input.first().json;\nconst stderr = item.stderr || '';\nconst stdout = item.stdout || '';\nconst code = item.code;\n\nreturn [{\n  json: {\n    status: 'error',\n    proveedor: 'ITS',\n    exit_code: code,\n    error_detail: stderr || stdout || `El script terminó con código ${code}`,\n    timestamp: new Date().toISOString()\n  }\n}];"
-      },
-      "id": "c3d4e5f6-a7b8-9012-cdef-123456789012"
-    },
-    {
-      "name": "🔴 Lanzar Error → Global Handler",
-      "type": "n8n-nodes-base.stopAndError",
-      "typeVersion": 1,
-      "position": [
-        1150,
-        420
-      ],
-      "parameters": {
-        "errorMessage": "=🚨 CRÍTICO (Primer Grado): Fallo en Ingesta ITS\n🖥️ Entidad Origen: Servidor Debian Webservices (IP ZeroTier: 10.147.18.4)\n🎯 Entidad Destino: FTP ITS (ftp.knc.dsp.mybluehost.me) / MSSQL (Saint)\n🔌 Servicio Afectado: ETL Python / ITS Inventario\n\n📝 Diagnóstico: El script de ingesta ITS falló durante la ejecución SSH.\n🔍 Detalles: {{ $json.error_detail }}"
-      },
-      "id": "d4e5f6a7-b8c9-0123-def0-234567890123"
+      "id": "351f4799-132c-4da2-890d-3e77917374f4",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 10000
     }
   ],
   "connections": {
@@ -115,46 +54,6 @@
         [
           {
             "node": "Cargar Datos",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Cargar Datos": {
-      "main": [
-        [
-          {
-            "node": "✅ ¿Éxito?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "✅ ¿Éxito?": {
-      "main": [
-        [
-          {
-            "node": "📊 Formatear Resultado",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "❌ Preparar Error",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "❌ Preparar Error": {
-      "main": [
-        [
-          {
-            "node": "🔴 Lanzar Error → Global Handler",
             "type": "main",
             "index": 0
           }
