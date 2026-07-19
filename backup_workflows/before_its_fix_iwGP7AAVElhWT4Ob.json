@@ -1,0 +1,137 @@
+{
+  "createdAt": "2026-04-30T22:22:40.364Z",
+  "updatedAt": "2026-07-19T17:26:22.910Z",
+  "id": "iwGP7AAVElhWT4Ob",
+  "name": "[PROD] [Inventario] - ETL Inventario ITS",
+  "active": true,
+  "nodes": [
+    {
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 20
+            }
+          ]
+        }
+      },
+      "id": "d4db4497-32c4-4c02-b528-f5af7c9f831d"
+    },
+    {
+      "name": "Cargar Datos",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        400,
+        300
+      ],
+      "parameters": {
+        "command": "cmd=\"export LANG=C.UTF-8; python3 /opt/scripts/droguerias/its.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      },
+      "id": "351f4799-132c-4da2-890d-3e77917374f4",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 10000
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "Cargar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "zLtMDgsc7OSXyXrp"
+  },
+  "staticData": {
+    "node:Ejecutar cada 30 min": {
+      "recurrenceRules": []
+    },
+    "node:Schedule": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": {},
+  "versionId": "e36bd43e-7b25-4513-9d86-ede62452b0e3",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2026-04-30T22:22:40.364Z",
+      "updatedAt": "2026-04-30T22:22:40.364Z",
+      "role": "workflow:owner",
+      "workflowId": "iwGP7AAVElhWT4Ob",
+      "projectId": "229NyZp0afAhCtOe",
+      "project": {
+        "createdAt": "2026-04-23T15:48:09.202Z",
+        "updatedAt": "2026-04-23T17:03:42.069Z",
+        "id": "229NyZp0afAhCtOe",
+        "name": "Dario Lubisco <dario.lubisco@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "projectRelations": [
+          {
+            "createdAt": "2026-04-23T15:48:09.202Z",
+            "updatedAt": "2026-04-23T15:48:09.202Z",
+            "role": "project:personalOwner",
+            "userId": "0826022f-c1e7-4bbb-9570-229133922b29",
+            "projectId": "229NyZp0afAhCtOe",
+            "user": {
+              "createdAt": "2026-04-23T15:48:04.505Z",
+              "updatedAt": "2026-05-19T04:10:37.696Z",
+              "id": "0826022f-c1e7-4bbb-9570-229133922b29",
+              "email": "dario.lubisco@gmail.com",
+              "firstName": "Dario",
+              "lastName": "Lubisco",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2026-04-23T17:03:48.393Z",
+                "personalization_survey_n8n_version": "2.15.1"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "J2ePJNem9vUKHwle",
+                "userActivatedAt": 1776975900155,
+                "easyAIWorkflowOnboarded": true,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1777239893220
+                }
+              },
+              "role": "global:owner",
+              "disabled": false,
+              "mfaEnabled": false,
+              "isPending": false,
+              "isOwner": true
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}
