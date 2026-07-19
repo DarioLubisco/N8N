@@ -34,7 +34,7 @@
         300
       ],
       "parameters": {
-        "command": "cmd=\"export LANG=C.UTF-8; python3 /opt/scripts/droguerias/its.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
+        "command": "run_its() {\n  export LANG=C.UTF-8\n  log=$(mktemp)\n  if python3 /opt/scripts/droguerias/its.py >\"$log\" 2>&1; then\n    if grep -q 'SALTADO' \"$log\"; then\n      rm -f \"$log\"\n      return 0\n    fi\n    grep -E 'OK ROWS:|^OK ' \"$log\" || true\n    rm -f \"$log\"\n    return 0\n  fi\n  cat \"$log\" >&2\n  rm -f \"$log\"\n  return 1\n}\nfor cycle in 1 2 3; do\n  for attempt in 1 2 3; do\n    if run_its; then\n      exit 0\n    fi\n    if [ $attempt -lt 3 ]; then\n      sleep 10\n    fi\n  done\n  if [ $cycle -lt 3 ]; then\n    sleep 300\n  fi\ndone\nexit 1"
       },
       "credentials": {
         "sshPassword": {

@@ -1,53 +1,36 @@
-# Parche recomendado para `its.py` (Debian)
+# ITS — Silencio en ejecuciones sin novedad
 
-## Problema
+## Regla
 
-Si `its.py` escribe logs JSON estructurados en **stdout**, cualquier integración que lea la salida del script (n8n SSH, cron, etc.) puede interpretarlos como eventos a notificar.
+Si no hay error ni trabajo nuevo, **no debe haber salida visible** (ni en n8n, ni en Telegram, ni en logs operativos).
 
-Mensajes como `SALTADO: El archivo ... ya fue procesado exitosamente` son **informativos** (idempotencia), no errores.
+| Resultado | stdout | stderr | exit |
+|-----------|--------|--------|------|
+| SALTADO (ya procesado) | *(vacío)* | *(vacío)* | 0 |
+| OK con filas nuevas | `OK ROWS:N` | opcional | 0 |
+| Error real | `ERROR: ...` | detalle | 1 |
 
-## Convención estándar (igual que `generic_inventario.py` y `blv_email_fetch.py`)
+## Implementado en n8n (inmediato)
 
-| Canal | Contenido |
-|-------|-----------|
-| **stdout** | Solo resultado machine-readable: `OK ROWS:123`, `OK SKIP`, o `ERROR: ...` |
-| **stderr** | Logs detallados (JSON o texto) para auditoría |
+El flujo `[PROD] [Inventario] - ETL Inventario ITS` captura la salida de `its.py` en un archivo temporal:
 
-## Cambio mínimo en Python
+- Si contiene `SALTADO` → termina en silencio (exit 0, sin stdout).
+- Si hay éxito con datos → solo imprime líneas `OK ROWS:` / `OK`.
+- Si falla → stderr con el log completo → handler global de errores.
 
-```python
-import json
-import logging
-import sys
+## Opcional en Debian (recomendado a medio plazo)
 
-class JsonLogFormatter(logging.Formatter):
-    def format(self, record: logging.LogRecord) -> str:
-        return json.dumps({
-            "ts": self.formatTime(record),
-            "level": record.levelname,
-            "module": "its",
-            "msg": record.getMessage(),
-        })
-
-logger = logging.getLogger("its")
-logger.handlers.clear()
-handler = logging.StreamHandler(sys.stderr)  # ← stderr, NO stdout
-handler.setFormatter(JsonLogFormatter())
-logger.addHandler(handler)
-logger.setLevel(logging.INFO)
-
-# Al finalizar sin error (incluyendo SALTADO/idempotencia):
-print("OK SKIP")   # o print(f"OK ROWS:{count}")
-sys.exit(0)
-
-# En fallo real:
-print(f"ERROR: {exc}")
-sys.exit(1)
-```
-
-## Despliegue en Debian
+Desplegar el wrapper y apuntar el cron/n8n a él:
 
 ```bash
-scp scripts/droguerias/its.py root@10.147.18.204:/opt/scripts/droguerias/its.py
-ssh root@10.147.18.204 "chmod +x /opt/scripts/droguerias/its.py"
+scp scripts/droguerias/its_quiet.sh root@10.147.18.204:/opt/scripts/droguerias/
+ssh root@10.147.18.204 "chmod +x /opt/scripts/droguerias/its_quiet.sh"
+```
+
+O parchear `its.py` para que los logs JSON vayan a **stderr** y en SALTADO no imprima nada en stdout:
+
+```python
+# logger → sys.stderr
+# al finalizar idempotente:
+sys.exit(0)  # sin print
 ```
