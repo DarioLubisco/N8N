@@ -1,11 +1,18 @@
 {
   "createdAt": "2026-05-07T14:29:23.143Z",
-  "updatedAt": "2026-06-22T22:40:14.370Z",
+  "updatedAt": "2026-07-18T18:53:28.640Z",
   "id": "o4HxmkefKceDYJWV",
   "name": "Ingesta: VitalClinic (Híbrido)",
   "active": true,
   "nodes": [
     {
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        304
+      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -16,21 +23,9 @@
           ]
         }
       },
-      "id": "d8b2f0d6-1e88-443f-a888-fc3848a50a06",
-      "name": "Schedule",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        112,
-        304
-      ]
+      "id": "23a958d7-0ed3-4110-9f51-d1bcab894d68"
     },
     {
-      "parameters": {
-        "path": "Existencia/inventario.txt",
-        "options": {}
-      },
-      "id": "edc0ead0-5500-47a9-bf6d-179a515baea1",
       "name": "Descargar Inventario FTP",
       "type": "n8n-nodes-base.ftp",
       "typeVersion": 1,
@@ -38,25 +33,19 @@
         304,
         304
       ],
+      "parameters": {
+        "path": "Existencia/inventario.txt",
+        "options": {}
+      },
       "credentials": {
         "ftp": {
           "id": "6d67u6BGhQbL0Cb5",
           "name": "VitalClinic FTP"
         }
       },
-      "retryOnFail": true,
-      "maxTries": 9,
-      "waitBetweenTries": 75000
+      "id": "4da2de6f-65a8-48a2-9491-04b9529279cf"
     },
     {
-      "parameters": {
-        "resource": "file",
-        "path": "/tmp",
-        "options": {
-          "fileName": "vitalclinic.txt"
-        }
-      },
-      "id": "575ad53e-2c73-45fd-9673-4043364c1d76",
       "name": "Cargar a Debian",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -64,21 +53,22 @@
         512,
         304
       ],
+      "parameters": {
+        "resource": "file",
+        "path": "/tmp",
+        "options": {
+          "fileName": "vitalclinic.txt"
+        }
+      },
       "credentials": {
         "sshPassword": {
           "id": "B3MvaiaBeDRdgs3C",
           "name": "Debian SSH"
         }
       },
-      "retryOnFail": true,
-      "maxTries": 9,
-      "waitBetweenTries": 75000
+      "id": "3e2ab99f-6468-472e-b84b-a561420cd983"
     },
     {
-      "parameters": {
-        "command": "cmd=\"cat /tmp/vitalclinic.txt \n | python3 /opt/scripts/droguerias/generic_inventario.py --proveedor VITALCLINIC --tabla VitalClinic_Inventario\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
-      },
-      "id": "0d0a08f6-9af3-4c81-a507-c0dc63b28a9f",
       "name": "Ejecutar Python",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -86,15 +76,16 @@
         704,
         304
       ],
+      "parameters": {
+        "command": "cmd=\"cat /tmp/vitalclinic.txt | python3 /opt/scripts/droguerias/vitalclinic.py\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
+      },
       "credentials": {
         "sshPassword": {
           "id": "B3MvaiaBeDRdgs3C",
           "name": "Debian SSH"
         }
       },
-      "retryOnFail": true,
-      "maxTries": 9,
-      "waitBetweenTries": 75000
+      "id": "79bdc6a5-ff0e-4ece-a309-cfbe16e54a7e"
     }
   ],
   "connections": {
@@ -133,8 +124,7 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "errorWorkflow": "LdkZneeq1ANGzv5Z"
+    "executionOrder": "v1"
   },
   "staticData": {
     "node:Schedule": {
@@ -147,7 +137,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "b6b30f39-e3d4-4afe-99a0-eaee1e54385e",
+  "versionId": "274d9b5a-3f12-4eb2-8bb1-5edda4461c7c",
   "triggerCount": 1,
   "tags": []
 }

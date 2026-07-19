@@ -1,0 +1,88 @@
+{
+  "createdAt": "2026-07-18T19:04:44.678Z",
+  "updatedAt": "2026-07-18T19:04:44.756Z",
+  "id": "SAHDeyNJ4LTIQiS2",
+  "name": "[ADMIN] Kill vitalclinic + check (temp)",
+  "active": true,
+  "nodes": [
+    {
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "path": "kill-vc",
+        "httpMethod": "GET",
+        "responseMode": "responseNode"
+      },
+      "webhookId": "kill-vc-001",
+      "id": "e0fe1f6e-fe27-4be7-8b8f-90b93fb0b020"
+    },
+    {
+      "name": "Kill",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        420,
+        300
+      ],
+      "parameters": {
+        "command": "set +e\necho '===== [1] Procesos python vitalclinic corriendo ====='\nps aux | grep -E 'vitalclinic\\.py' | grep -v grep\n\necho ''\necho '===== [2] Matar procesos ====='\npkill -f 'vitalclinic.py' && echo 'procesos matados' || echo 'no habia procesos'\nsleep 2\nps aux | grep -E 'vitalclinic\\.py' | grep -v grep || echo 'confirmado: sin procesos'\n\necho ''\necho '===== [3] locks en SQL Server ====='\nPYTHONPATH=/opt/scripts/droguerias python3 -c \"\nfrom db_config import get_conn_str\nimport pyodbc\ntry:\n    c = pyodbc.connect(get_conn_str(), timeout=10)\n    cur = c.cursor()\n    cur.execute('SELECT COUNT(*), MAX(fecha_carga) FROM Proveedores.VitalClinic_Inventario')\n    r = cur.fetchone()\n    print(f'VitalClinic: {r[0]} filas, ultima={r[1]}')\n    c.close()\nexcept Exception as e:\n    print(f'SQL error: {e}')\n\""
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      },
+      "id": "823c6229-18cd-4e7f-9cf7-3689f157fe47"
+    },
+    {
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        640,
+        300
+      ],
+      "parameters": {},
+      "id": "99af3f5f-d9e8-406c-a18c-67fb09f9d511"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Kill",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kill": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "45d34c11-f658-4ec5-bcc2-ebae79350dcd",
+  "triggerCount": 1,
+  "tags": []
+}

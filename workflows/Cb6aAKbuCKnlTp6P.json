@@ -1,72 +1,56 @@
 {
   "createdAt": "2026-05-01T01:41:04.407Z",
-  "updatedAt": "2026-06-22T22:40:11.061Z",
+  "updatedAt": "2026-07-19T01:30:16.868Z",
   "id": "Cb6aAKbuCKnlTp6P",
   "name": "[PROD] Ingesta_Inventarios_Email",
-  "active": false,
+  "active": true,
   "nodes": [
     {
-      "parameters": {
-        "postProcessAction": "nothing",
-        "downloadAttachments": true,
-        "options": {}
-      },
-      "name": "Email Trigger (IMAP)",
-      "type": "n8n-nodes-base.emailReadImap",
-      "typeVersion": 2,
-      "position": [
-        -32,
-        -240
-      ],
-      "id": "53638c32-2c78-4a18-822e-ee666a2b2386"
-    },
-    {
-      "parameters": {
-        "fileName": "=/tmp/attachments/{{ $json.fileName }}",
-        "options": {
-          "append": false
-        }
-      },
-      "name": "Save Attachment to Disk",
-      "type": "n8n-nodes-base.writeBinaryFile",
+      "name": "Schedule (30min)",
+      "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1,
       "position": [
-        224,
-        -240
+        200,
+        300
       ],
-      "id": "a8530354-de9e-4b5c-b20c-8f5d6c8c512c"
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "1f946656-df12-45c1-b8a8-a50e18f4df86"
     },
     {
-      "parameters": {
-        "command": "cmd=\"=python3 /opt/scripts/droguerias/email_parser.py --legacy-mode --file \"/tmp/attachments/{{ $json.fileName }}\"\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
-      },
-      "name": "Execute Python Script (SSH)",
+      "name": "Fetch + Ingest BLV",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        480,
-        -240
+        440,
+        300
       ],
-      "id": "1dd55efa-836b-4cfc-b294-4610a3f62cb0"
+      "parameters": {
+        "command": "set -e\nexport LANG=C.UTF-8\nPYTHONPATH=/opt/scripts/droguerias\n\n# blv_email_fetch.py descarga el Ãºltimo xlsx BLV del IMAP y lo pasa a blv_ingest.py.\n# Idempotente: si no hay email nuevo, termina rÃ¡pido con OK NO_NEW_EMAILS.\npython3 /opt/scripts/droguerias/blv_email_fetch.py 2>&1\nexit 0"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      },
+      "id": "2520ac89-edb5-4591-ade3-3e9aefdc7439"
     }
   ],
   "connections": {
-    "Email Trigger (IMAP)": {
+    "Schedule (30min)": {
       "main": [
         [
           {
-            "node": "Save Attachment to Disk",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Save Attachment to Disk": {
-      "main": [
-        [
-          {
-            "node": "Execute Python Script (SSH)",
+            "node": "Fetch + Ingest BLV",
             "type": "main",
             "index": 0
           }
@@ -75,13 +59,16 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate"
+    "executionOrder": "v1"
   },
-  "staticData": null,
+  "staticData": {
+    "node:Schedule (30min)": {
+      "recurrenceRules": []
+    }
+  },
   "meta": null,
   "pinData": {},
-  "versionId": "25a200a3-cd22-4290-8436-a76e909d977f",
-  "triggerCount": 0,
+  "versionId": "e163dc8a-23ba-4554-9276-2705124b72ab",
+  "triggerCount": 1,
   "tags": []
 }

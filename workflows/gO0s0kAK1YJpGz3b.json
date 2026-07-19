@@ -1,42 +1,59 @@
 {
   "createdAt": "2026-05-06T01:09:19.237Z",
-  "updatedAt": "2026-05-06T01:49:43.699Z",
+  "updatedAt": "2026-07-18T19:55:20.139Z",
   "id": "gO0s0kAK1YJpGz3b",
   "name": "[ADMIN] Leer Script Debian",
   "active": false,
   "nodes": [
     {
-      "id": "136414f2-700f-4c51-bd1c-9c38647e94ac",
-      "name": "Start",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
       "position": [
-        240,
+        200,
         300
-      ]
+      ],
+      "parameters": {
+        "path": "admin-leer-script",
+        "httpMethod": "GET",
+        "responseMode": "responseNode"
+      },
+      "webhookId": "admin-leer-script-001",
+      "id": "a3907667-4502-44d2-9c7d-2c9093069683"
     },
     {
-      "id": "4bcfcf4d-e1c8-49cd-9cb3-87511ded8e19",
       "name": "Read Generic",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        500,
+        420,
         300
       ],
       "parameters": {
-        "command": "cat /opt/scripts/droguerias/generic_inventario.py"
+        "command": "echo '===== [1] email_parser.py header (1-100) ====='\nhead -100 /opt/scripts/droguerias/email_parser.py\necho ''\necho '===== [2] grep blv/BLV en email_parser.py ====='\ngrep -n -iE 'blv|proveedor' /opt/scripts/droguerias/email_parser.py | head -30\necho ''\necho '===== [3] ls /tmp/attachments/ (archivos procesados recientes) ====='\nls -la /tmp/attachments/ 2>&1 | head -20\necho ''\necho '===== [4] BÃºsqueda de archivos BLV en filesystem reciente ====='\nfind /opt/data /tmp -iname '*blv*' -o -iname '*BLV*' 2>/dev/null | head -10\necho ''\necho '===== [5] Proveedores.BLV schema ====='\nPYTHONPATH=/opt/scripts/droguerias python3 -c \"\nfrom db_config import get_conn_str\nimport pyodbc\nc = pyodbc.connect(get_conn_str())\ncur = c.cursor()\ncur.execute('SELECT TOP 3 * FROM Proveedores.BLV')\ncols = [d[0] for d in cur.description]\nprint('Columnas:', cols)\nfor r in cur.fetchall():\n    print(dict(zip(cols, r)))\nc.close()\n\""
       },
       "credentials": {
         "sshPassword": {
           "id": "q9XQyJD7Uu17tWSl",
           "name": "[PROD] SSH - Debian WebServices"
         }
-      }
+      },
+      "id": "a69b4a7d-420a-439d-ba06-7dcb83440d5b"
+    },
+    {
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        640,
+        300
+      ],
+      "parameters": {},
+      "id": "8b1ab7f8-f1bb-4545-a91e-be60c86e25f0"
     }
   ],
   "connections": {
-    "Start": {
+    "Webhook": {
       "main": [
         [
           {
@@ -46,18 +63,28 @@
           }
         ]
       ]
+    },
+    "Read Generic": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "availableInMCP": true
+    "executionOrder": "v1"
   },
   "staticData": null,
   "meta": {
     "aiBuilderAssisted": true
   },
   "pinData": null,
-  "versionId": "97e92825-3d6d-4c1c-a8ef-9fefd87c32c6",
-  "triggerCount": 0,
+  "versionId": "fe7558a0-99c7-4c6d-85f1-6d511ce9fda4",
+  "triggerCount": 1,
   "tags": []
 }

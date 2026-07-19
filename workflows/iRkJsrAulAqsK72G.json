@@ -1,11 +1,18 @@
 {
   "createdAt": "2026-05-07T14:29:43.051Z",
-  "updatedAt": "2026-06-22T22:40:14.265Z",
+  "updatedAt": "2026-07-18T18:44:12.115Z",
   "id": "iRkJsrAulAqsK72G",
   "name": "Ingesta: Mastranto (Híbrido)",
   "active": true,
   "nodes": [
     {
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        304
+      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -16,21 +23,9 @@
           ]
         }
       },
-      "id": "0ef8efdd-3935-48a3-9058-e8224aa01fee",
-      "name": "Schedule",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        112,
-        304
-      ]
+      "id": "d2d38cc4-2fbb-45dc-9d9f-09cd87744b7a"
     },
     {
-      "parameters": {
-        "path": "/Listados/txt/listado.txt",
-        "options": {}
-      },
-      "id": "7b01e685-fe61-4b93-a8f2-7351728b60f0",
       "name": "Descargar Inventario FTP",
       "type": "n8n-nodes-base.ftp",
       "typeVersion": 1,
@@ -38,25 +33,19 @@
         304,
         304
       ],
+      "parameters": {
+        "path": "/Listados/txt/listado.txt",
+        "options": {}
+      },
       "credentials": {
         "ftp": {
           "id": "Sn8EBtpGArKCjFIw",
           "name": "Mastranto FTP"
         }
       },
-      "retryOnFail": true,
-      "maxTries": 9,
-      "waitBetweenTries": 75000
+      "id": "77de0cde-3c26-4466-9965-3195bbae3e5c"
     },
     {
-      "parameters": {
-        "resource": "file",
-        "path": "/tmp",
-        "options": {
-          "fileName": "mastranto.txt"
-        }
-      },
-      "id": "b50f189c-77e2-4f4f-a116-8dbe35787b2b",
       "name": "Cargar a Debian",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -64,21 +53,22 @@
         512,
         304
       ],
+      "parameters": {
+        "resource": "file",
+        "path": "/tmp",
+        "options": {
+          "fileName": "mastranto.txt"
+        }
+      },
       "credentials": {
         "sshPassword": {
           "id": "B3MvaiaBeDRdgs3C",
           "name": "Debian SSH"
         }
       },
-      "retryOnFail": true,
-      "maxTries": 9,
-      "waitBetweenTries": 75000
+      "id": "9ce36a69-686f-4c61-aab9-852c3a6cbc39"
     },
     {
-      "parameters": {
-        "command": "cmd=\"cat /tmp/mastranto.txt \n | python3 /opt/scripts/droguerias/mastranto.py --sucursal CENTRO --tabla MastrantoC_Inventario\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
-      },
-      "id": "0d0adca1-0a19-4733-99a8-aad1d54f788a",
       "name": "Ejecutar Python Centro",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -86,21 +76,18 @@
         704,
         304
       ],
+      "parameters": {
+        "command": "cmd=\"cat /tmp/mastranto.txt | python3 /opt/scripts/droguerias/mastranto.py --sucursal CENTRO --tabla MastrantoC_Inventario\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
+      },
       "credentials": {
         "sshPassword": {
           "id": "B3MvaiaBeDRdgs3C",
           "name": "Debian SSH"
         }
       },
-      "retryOnFail": true,
-      "maxTries": 9,
-      "waitBetweenTries": 75000
+      "id": "e2815111-ce59-4f11-878d-8854c609fa10"
     },
     {
-      "parameters": {
-        "command": "cmd=\"cat /tmp/mastranto.txt \n | python3 /opt/scripts/droguerias/mastranto.py --sucursal BARINAS --tabla MastrantoB_Inventario\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
-      },
-      "id": "8e2359b0-244d-4922-a0f1-e03697933aea",
       "name": "Ejecutar Python Barinas",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -108,15 +95,16 @@
         912,
         304
       ],
+      "parameters": {
+        "command": "cmd=\"cat /tmp/mastranto.txt | python3 /opt/scripts/droguerias/mastranto.py --sucursal BARINAS --tabla MastrantoB_Inventario\"\nfor cycle in 1 2 3; do\n    for attempt in 1 2 3; do\n        if eval \"$cmd\"; then\n            exit 0\n        fi\n        if [ $attempt -lt 3 ]; then\n            sleep 10\n        fi\n    done\n    if [ $cycle -lt 3 ]; then\n        sleep 300\n    fi\ndone\nexit 1"
+      },
       "credentials": {
         "sshPassword": {
           "id": "B3MvaiaBeDRdgs3C",
           "name": "Debian SSH"
         }
       },
-      "retryOnFail": true,
-      "maxTries": 9,
-      "waitBetweenTries": 75000
+      "id": "4cbcb8b7-4e40-40c4-a3a8-f12c11cddab5"
     }
   ],
   "connections": {
@@ -166,8 +154,7 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "errorWorkflow": "LdkZneeq1ANGzv5Z"
+    "executionOrder": "v1"
   },
   "staticData": {
     "node:Schedule": {
@@ -182,7 +169,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "ac27b821-636d-46a0-b6d5-04965f2b016c",
+  "versionId": "6d5d7778-c901-4b7d-8f03-f3f4c894fc87",
   "triggerCount": 1,
   "tags": []
 }

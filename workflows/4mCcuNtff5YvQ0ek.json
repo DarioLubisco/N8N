@@ -1,0 +1,88 @@
+{
+  "createdAt": "2026-07-19T01:24:37.060Z",
+  "updatedAt": "2026-07-19T01:24:45.828Z",
+  "id": "4mCcuNtff5YvQ0ek",
+  "name": "[ADMIN] Restart n8n (temp)",
+  "active": true,
+  "nodes": [
+    {
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "path": "restart-n8n",
+        "httpMethod": "GET",
+        "responseMode": "responseNode"
+      },
+      "webhookId": "restart-n8n-001",
+      "id": "b5bd271a-b042-46cd-8723-036debdbde0a"
+    },
+    {
+      "name": "SSH",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        420,
+        300
+      ],
+      "parameters": {
+        "command": "set +e\necho '===== [1] Estado contenedor n8n antes ====='\ndocker ps --filter name=n8n --format 'table {{.Names}}\\t{{.Status}}\\t{{.RunningFor}}'\necho ''\necho '===== [2] Memoria/CPU antes ====='\ndocker stats --no-stream --format 'table {{.Name}}\\t{{.CPUPerc}}\\t{{.MemUsage}}' n8n-N8N 2>&1 | head -5\necho ''\necho '===== [3] Restart n8n ====='\ndocker restart n8n-N8N\necho 'restart issued'\necho ''\necho '===== [4] Esperar 15s y verificar ====='\nsleep 15\ndocker ps --filter name=n8n --format 'table {{.Names}}\\t{{.Status}}'\necho ''\necho '===== [5] Health endpoint ====='\ncurl -sS --max-time 10 -o /dev/null -w 'health=%{http_code}\\n' http://localhost:5678/healthz"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      },
+      "id": "93f5f179-69d2-48e9-b53a-d150bac9955c"
+    },
+    {
+      "name": "R",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        640,
+        300
+      ],
+      "parameters": {},
+      "id": "5e815d5f-fb76-4396-9005-5c51f27e648d"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "SSH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SSH": {
+      "main": [
+        [
+          {
+            "node": "R",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "ef422f0a-31ab-4079-84c0-dba0e239bf34",
+  "triggerCount": 1,
+  "tags": []
+}

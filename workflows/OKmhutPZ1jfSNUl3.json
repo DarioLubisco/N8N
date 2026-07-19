@@ -1,0 +1,88 @@
+{
+  "createdAt": "2026-07-18T18:59:44.472Z",
+  "updatedAt": "2026-07-18T18:59:44.538Z",
+  "id": "OKmhutPZ1jfSNUl3",
+  "name": "[ADMIN] Debug vitalclinic v2 (temp)",
+  "active": true,
+  "nodes": [
+    {
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "path": "debug-vc2",
+        "httpMethod": "GET",
+        "responseMode": "responseNode"
+      },
+      "webhookId": "debug-vc2-001",
+      "id": "9d71c655-2712-4542-9c0b-736080bfbe0e"
+    },
+    {
+      "name": "Run",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        420,
+        300
+      ],
+      "parameters": {
+        "command": "set +e\nexport LANG=C.UTF-8\nLOG=/tmp/vc_run_$(date +%s).log\n{\n  echo '===== [1] Check archivo ====='\n  ls -la /tmp/vitalclinic.txt\n  echo ''\n  echo '===== [2] Run vitalclinic.py con stderr a stdout ====='\n  cat /tmp/vitalclinic.txt | python3 /opt/scripts/droguerias/vitalclinic.py 2>&1\n  echo \"\"\n  echo \"EXIT_CODE=$?\"\n  echo ''\n  echo '===== [3] Filas y Ãºltima carga ====='\n  PYTHONPATH=/opt/scripts/droguerias python3 -c \"\nfrom db_config import get_conn_str\nimport pyodbc\nc = pyodbc.connect(get_conn_str())\ncur = c.cursor()\ncur.execute('SELECT COUNT(*), MAX(fecha_carga) FROM Proveedores.VitalClinic_Inventario')\nr = cur.fetchone()\nprint(f'Filas: {r[0]} Ultima carga: {r[1]}')\ncur.execute(\\\"SELECT TOP 2 ProviderID, LEFT(FileHash,16) AS h, ProcessedAt FROM dbo.InboundFilesLog WHERE ProviderID='vitalclinic' ORDER BY ProcessedAt DESC\\\")\nfor row in cur.fetchall():\n    print(f'  Log: {row.ProviderID} | {row.h} | {row.ProcessedAt}')\nc.close()\n\"\n} > $LOG 2>&1\ncat $LOG"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      },
+      "id": "f6cc8edb-d058-4779-a7f0-ff7f919076e3"
+    },
+    {
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        640,
+        300
+      ],
+      "parameters": {},
+      "id": "49726d70-5fe8-40b5-ac13-5447195fcd3a"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "3876f4ab-96cd-4f92-ae87-fe12e3b37faf",
+  "triggerCount": 1,
+  "tags": []
+}

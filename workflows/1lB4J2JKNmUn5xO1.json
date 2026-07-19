@@ -1,0 +1,88 @@
+{
+  "createdAt": "2026-07-18T17:34:14.963Z",
+  "updatedAt": "2026-07-18T17:34:15.034Z",
+  "id": "1lB4J2JKNmUn5xO1",
+  "name": "[ADMIN] Audit credenciales Debian (temp)",
+  "active": true,
+  "nodes": [
+    {
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "path": "audit-creds",
+        "httpMethod": "GET",
+        "responseMode": "responseNode"
+      },
+      "webhookId": "audit-creds-001",
+      "id": "482bf9fb-5689-4664-850a-5c854eae2234"
+    },
+    {
+      "name": "Audit",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        420,
+        300
+      ],
+      "parameters": {
+        "command": "set +e\necho '===== [1] Archivos .env en Debian con DB_PASSWORD ====='\nfind /opt /etc /home -maxdepth 5 -name '.env*' -type f 2>/dev/null | while read f; do\n    if grep -q 'DB_PASSWORD' \"$f\" 2>/dev/null; then\n        h=$(grep '^DB_PASSWORD=' \"$f\" | head -1 | cut -d= -f2- | tr -d '\"' | tr -d \"'\" | sha256sum | awk '{print $1}')\n        srv=$(grep -E '^DB_SERVER=' \"$f\" | head -1 | cut -d= -f2-)\n        echo \"$h  SERVER=$srv  $f\"\n    fi\ndone\necho ''\necho 'HASH_CORRECTO=fa8baaebcdd1778250aa4fc5e4ebb490631c0d14d2e7c7d70460a66dab434cd2 (Twinc3pt.)'\necho ''\necho '===== [2] Scripts Python que usan get_conn_str o tienen conexion directa ====='\ngrep -rln -E '(get_conn_str|pyodbc\\.connect|CONNECTION_STRING|sa;PWD)' /opt/scripts 2>/dev/null | head -30\necho ''\necho '===== [3] Cualquier credencial hardcoded en /opt/scripts ====='\ngrep -rln -E '(PWD|PASSWORD)\\s*=' /opt/scripts --include='*.py' 2>/dev/null | grep -v '.env' | head -20\necho ''\necho '===== [4] systemctl services con DB_PASSWORD ====='\nfor svc in $(systemctl list-unit-files --type=service --no-legend 2>/dev/null | awk '{print $1}' | head -50); do\n    if sudo systemctl cat \"$svc\" 2>/dev/null | grep -qE 'DB_PASSWORD|DB_SERVER'; then\n        echo \"--- $svc ---\"\n        sudo systemctl cat \"$svc\" 2>/dev/null | grep -E 'DB_|Environment' | sed 's/PASSWORD=.*/PASSWORD=<r>/'\n    fi\ndone\necho ''\necho '===== [5] cron jobs con DB_ ====='\nsudo crontab -l -u root 2>/dev/null | grep -iE 'DB_|pyodbc|sql' | head -10\nfor u in synapse n8n; do\n    crontab -l -u $u 2>/dev/null | grep -iE 'DB_|pyodbc' | head -5\ndone"
+      },
+      "credentials": {
+        "sshPassword": {
+          "id": "q9XQyJD7Uu17tWSl",
+          "name": "[PROD] SSH - Debian WebServices"
+        }
+      },
+      "id": "6c838afe-c81e-470b-abf6-36fab21e7d4a"
+    },
+    {
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        640,
+        300
+      ],
+      "parameters": {},
+      "id": "200cedae-3953-464f-83ff-b1f61c445ab2"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audit": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "56b73ddc-0af1-484d-9517-99e524517648",
+  "triggerCount": 1,
+  "tags": []
+}

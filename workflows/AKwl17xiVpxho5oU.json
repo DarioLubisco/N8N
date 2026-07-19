@@ -1,9 +1,9 @@
 {
   "createdAt": "2026-06-20T01:06:54.156Z",
-  "updatedAt": "2026-06-22T22:40:14.159Z",
+  "updatedAt": "2026-07-18T16:47:19.163Z",
   "id": "AKwl17xiVpxho5oU",
   "name": "Ingesta: Drocerca (Híbrido)",
-  "active": true,
+  "active": false,
   "nodes": [
     {
       "credentials": {
