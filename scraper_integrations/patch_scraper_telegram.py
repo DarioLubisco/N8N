@@ -21,16 +21,17 @@ REPO_ROOT = Path(__file__).resolve().parent
 MODULE_SOURCE = REPO_ROOT / "n8n_error_reporter.py"
 MODULE_DEST_NAME = "n8n_error_reporter.py"
 
-IMPORT_LINE = "from n8n_error_reporter import report_valueserp_no_urls, report_external_error, report_scraper_critical\n"
+IMPORT_LINE = (
+    "from n8n_error_reporter import report_valueserp_access_failure, "
+    "report_external_error, report_scraper_critical\n"
+)
 
-REPLACEMENT_BLOCK = """report_valueserp_no_urls(
-    trigger_id={trigger_id},
-    ean={ean},
-    http_status={http_status},
-    organic_count={organic_count},
-    api_message={api_message},
-    query={query},
-)"""
+REPLACEMENT_CALL = (
+    "report_valueserp_access_failure("
+    "trigger_id=trigger_id, ean=ean, http_status=http_status, "
+    "organic_count=organic_count, api_message=api_message, "
+    "request_success=request_success, query=query, access_error=access_error)"
+)
 
 # Patrón típico del mensaje legacy observado en producción.
 LEGACY_FSTRING = re.compile(
@@ -76,14 +77,14 @@ def patch_file(path: Path, dry_run: bool) -> list[str]:
     if "ValueSERP no devolvió URLs" in updated or "SCRAPER [T" in updated:
         if LEGACY_FSTRING.search(updated):
             updated = LEGACY_FSTRING.sub(
-                "report_valueserp_no_urls(trigger_id=trigger_id, ean=ean, http_status=http_status, organic_count=organic_count, api_message=api_message, query=query)",
+                REPLACEMENT_CALL,
                 updated,
             )
             changes.append("reemplazó f-string legacy SCRAPER/ValueSERP")
 
         if LEGACY_PLAIN.search(updated):
             updated = LEGACY_PLAIN.sub(
-                "report_valueserp_no_urls(trigger_id=trigger_id, ean=ean, http_status=http_status, organic_count=organic_count, api_message=api_message, query=query)",
+                REPLACEMENT_CALL,
                 updated,
             )
             changes.append("reemplazó string literal legacy SCRAPER/ValueSERP")
@@ -91,7 +92,7 @@ def patch_file(path: Path, dry_run: bool) -> list[str]:
         for pattern in TELEGRAM_SEND_PATTERNS:
             if pattern.search(updated) and "SCRAPER" in updated:
                 updated = pattern.sub(
-                    "report_valueserp_no_urls(trigger_id=trigger_id, ean=ean, http_status=http_status, organic_count=organic_count, api_message=api_message, query=query)",
+                    REPLACEMENT_CALL,
                     updated,
                 )
                 changes.append("reemplazó envío directo a Telegram del scraper")
@@ -124,7 +125,7 @@ def scan_repo(repo: Path, dry_run: bool) -> int:
     if total_changes == 0:
         print("No se encontraron patrones legacy. Revisar manualmente el archivo que emite:")
         print("  ⚠️ SCRAPER [T1] <ean> / ValueSERP no devolvió URLs ...")
-        print("y reemplazar por report_valueserp_no_urls(...)")
+        print("y reemplazar por report_valueserp_access_failure(...)")
     return total_changes
 
 

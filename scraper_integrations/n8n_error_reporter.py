@@ -1,15 +1,17 @@
 """Cliente de reporte de errores alineado con el protocolo n8n de Synapse.
 
+Solo debe alertar ante problemas de ACCESO a ValueSERP (red, auth, créditos,
+caída del proveedor). Un EAN sin resultados orgánicos NO es motivo de alerta.
+
 Uso desde el scraper MDM (Clasificacion Medicamentos):
 
-    from n8n_error_reporter import report_valueserp_no_urls
+    from n8n_error_reporter import report_valueserp_access_failure
 
-    report_valueserp_no_urls(
+    report_valueserp_access_failure(
         trigger_id=1,
         ean="1254896321544",
-        http_status=200,
-        organic_count=0,
-        api_message="success",
+        http_status=503,
+        api_message="Service Unavailable",
     )
 """
 
@@ -95,6 +97,157 @@ def report_external_error(
     return _post_alert(payload)
 
 
+def is_valueserp_access_failure(
+    *,
+    http_status: int | None = None,
+    organic_count: int | None = None,
+    api_message: str | None = None,
+    request_success: bool | None = None,
+    access_error: str | None = None,
+) -> bool:
+    """True solo si hay un problema de acceso/servicio, no si el EAN no tiene resultados."""
+    if access_error:
+        return True
+
+    if http_status is None:
+        return True
+
+    if http_status >= 400:
+        return True
+
+    if request_success is False:
+        return True
+
+    # Respuesta HTTP OK pero la API indica fallo en el cuerpo (sin status HTTP de error).
+    if api_message:
+        lowered = api_message.lower()
+        failure_markers = (
+            "invalid api",
+            "api key",
+            "payment required",
+            "run out of",
+            "rate limit",
+            "too many requests",
+            "service unavailable",
+            "internal server error",
+            "sign up for a plan",
+        )
+        if any(marker in lowered for marker in failure_markers):
+            return True
+
+    # API respondió correctamente: sin alerta aunque el EAN no tenga resultados.
+    if http_status < 400 and (request_success is None or request_success is True):
+        return False
+
+    return True
+
+
+def log_valueserp_no_results(
+    *,
+    trigger_id: int,
+    ean: str,
+    http_status: int | None = None,
+    organic_count: int | None = None,
+    query: str | None = None,
+) -> None:
+    """Registra en log un producto sin resultados, sin generar alerta."""
+    logger.info(
+        "ValueSERP sin resultados para EAN %s [T%s] (%s, organic_results=%s, query=%s)",
+        ean,
+        trigger_id,
+        f"http_status={http_status}" if http_status is not None else "http_status=desconocido",
+        organic_count,
+        query or ean,
+    )
+
+
+def report_valueserp_access_failure(
+    *,
+    trigger_id: int,
+    ean: str,
+    http_status: int | None = None,
+    organic_count: int | None = None,
+    api_message: str | None = None,
+    request_success: bool | None = None,
+    query: str | None = None,
+    access_error: str | None = None,
+) -> bool:
+    """Alerta solo si ValueSERP no es accesible o devuelve error de servicio."""
+    if not is_valueserp_access_failure(
+        http_status=http_status,
+        organic_count=organic_count,
+        api_message=api_message,
+        request_success=request_success,
+        access_error=access_error,
+    ):
+        log_valueserp_no_results(
+            trigger_id=trigger_id,
+            ean=ean,
+            http_status=http_status,
+            organic_count=organic_count,
+            query=query,
+        )
+        return False
+
+    status_part = f"http_status={http_status}" if http_status is not None else "http_status=sin_respuesta"
+    organic_part = f"organic_results={organic_count}" if organic_count is not None else "organic_results=desconocido"
+    api_part = f"api_message={api_message}" if api_message else "api_message=sin_mensaje"
+    query_part = f"query={query or ean}"
+    error_part = f"access_error={access_error}" if access_error else ""
+
+    if access_error:
+        causes = "Timeout, error de red o imposibilidad de contactar api.valueserp.com."
+        diagnosis = f"No se pudo acceder a ValueSERP mientras se procesaba el producto {ean}."
+        title = "Fallo de acceso a ValueSERP"
+    elif http_status in (402,):
+        causes = "Créditos de ValueSERP agotados o problema de facturación (HTTP 402)."
+        diagnosis = "ValueSERP rechazó la solicitud por créditos o facturación."
+        title = "ValueSERP sin créditos"
+    elif http_status in (429,):
+        causes = "Rate limit de ValueSERP alcanzado (HTTP 429). Reintentar con backoff."
+        diagnosis = "ValueSERP bloqueó la solicitud por exceso de peticiones."
+        title = "ValueSERP rate limit"
+    elif http_status in (401, 403):
+        causes = "API key inválida o no autorizada en ValueSERP."
+        diagnosis = "ValueSERP rechazó la autenticación de la API key."
+        title = "ValueSERP no autorizado"
+    elif http_status and http_status >= 500:
+        causes = "ValueSERP respondió con error de servidor. Posible incidente del proveedor."
+        diagnosis = f"ValueSERP devolvió HTTP {http_status} (fallo del proveedor)."
+        title = "ValueSERP caído o degradado"
+    elif request_success is False or api_message:
+        causes = "ValueSERP respondió con error lógico en el cuerpo de la API."
+        diagnosis = f"ValueSERP reportó fallo de servicio al consultar el producto {ean}."
+        title = "ValueSERP respondió con error"
+    else:
+        causes = "No se pudo completar la consulta a ValueSERP."
+        diagnosis = f"Fallo de acceso a ValueSERP para el producto {ean}."
+        title = "Fallo de acceso a ValueSERP"
+
+    native_log = ", ".join(part for part in [status_part, organic_part, api_part, query_part, error_part] if part)
+
+    return report_external_error(
+        severity="warning",
+        service_name="MDM_Farmaceutico_Scraper",
+        trigger_id=trigger_id,
+        title=title,
+        destination_entity="ValueSERP API (api.valueserp.com)",
+        diagnosis=diagnosis,
+        probable_causes=causes,
+        native_log=native_log,
+        context={
+            "ean": ean,
+            "trigger_id": trigger_id,
+            "http_status": http_status,
+            "organic_count": organic_count,
+            "api_message": api_message,
+            "request_success": request_success,
+            "access_error": access_error,
+            "query": query or ean,
+        },
+    )
+
+
 def report_valueserp_no_urls(
     *,
     trigger_id: int,
@@ -102,49 +255,20 @@ def report_valueserp_no_urls(
     http_status: int | None = None,
     organic_count: int | None = None,
     api_message: str | None = None,
+    request_success: bool | None = None,
     query: str | None = None,
+    access_error: str | None = None,
 ) -> bool:
-    """Reemplazo protocolizado del antiguo mensaje directo a Telegram."""
-    status_part = f"http_status={http_status}" if http_status is not None else "http_status=desconocido"
-    organic_part = f"organic_results={organic_count}" if organic_count is not None else "organic_results=desconocido"
-    api_part = f"api_message={api_message}" if api_message else "api_message=sin_mensaje"
-    query_part = f"query={query or ean}"
-
-    if http_status in (402,):
-        causes = "Créditos de ValueSERP agotados o problema de facturación (HTTP 402)."
-    elif http_status in (429,):
-        causes = "Rate limit de ValueSERP alcanzado (HTTP 429). Reintentar con backoff."
-    elif http_status in (401, 403):
-        causes = "API key inválida o no autorizada en ValueSERP."
-    elif http_status and http_status >= 500:
-        causes = "ValueSERP respondió con error de servidor. Posible incidente del proveedor."
-    elif organic_count == 0:
-        causes = (
-            "La API respondió pero sin URLs orgánicas para ese EAN; puede ser un producto sin "
-            "presencia web indexada o una consulta demasiado restrictiva."
-        )
-    else:
-        causes = (
-            "Respuesta incompleta de ValueSERP, timeout de red, o fallo al parsear resultados."
-        )
-
-    return report_external_error(
-        severity="warning",
-        service_name="MDM_Farmaceutico_Scraper",
+    """Alias retrocompatible: solo alerta si hay fallo de acceso, no por EAN sin resultados."""
+    return report_valueserp_access_failure(
         trigger_id=trigger_id,
-        title="ValueSERP sin URLs para producto",
-        destination_entity="ValueSERP API (api.valueserp.com)",
-        diagnosis=f"ValueSERP no devolvió URLs utilizables para el producto {ean}.",
-        probable_causes=causes,
-        native_log=", ".join([status_part, organic_part, api_part, query_part]),
-        context={
-            "ean": ean,
-            "trigger_id": trigger_id,
-            "http_status": http_status,
-            "organic_count": organic_count,
-            "api_message": api_message,
-            "query": query or ean,
-        },
+        ean=ean,
+        http_status=http_status,
+        organic_count=organic_count,
+        api_message=api_message,
+        request_success=request_success,
+        query=query,
+        access_error=access_error,
     )
 
 

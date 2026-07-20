@@ -59,7 +59,7 @@ Los scripts que corren fuera de n8n (por ejemplo `MDM_Farmaceutico_Scraper` en D
 ### Vía obligatoria
 
 1. Importar `n8n_error_reporter.py` (ubicado en `scraper_integrations/` de este repo).
-2. Llamar a `report_valueserp_no_urls(...)` o `report_external_error(...)`.
+2. Llamar a `report_valueserp_access_failure(...)` solo ante fallos de acceso a ValueSERP (red, auth, créditos, caída del proveedor). **No alertar** si un EAN simplemente no devuelve resultados orgánicos.
 3. El módulo hace `POST` al webhook `[PROD] External Error Reporter (Scraper)`:
    - URL: `https://n8n.farmaciaamericana.es/webhook/scraper-error-report`
    - Header opcional: `X-Synapse-Webhook-Token`
