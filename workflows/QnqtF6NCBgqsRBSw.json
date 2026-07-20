@@ -7,7 +7,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "### 📦 iCompras360 Sync\n- **Logic**: Native n8n SQL + API\n- **DB**: EnterpriseAdmin_AMC\n- **Freq**: Cada 20 min (8am-7pm)",
+        "content": "### 📦 iCompras360 Sync\n- **Logic**: SQL directo → API iCompras\n- **DB**: EnterpriseAdmin_AMC (NOLOCK)\n- **Resiliencia**: 5 reintentos SQL (15s)\n- **Freq**: Cada 20 min (8am-7pm)",
         "width": 300
       },
       "id": "90fc0978-8c90-4996-a847-0bfc8c67366d",
@@ -64,21 +64,24 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        464,
+        944,
         304
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 10000
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT LineaInventario FROM EnterpriseAdmin_AMC.dbo.Custom_Inventario_i360"
+        "query": "SELECT LineaInventario FROM EnterpriseAdmin_AMC.dbo.Custom_Inventario_i360 WITH (NOLOCK)"
       },
       "id": "604ef1fe-227f-4556-8360-bd7d7d2ee9f3",
       "name": "Consultar Inventario SQL",
       "type": "n8n-nodes-base.microsoftSql",
       "typeVersion": 1.1,
       "position": [
-        704,
+        464,
         304
       ],
       "credentials": {
@@ -87,9 +90,9 @@
           "name": "[PROD] MSSQL - Saint Enterprise"
         }
       },
-      "maxTries": 3,
+      "maxTries": 5,
       "retryOnFail": true,
-      "waitBetweenTries": 5000
+      "waitBetweenTries": 15000
     },
     {
       "parameters": {
@@ -100,7 +103,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        944,
+        704,
         304
       ]
     },
@@ -120,7 +123,10 @@
       "position": [
         1184,
         304
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 10000
     }
   ],
   "connections": {
@@ -128,7 +134,7 @@
       "main": [
         [
           {
-            "node": "Obtener Catalogo iCompras",
+            "node": "Consultar Inventario SQL",
             "type": "main",
             "index": 0
           }
@@ -136,17 +142,6 @@
       ]
     },
     "Disparador (Cada 20m)": {
-      "main": [
-        [
-          {
-            "node": "Obtener Catalogo iCompras",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Obtener Catalogo iCompras": {
       "main": [
         [
           {
