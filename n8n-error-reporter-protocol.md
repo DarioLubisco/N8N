@@ -51,3 +51,31 @@ Cualquier interacción técnica con la instancia de n8n DEBE seguir estrictament
 Al desarrollar nuevos flujos o modificar los existentes:
 - **Verificar Settings del Workflow:** Asegúrate de que el flujo de trabajo tenga configurado el `Error Workflow` apuntando al flujo central de reporte de errores (si se maneja a nivel de workspace o de configuración del flujo).
 - **No duplicar:** Confía en el sistema central de errores. No agregues nodos HTTP o de mensajería en el flujo normal solo para notificar que algo falló, deja que falle elegantemente y que el Global Error Handler se encargue.
+
+## Reporte desde procesos externos (Python / Scraper)
+
+Los scripts que corren fuera de n8n (por ejemplo `MDM_Farmaceutico_Scraper` en Debian) **no deben** enviar Telegram directo con mensajes ad hoc como `⚠️ SCRAPER [T1] ...`.
+
+### Vía obligatoria
+
+1. Importar `n8n_error_reporter.py` (ubicado en `scraper_integrations/` de este repo).
+2. Llamar a `report_valueserp_no_urls(...)` o `report_external_error(...)`.
+3. El módulo hace `POST` al webhook `[PROD] External Error Reporter (Scraper)`:
+   - URL: `https://n8n.farmaciaamericana.es/webhook/scraper-error-report`
+   - Header opcional: `X-Synapse-Webhook-Token`
+4. Ese flujo formatea la alerta con el esquema estructurado (`Entidad Origen`, `Servicio Afectado`, etc.) y la delega a `[PROD] Error Notification System`.
+
+### Variables de entorno requeridas en Debian
+
+```bash
+export N8N_SCRAPER_ERROR_WEBHOOK_URL="https://n8n.farmaciaamericana.es/webhook/scraper-error-report"
+export N8N_SCRAPER_ERROR_TOKEN="<token compartido>"
+export SCRAPER_ERROR_WEBHOOK_TOKEN="<mismo token en n8n>"
+```
+
+### Despliegue
+
+```bash
+python3 deploy_scraper_error_reporter.py
+python3 scraper_integrations/patch_scraper_telegram.py "/home/synapse/source/repos/Clasificacion Medicamentos"
+```
