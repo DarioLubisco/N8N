@@ -1,26 +1,23 @@
 {
   "createdAt": "2026-04-30T02:41:17.223Z",
-  "updatedAt": "2026-04-30T03:08:20.882Z",
+  "updatedAt": "2026-07-20T05:10:00.000Z",
   "id": "AAnxxGYtgg5sD0o8",
-  "name": "[PROD] Agente Clasificador (Automatico)",
+  "name": "[PROD] Orquestador Clasificador (Ventanas)",
   "active": false,
   "nodes": [
     {
       "id": "207b75a7-61e3-4164-8cc9-6f47cd0a596d",
-      "name": "Trigger Diario (08:00 AM)",
+      "name": "Ventana Manana (07:00)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
-      "position": [
-        100,
-        300
-      ],
+      "position": [100, 100],
       "parameters": {
         "rule": {
           "interval": [
             {
               "field": "days",
               "daysInterval": 1,
-              "triggerAtHour": 8
+              "triggerAtHour": 7
             }
           ]
         }
@@ -28,50 +25,81 @@
     },
     {
       "id": "8f304704-e41b-4389-b36e-99aed63ec42a",
-      "name": "Check Pendientes",
-      "type": "n8n-nodes-base.microsoftSql",
-      "typeVersion": 1.1,
-      "position": [
-        300,
-        300
-      ],
+      "name": "Ventana Mediodia (12:00)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [100, 300],
       "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT COUNT(*) as Pendientes FROM Procurement.por_aprobacion_equivalencias WHERE origen_dato IS NULL OR codigo_atc IS NULL"
-      },
-      "credentials": {
-        "microsoftSql": {
-          "id": "oCKBzGZBl1xETeZa",
-          "name": "[PROD] MSSQL - Saint Enterprise"
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 12
+            }
+          ]
         }
       }
     },
     {
       "id": "7fb33034-f0f5-4335-9079-c4c3f8623a8f",
-      "name": "¿Hay Registros?",
+      "name": "Ventana Noche (19:00)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [100, 500],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 19
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "a1b2c3d4-1111-2222-3333-444455556666",
+      "name": "Iniciar Ventana",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        500,
-        300
-      ],
+      "position": [320, 300],
       "parameters": {
-        "jsCode": "const count = $input.first().json.Pendientes;\nreturn (count > 0) ? $input.all() : [];"
+        "jsCode": "// Inicializa el estado de la ventana de 2 horas.\n// Pasa un único item al splitInBatches con el estado inicial.\n// El loop itera mientras el item que vuelve tenga 'seguir=true'.\nconst ahora = Date.now();\nconst window_end = ahora + (2 * 60 * 60 * 1000); // +2h\n\nconst estado = {\n  inicio: ahora,\n  window_end,\n  iteraciones: 0,\n  procesados_total: 0,\n  escritos_total: 0,\n  motivo_parada: null,\n  seguir: true\n};\n\nreturn [{ json: estado }];"
+      }
+    },
+    {
+      "id": "b2c3d4e5-2222-3333-4444-555566667777",
+      "name": "Loop Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [520, 300],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "c3d4e5f6-3333-4444-5555-666677778888",
+      "name": "Check Tiempo Restante",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [740, 380],
+      "parameters": {
+        "jsCode": "// Recibe el estado del item actual (vía branch 1 del splitInBatches).\n// Verifica si quedan >=15 min de ventana. Si no, marca seguir=false\n// para cortar el loop en la próxima vuelta.\nconst state = $json;\nconst ahora = Date.now();\nconst restante_min = Math.floor((state.window_end - ahora) / 60000);\n\n// El estado puede venir con 'seguir' ya en false desde la iteración anterior\n// (porque el SSH marcó parar). En ese caso no hacer nada, dejar pasar para\n// que el SSH no se ejecute y el loop termine.\nif (!state.seguir) {\n  return [{ json: state }];\n}\n\nif (restante_min < 15) {\n  state.seguir = false;\n  state.motivo_parada = `tiempo_agotado (quedaban ${restante_min} min)`;\n  return [{ json: state }];\n}\n\nreturn [{ json: state }];"
       }
     },
     {
       "id": "374c7bf3-7262-4239-abf6-06d6b93dcebd",
-      "name": "Ejecutar Agente Python",
+      "name": "Ejecutar Batch (SSH)",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
-      "position": [
-        700,
-        300
-      ],
+      "position": [940, 380],
       "parameters": {
         "resource": "command",
         "operation": "execute",
-        "command": "python3 /opt/scripts/Agente_Clasificador.py"
+        "command": "cd \"/home/synapse/source/repos/Clasificacion Medicamentos\" && export DB_SERVER=\"100.94.5.108,49751\" && python3 -u orquestador_produccion.py --trigger-json '{\"TriggerID\":1,\"ProcessName\":\"MDM_Farmaceutico_Scraper\",\"CheckQuery\":\"SELECT COUNT(*) FROM Procurement.por_aprobacion_equivalencias WHERE estado_ciclo = '\\''ABIERTO'\\''\",\"ThresholdValue\":1}' --sync"
       },
       "credentials": {
         "sshPassword": {
@@ -79,19 +107,18 @@
           "name": "[PROD] SSH - Debian WebServices"
         }
       },
-      "retryOnFail": true
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000
     },
     {
-      "id": "c77e40e7-bdd6-4618-9415-940cf7054ec3",
-      "name": "Validar Ejecución",
+      "id": "d4e5f6g7-4444-5555-6666-777788889999",
+      "name": "Parse y Acumular",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        900,
-        300
-      ],
+      "position": [1140, 380],
       "parameters": {
-        "jsCode": "const res = $input.first().json;\nif (res.code !== 0) {\n  throw new Error(\"Fallo en script Python: \" + (res.stderr || \"Error desconocido\"));\n}\nreturn $input.all();"
+        "jsCode": "// El SSH devuelve stdout. La última línea válida es el JSON {status, procesados, escritos, intentados}.\n// Acumula contadores y decide si seguir iterando:\n//   - si status='skipped' o intentados=0 → seguir=false (no hay más ABIERTO)\n//   - si hubo error → seguir=false y propagar mensaje al estado\nconst state = $items('Check Tiempo Restante')[0].json;\nconst stdout = ($input.first().json.stdout || '').trim();\nconst stderr = ($input.first().json.stderr || '').trim();\nconst exitCode = $input.first().json.exitCode;\n\n// Extraer último JSON del stdout\nconst lines = stdout.split('\\n').filter(l => l.trim());\nlet resultado = null;\nfor (let i = lines.length - 1; i >= 0; i--) {\n  try {\n    const p = JSON.parse(lines[i]);\n    if (p.status && 'procesados' in p) { resultado = p; break; }\n  } catch (e) {}\n}\n\nif (!resultado) {\n  state.seguir = false;\n  state.motivo_parada = `error_batch_sin_json (exitCode=${exitCode}, stderr=${stderr.slice(0,200)})`;\n  state.iteraciones += 1;\n  return [{ json: state }];\n}\n\nstate.iteraciones += 1;\nstate.procesados_total += (resultado.procesados || 0);\nstate.escritos_total += (resultado.escritos || 0);\n\n// Si no hay más productos ABIERTO, cortar\nif (resultado.status === 'skipped' || resultado.intentados === 0) {\n  state.seguir = false;\n  state.motivo_parada = state.motivo_parada || 'sin_productos_ABIERTO';\n}\n\nreturn [{ json: state }];"
       }
     },
     {
@@ -99,25 +126,19 @@
       "name": "Error Trigger",
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
-      "position": [
-        100,
-        450
-      ]
+      "position": [100, 700]
     },
     {
       "id": "e8183a2a-c2f9-4030-a2c2-8abff1c73757",
       "name": "Notificar Error a Telegram",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [
-        300,
-        450
-      ],
+      "position": [320, 700],
       "parameters": {
         "resource": "message",
         "operation": "sendMessage",
-        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
-        "text": "=🚨 <b>ERROR EN AGENTE CLASIFICADOR</b> 🚨\n\nEl flujo automatico de clasificacion de medicamentos ha fallado.\n\n<b>Nodo:</b> {{$json.execution.error.node.name}}\n<b>Mensaje:</b> <code>{{$json.execution.error.message}}</code>\n\nRevisar n8n de inmediato.",
+        "chatId": "={{ $env.ERROR_CHAT_ID }}",
+        "text": "=🚨 <b>ERROR EN ORQUESTADOR CLASIFICADOR</b> 🚨\n\nLa ventana automática falló.\n\n<b>Nodo:</b> {{$json.execution.error.node.name}}\n<b>Mensaje:</b> <code>{{$json.execution.error.message}}</code>\n\nRevisar n8n / SSH / Python de inmediato.",
         "additionalFields": {
           "parse_mode": "HTML"
         }
@@ -129,47 +150,120 @@
         }
       },
       "webhookId": "e7fdcc72-fed4-45ac-8e32-cc324d150ec1"
+    },
+    {
+      "id": "f7a8b9c0-6666-7777-8888-999900001111",
+      "name": "Resumen Ventana Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [740, 200],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $env.ERROR_CHAT_ID }}",
+        "text": "=✅ <b>Ventana Orquestador Finalizada</b>\n\n<b>Iteraciones:</b> {{$json.iteraciones}}\n<b>Productos procesados:</b> {{$json.procesados_total}}\n<b>Filas escritas:</b> {{$json.escritos_total}}\n<b>Motivo parada:</b> {{$json.motivo_parada || 'tiempo_agotado (2h)'}}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "RkijxthBpMtc1pDO",
+          "name": "[PROD] Telegram - Bot Pago Movil"
+        }
+      }
     }
   ],
   "connections": {
-    "Trigger Diario (08:00 AM)": {
+    "Ventana Manana (07:00)": {
       "main": [
         [
           {
-            "node": "Check Pendientes",
+            "node": "Iniciar Ventana",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Check Pendientes": {
+    "Ventana Mediodia (12:00)": {
       "main": [
         [
           {
-            "node": "¿Hay Registros?",
+            "node": "Iniciar Ventana",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "¿Hay Registros?": {
+    "Ventana Noche (19:00)": {
       "main": [
         [
           {
-            "node": "Ejecutar Agente Python",
+            "node": "Iniciar Ventana",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Ejecutar Agente Python": {
+    "Iniciar Ventana": {
       "main": [
         [
           {
-            "node": "Validar Ejecución",
+            "node": "Loop Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Batches": {
+      "main": [
+        [
+          {
+            "node": "Resumen Ventana Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check Tiempo Restante",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Tiempo Restante": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar Batch (SSH)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejecutar Batch (SSH)": {
+      "main": [
+        [
+          {
+            "node": "Parse y Acumular",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse y Acumular": {
+      "main": [
+        [
+          {
+            "node": "Loop Batches",
             "type": "main",
             "index": 0
           }
@@ -194,10 +288,10 @@
   },
   "staticData": null,
   "meta": {
-    "aiBuilderAssisted": true
+    "aiBuilderAssisted": false
   },
   "pinData": null,
-  "versionId": "2f6fe416-f470-4fa3-8b80-13ad2f7ca28f",
+  "versionId": "4a004eab-5cfa-4bf1-9fba-d39c3f7ab7d9",
   "triggerCount": 0,
   "tags": []
 }
