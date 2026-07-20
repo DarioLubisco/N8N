@@ -1,16 +1,19 @@
 {
   "createdAt": "2026-04-30T02:41:17.223Z",
-  "updatedAt": "2026-07-20T05:10:00.000Z",
+  "updatedAt": "2026-07-20T05:00:11.737Z",
   "id": "AAnxxGYtgg5sD0o8",
   "name": "[PROD] Orquestador Clasificador (Ventanas)",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "id": "207b75a7-61e3-4164-8cc9-6f47cd0a596d",
       "name": "Ventana Manana (07:00)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
-      "position": [100, 100],
+      "position": [
+        100,
+        100
+      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -28,7 +31,10 @@
       "name": "Ventana Mediodia (12:00)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
-      "position": [100, 300],
+      "position": [
+        100,
+        300
+      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -46,7 +52,10 @@
       "name": "Ventana Noche (19:00)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
-      "position": [100, 500],
+      "position": [
+        100,
+        500
+      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -64,7 +73,10 @@
       "name": "Iniciar Ventana",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [320, 300],
+      "position": [
+        320,
+        300
+      ],
       "parameters": {
         "jsCode": "// Inicializa el estado de la ventana de 2 horas.\n// Pasa un único item al splitInBatches con el estado inicial.\n// El loop itera mientras el item que vuelve tenga 'seguir=true'.\nconst ahora = Date.now();\nconst window_end = ahora + (2 * 60 * 60 * 1000); // +2h\n\nconst estado = {\n  inicio: ahora,\n  window_end,\n  iteraciones: 0,\n  procesados_total: 0,\n  escritos_total: 0,\n  motivo_parada: null,\n  seguir: true\n};\n\nreturn [{ json: estado }];"
       }
@@ -74,7 +86,10 @@
       "name": "Loop Batches",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 1,
-      "position": [520, 300],
+      "position": [
+        520,
+        300
+      ],
       "parameters": {
         "batchSize": 1,
         "options": {}
@@ -85,7 +100,10 @@
       "name": "Check Tiempo Restante",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [740, 380],
+      "position": [
+        740,
+        380
+      ],
       "parameters": {
         "jsCode": "// Recibe el estado del item actual (vía branch 1 del splitInBatches).\n// Verifica si quedan >=15 min de ventana. Si no, marca seguir=false\n// para cortar el loop en la próxima vuelta.\nconst state = $json;\nconst ahora = Date.now();\nconst restante_min = Math.floor((state.window_end - ahora) / 60000);\n\n// El estado puede venir con 'seguir' ya en false desde la iteración anterior\n// (porque el SSH marcó parar). En ese caso no hacer nada, dejar pasar para\n// que el SSH no se ejecute y el loop termine.\nif (!state.seguir) {\n  return [{ json: state }];\n}\n\nif (restante_min < 15) {\n  state.seguir = false;\n  state.motivo_parada = `tiempo_agotado (quedaban ${restante_min} min)`;\n  return [{ json: state }];\n}\n\nreturn [{ json: state }];"
       }
@@ -95,7 +113,10 @@
       "name": "Ejecutar Batch (SSH)",
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
-      "position": [940, 380],
+      "position": [
+        940,
+        380
+      ],
       "parameters": {
         "resource": "command",
         "operation": "execute",
@@ -116,7 +137,10 @@
       "name": "Parse y Acumular",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1140, 380],
+      "position": [
+        1140,
+        380
+      ],
       "parameters": {
         "jsCode": "// El SSH devuelve stdout. La última línea válida es el JSON {status, procesados, escritos, intentados}.\n// Acumula contadores y decide si seguir iterando:\n//   - si status='skipped' o intentados=0 → seguir=false (no hay más ABIERTO)\n//   - si hubo error → seguir=false y propagar mensaje al estado\nconst state = $items('Check Tiempo Restante')[0].json;\nconst stdout = ($input.first().json.stdout || '').trim();\nconst stderr = ($input.first().json.stderr || '').trim();\nconst exitCode = $input.first().json.exitCode;\n\n// Extraer último JSON del stdout\nconst lines = stdout.split('\\n').filter(l => l.trim());\nlet resultado = null;\nfor (let i = lines.length - 1; i >= 0; i--) {\n  try {\n    const p = JSON.parse(lines[i]);\n    if (p.status && 'procesados' in p) { resultado = p; break; }\n  } catch (e) {}\n}\n\nif (!resultado) {\n  state.seguir = false;\n  state.motivo_parada = `error_batch_sin_json (exitCode=${exitCode}, stderr=${stderr.slice(0,200)})`;\n  state.iteraciones += 1;\n  return [{ json: state }];\n}\n\nstate.iteraciones += 1;\nstate.procesados_total += (resultado.procesados || 0);\nstate.escritos_total += (resultado.escritos || 0);\n\n// Si no hay más productos ABIERTO, cortar\nif (resultado.status === 'skipped' || resultado.intentados === 0) {\n  state.seguir = false;\n  state.motivo_parada = state.motivo_parada || 'sin_productos_ABIERTO';\n}\n\nreturn [{ json: state }];"
       }
@@ -126,14 +150,20 @@
       "name": "Error Trigger",
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
-      "position": [100, 700]
+      "position": [
+        100,
+        700
+      ]
     },
     {
       "id": "e8183a2a-c2f9-4030-a2c2-8abff1c73757",
       "name": "Notificar Error a Telegram",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [320, 700],
+      "position": [
+        320,
+        700
+      ],
       "parameters": {
         "resource": "message",
         "operation": "sendMessage",
@@ -156,7 +186,10 @@
       "name": "Resumen Ventana Telegram",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [740, 200],
+      "position": [
+        740,
+        200
+      ],
       "parameters": {
         "resource": "message",
         "operation": "sendMessage",
@@ -282,16 +315,23 @@
       ]
     }
   },
-  "settings": {
-    "executionOrder": "v1",
-    "availableInMCP": true
+  "settings": {},
+  "staticData": {
+    "node:Ventana Manana (07:00)": {
+      "recurrenceRules": []
+    },
+    "node:Ventana Mediodia (12:00)": {
+      "recurrenceRules": []
+    },
+    "node:Ventana Noche (19:00)": {
+      "recurrenceRules": []
+    }
   },
-  "staticData": null,
   "meta": {
-    "aiBuilderAssisted": false
+    "aiBuilderAssisted": true
   },
   "pinData": null,
-  "versionId": "4a004eab-5cfa-4bf1-9fba-d39c3f7ab7d9",
-  "triggerCount": 0,
+  "versionId": "788810fd-be5e-4cee-bc39-36fc94e36953",
+  "triggerCount": 3,
   "tags": []
 }
