@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-27T21:41:54.299Z",
-  "updatedAt": "2026-05-19T04:15:58.118Z",
+  "updatedAt": "2026-07-20T15:25:53.168Z",
   "id": "MGuM78qi3IWrDWOt",
   "name": "[PROD] [Finanzas] - Monitorear Frescura DolarToday",
   "active": true,
@@ -57,7 +57,10 @@
           "id": "oCKBzGZBl1xETeZa",
           "name": "[PROD] MSSQL - Saint Enterprise"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 15000
     },
     {
       "parameters": {
@@ -165,7 +168,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "d1092f1f-d988-4277-92ec-09a1b99962a8",
+  "versionId": "fec2dad8-b909-43cf-a2b2-5c3e00d1b7c3",
   "triggerCount": 1,
   "tags": []
 }
