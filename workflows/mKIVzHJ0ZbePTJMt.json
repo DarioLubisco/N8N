@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-29T23:38:21.289Z",
-  "updatedAt": "2026-06-15T18:00:32.178Z",
+  "updatedAt": "2026-07-20T14:55:02.533Z",
   "id": "mKIVzHJ0ZbePTJMt",
   "name": "[UTILITY] Network Router",
   "active": false,
@@ -26,7 +26,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "\n/**\n * 🛰️ CONFIGURACIÓN MAESTRA DE RED\n * Cambia 'ZT' por 'LAN' o 'TS' para redirigir todo el tráfico de n8n.\n */\nconst RED_ACTIVA = 'TS'; \n\nconst networkDictionary = {\n  \"DEBIAN\": {\n    \"LAN\": \"10.200.8.197\",\n    \"ZT\": \"10.147.18.4\",\n    \"TS\": \"100.123.98.5\"\n  },\n  \"SQL\": {\n    \"LAN\": \"10.200.8.5\",\n    \"ZT\": \"10.147.18.192\",\n    \"TS\": \"100.94.5.108\"\n  },\n  \"PC_DARIO\": {\n    \"LAN\": \"10.200.8.114\",\n    \"ZT\": \"10.147.18.63\",\n    \"TS\": \"100.126.220.118\" // Extraída de synapse_credentials.md (dario-desktop)\n  }\n};\n\n// Normalización y Fallback\nconst mode = RED_ACTIVA.toUpperCase();\n\nreturn {\n  network: mode,\n  DEBIAN: networkDictionary.DEBIAN[mode] || networkDictionary.DEBIAN.ZT,\n  SQL: networkDictionary.SQL[mode] || networkDictionary.SQL.ZT,\n  PC_DARIO: networkDictionary.PC_DARIO[mode] || networkDictionary.PC_DARIO.ZT\n};"
+        "jsCode": "\n/**\n * 🛰️ CONFIGURACIÓN MAESTRA DE RED\n * Cambia 'ZT' por 'LAN' o 'TS' para redirigir todo el tráfico de n8n.\n */\nconst RED_ACTIVA = 'ZT'; \n\nconst networkDictionary = {\n  \"DEBIAN\": {\n    \"LAN\": \"10.200.8.197\",\n    \"ZT\": \"10.147.18.4\",\n    \"TS\": \"100.123.98.5\"\n  },\n  \"SQL\": {\n    \"LAN\": \"10.200.8.5\",\n    \"ZT\": \"10.147.18.192\",\n    \"TS\": \"100.94.5.108\"\n  },\n  \"PC_DARIO\": {\n    \"LAN\": \"10.200.8.114\",\n    \"ZT\": \"10.147.18.63\",\n    \"TS\": \"100.126.220.118\" // Extraída de synapse_credentials.md (dario-desktop)\n  }\n};\n\n// Normalización y Fallback\nconst mode = RED_ACTIVA.toUpperCase();\n\nreturn {\n  network: mode,\n  DEBIAN: networkDictionary.DEBIAN[mode] || networkDictionary.DEBIAN.ZT,\n  SQL: networkDictionary.SQL[mode] || networkDictionary.SQL.ZT,\n  PC_DARIO: networkDictionary.PC_DARIO[mode] || networkDictionary.PC_DARIO.ZT\n};"
       }
     }
   ],
@@ -51,7 +51,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": null,
-  "versionId": "494f815c-95de-407c-9f40-f8887e159289",
+  "versionId": "cb733cb8-e921-4e2c-b9db-df858a8aa87e",
   "triggerCount": 0,
   "tags": []
 }
