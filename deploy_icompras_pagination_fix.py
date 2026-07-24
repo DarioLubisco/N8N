@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Deploy paginated SQL fix for [PROD] [Finanzas] - Reporte de Compras Diarias."""
+"""Deploy paginated sequential SQL fix for [PROD] [Finanzas] - Reporte de Compras Diarias."""
 
 import json
 import sys
+import time
 
 import requests
 
@@ -24,6 +25,17 @@ def login() -> requests.Session:
     return session
 
 
+def set_active(session: requests.Session, active: bool) -> None:
+    resp = session.patch(
+        f"{BASE_URL}/workflows/{WORKFLOW_ID}",
+        json={"active": active},
+        timeout=30,
+    )
+    resp.raise_for_status()
+    state = "activated" if active else "deactivated"
+    print(f"Workflow {WORKFLOW_ID} {state}.")
+
+
 def main() -> int:
     session = login()
     print("Logged in to n8n.")
@@ -34,11 +46,16 @@ def main() -> int:
     resp = session.get(f"{BASE_URL}/workflows/{WORKFLOW_ID}", timeout=30)
     resp.raise_for_status()
     remote_workflow = resp.json()["data"]
+    was_active = remote_workflow.get("active", False)
+
+    if was_active:
+        set_active(session, False)
+        time.sleep(2)
 
     remote_workflow["nodes"] = local_workflow["nodes"]
     remote_workflow["connections"] = local_workflow["connections"]
     remote_workflow["settings"] = local_workflow.get("settings", remote_workflow.get("settings", {}))
-    remote_workflow["staticData"] = local_workflow.get("staticData", remote_workflow.get("staticData", {}))
+    remote_workflow["staticData"] = local_workflow.get("staticData", {})
 
     patch_resp = session.patch(
         f"{BASE_URL}/workflows/{WORKFLOW_ID}",
@@ -50,7 +67,12 @@ def main() -> int:
         print(patch_resp.text)
         return 1
 
-    print(f"Workflow {WORKFLOW_ID} updated successfully with paginated SQL reads.")
+    print(f"Workflow {WORKFLOW_ID} updated with sequential paginated SQL reads.")
+
+    if was_active:
+        time.sleep(1)
+        set_active(session, True)
+
     return 0
 
 

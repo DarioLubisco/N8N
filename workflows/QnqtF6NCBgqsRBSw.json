@@ -7,7 +7,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "### 📦 iCompras360 Sync\n- **Logic**: SQL paginado → API iCompras\n- **DB**: EnterpriseAdmin_AMC (NOLOCK)\n- **Paginación**: 2500 filas/página\n- **Resiliencia**: 5 reintentos SQL (20s)\n- **Freq**: Cada 20 min (8am-7pm)",
+        "content": "### 📦 iCompras360 Sync\n- **Logic**: SQL paginado → API iCompras\n- **DB**: EnterpriseAdmin_AMC (NOLOCK)\n- **Paginación**: 1000 filas/página\n- **Resiliencia**: 5 reintentos SQL (20s)\n- **Freq**: Cada 20 min (8am-7pm)",
         "width": 300
       },
       "id": "90fc0978-8c90-4996-a847-0bfc8c67366d",
@@ -96,7 +96,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const PAGE_SIZE = 2500;\nconst total = Number($input.first().json.total || 0);\n\nif (!total) {\n  throw new Error('Inventario vacío: COUNT devolvió 0 filas');\n}\n\nconst pages = [];\nfor (let offset = 0; offset < total; offset += PAGE_SIZE) {\n  pages.push({\n    json: {\n      offset,\n      pageSize: PAGE_SIZE,\n      pageNum: Math.floor(offset / PAGE_SIZE) + 1,\n      totalPages: Math.ceil(total / PAGE_SIZE),\n      totalRows: total\n    }\n  });\n}\n\nreturn pages;"
+        "jsCode": "const PAGE_SIZE = 1000;\nconst total = Number($input.first().json.total || 0);\n\nif (!total) {\n  throw new Error('Inventario vacío: COUNT devolvió 0 filas');\n}\n\nconst pages = [];\nfor (let offset = 0; offset < total; offset += PAGE_SIZE) {\n  pages.push({\n    json: {\n      offset,\n      pageSize: PAGE_SIZE,\n      pageNum: Math.floor(offset / PAGE_SIZE) + 1,\n      totalPages: Math.ceil(total / PAGE_SIZE),\n      totalRows: total\n    }\n  });\n}\n\nreturn pages;"
       },
       "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
       "name": "Generar Paginas SQL",
@@ -235,13 +235,11 @@
   },
   "settings": {
     "executionOrder": "v1",
+    "executionTimeout": 900,
     "errorWorkflow": "zLtMDgsc7OSXyXrp",
     "timezone": "America/Caracas"
   },
   "staticData": {
-    "node:Schedule (8am-7pm)": {
-      "recurrenceRules": []
-    },
     "node:Disparador (Cada 20m)": {
       "recurrenceRules": []
     }
