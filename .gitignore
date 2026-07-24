@@ -10,6 +10,7 @@ Synapse_credentials/
 Synapse_credentials.mmd
 Synapse_cretentials.mmd
 Synapse_credential.mmd
+config/n8n_mcp.env
 
 # Other
 *.png
