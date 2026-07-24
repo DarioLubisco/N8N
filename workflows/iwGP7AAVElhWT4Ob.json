@@ -6,6 +6,20 @@
   "active": true,
   "nodes": [
     {
+      "parameters": {
+        "content": "### ITS ETL\n- **Ruta FTP**: `/0722_inventario.txt` (vía `its.py` en Debian)\n- **Flujo**: Schedule → SSH (`its.py`)\n- **Nota**: Sin nodo FTP en n8n (evita rutas obsoletas)",
+        "width": 360
+      },
+      "id": "a9f8e7d6-c5b4-4321-a987-6543210fedcb",
+      "name": "Nota de Infraestructura",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        80,
+        120
+      ]
+    },
+    {
       "name": "Schedule",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1,
@@ -66,9 +80,6 @@
     "errorWorkflow": "zLtMDgsc7OSXyXrp"
   },
   "staticData": {
-    "node:Ejecutar cada 30 min": {
-      "recurrenceRules": []
-    },
     "node:Schedule": {
       "recurrenceRules": []
     }
