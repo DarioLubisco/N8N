@@ -7,7 +7,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "### 📦 iCompras360 Sync\n- **Logic**: SQL directo → API iCompras\n- **DB**: EnterpriseAdmin_AMC (NOLOCK)\n- **Resiliencia**: 5 reintentos SQL (15s)\n- **Freq**: Cada 20 min (8am-7pm)",
+        "content": "### 📦 iCompras360 Sync\n- **Logic**: SQL paginado → API iCompras\n- **DB**: EnterpriseAdmin_AMC (NOLOCK)\n- **Paginación**: 2500 filas/página\n- **Resiliencia**: 5 reintentos SQL (20s)\n- **Freq**: Cada 20 min (8am-7pm)",
         "width": 300
       },
       "id": "90fc0978-8c90-4996-a847-0bfc8c67366d",
@@ -74,10 +74,10 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT LineaInventario FROM EnterpriseAdmin_AMC.dbo.Custom_Inventario_i360 WITH (NOLOCK)"
+        "query": "SELECT COUNT(*) AS total FROM EnterpriseAdmin_AMC.dbo.Custom_Inventario_i360 WITH (NOLOCK)"
       },
-      "id": "604ef1fe-227f-4556-8360-bd7d7d2ee9f3",
-      "name": "Consultar Inventario SQL",
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Obtener Total Inventario",
       "type": "n8n-nodes-base.microsoftSql",
       "typeVersion": 1.1,
       "position": [
@@ -92,7 +92,43 @@
       },
       "maxTries": 5,
       "retryOnFail": true,
-      "waitBetweenTries": 15000
+      "waitBetweenTries": 20000
+    },
+    {
+      "parameters": {
+        "jsCode": "const PAGE_SIZE = 2500;\nconst total = Number($input.first().json.total || 0);\n\nif (!total) {\n  throw new Error('Inventario vacío: COUNT devolvió 0 filas');\n}\n\nconst pages = [];\nfor (let offset = 0; offset < total; offset += PAGE_SIZE) {\n  pages.push({\n    json: {\n      offset,\n      pageSize: PAGE_SIZE,\n      pageNum: Math.floor(offset / PAGE_SIZE) + 1,\n      totalPages: Math.ceil(total / PAGE_SIZE),\n      totalRows: total\n    }\n  });\n}\n\nreturn pages;"
+      },
+      "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "name": "Generar Paginas SQL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ `SELECT LineaInventario FROM EnterpriseAdmin_AMC.dbo.Custom_Inventario_i360 WITH (NOLOCK) ORDER BY LineaInventario OFFSET ${$json.offset} ROWS FETCH NEXT ${$json.pageSize} ROWS ONLY` }}"
+      },
+      "id": "604ef1fe-227f-4556-8360-bd7d7d2ee9f3",
+      "name": "Consultar Inventario SQL",
+      "type": "n8n-nodes-base.microsoftSql",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        304
+      ],
+      "credentials": {
+        "microsoftSql": {
+          "id": "oCKBzGZBl1xETeZa",
+          "name": "[PROD] MSSQL - Saint Enterprise"
+        }
+      },
+      "maxTries": 5,
+      "retryOnFail": true,
+      "waitBetweenTries": 20000
     },
     {
       "parameters": {
@@ -103,7 +139,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        704,
+        1184,
         304
       ]
     },
@@ -121,7 +157,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1184,
+        1424,
         304
       ],
       "retryOnFail": true,
@@ -134,7 +170,7 @@
       "main": [
         [
           {
-            "node": "Consultar Inventario SQL",
+            "node": "Obtener Total Inventario",
             "type": "main",
             "index": 0
           }
@@ -142,6 +178,28 @@
       ]
     },
     "Disparador (Cada 20m)": {
+      "main": [
+        [
+          {
+            "node": "Obtener Total Inventario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Total Inventario": {
+      "main": [
+        [
+          {
+            "node": "Generar Paginas SQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Paginas SQL": {
       "main": [
         [
           {
