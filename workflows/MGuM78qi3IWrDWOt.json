@@ -10,13 +10,14 @@
         "rule": {
           "interval": [
             {
-              "field": "hours"
+              "field": "hours",
+              "hoursInterval": 1
             }
           ]
         }
       },
       "id": "5ea33254-91df-49ed-9932-e9350f289e05",
-      "name": "Cada 4 Horas",
+      "name": "Cada 1 Hora",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
@@ -64,7 +65,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst total = $input.first().json.total;\nif (total === 0 || total === undefined || total === null) {\n  return [{ json: { trigger_alert: true } }];\n}\nreturn []; // No alert needed\n"
+        "jsCode": "\nconst FAIL_THRESHOLD = 3;\nconst staticData = $getWorkflowStaticData('global');\nconst total = $input.first().json.total;\nconst hasData = Number(total) > 0;\n\nif (hasData) {\n  staticData.consecutiveFailures = 0;\n  staticData.alertSent = false;\n  return [];\n}\n\nstaticData.consecutiveFailures = (staticData.consecutiveFailures || 0) + 1;\n\nif (staticData.consecutiveFailures >= FAIL_THRESHOLD && !staticData.alertSent) {\n  staticData.alertSent = true;\n  return [{\n    json: {\n      trigger_alert: true,\n      consecutive_failures: staticData.consecutiveFailures\n    }\n  }];\n}\n\nreturn [];\n"
       },
       "id": "37ccff59-9d3a-4576-ae25-759aaa73d589",
       "name": "Evaluar Alerta",
@@ -78,7 +79,7 @@
     {
       "parameters": {
         "chatId": "-1003531406167",
-        "text": "🚨 *ALERTA DOLARTODAY*\n\nNo se detectó el registro de la tasa para el día de hoy en la base de datos.\n\nFavor revisar el bot de actualización.",
+        "text": "🚨 *ALERTA DOLARTODAY*\n\nNo se detectó el registro de la tasa para el día de hoy tras *3 verificaciones consecutivas* (~3 horas).\n\nFavor revisar el bot de actualización.",
         "additionalFields": {
           "parse_mode": "Markdown"
         }
@@ -101,7 +102,7 @@
     }
   ],
   "connections": {
-    "Cada 4 Horas": {
+    "Cada 1 Hora": {
       "main": [
         [
           {
@@ -160,7 +161,7 @@
     "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": {
-    "node:Cada 4 Horas": {
+    "node:Cada 1 Hora": {
       "recurrenceRules": []
     }
   },
