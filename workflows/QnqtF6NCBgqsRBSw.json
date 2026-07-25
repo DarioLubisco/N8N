@@ -1,6 +1,6 @@
 {
   "createdAt": "2026-04-28T03:10:13.631Z",
-  "updatedAt": "2026-07-20T17:04:19.614Z",
+  "updatedAt": "2026-07-25T14:07:37.136Z",
   "id": "QnqtF6NCBgqsRBSw",
   "name": "[PROD] [Finanzas] - Reporte de Compras Diarias",
   "active": true,
@@ -56,23 +56,6 @@
     },
     {
       "parameters": {
-        "url": "https://admin.icompras360.online/api/get_catalogo/008376238?licencia=VEISACO0000100100845&serial=NG5626W1019110S390&codisb=008376238",
-        "options": {}
-      },
-      "id": "68e5d756-09f3-45e0-9206-0ce122c615ec",
-      "name": "Obtener Catalogo iCompras",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [
-        944,
-        304
-      ],
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 10000
-    },
-    {
-      "parameters": {
         "operation": "executeQuery",
         "query": "SELECT LineaInventario FROM EnterpriseAdmin_AMC.dbo.Custom_Inventario_i360 WITH (NOLOCK)"
       },
@@ -121,7 +104,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1184,
+        944,
         304
       ],
       "retryOnFail": true,
@@ -178,12 +161,10 @@
   "settings": {
     "executionOrder": "v1",
     "errorWorkflow": "zLtMDgsc7OSXyXrp",
-    "timezone": "America/Caracas"
+    "timezone": "America/Caracas",
+    "executionTimeout": 900
   },
   "staticData": {
-    "node:Schedule (8am-7pm)": {
-      "recurrenceRules": []
-    },
     "node:Disparador (Cada 20m)": {
       "recurrenceRules": []
     }
@@ -192,7 +173,7 @@
     "aiBuilderAssisted": true
   },
   "pinData": {},
-  "versionId": "eee9cdec-8ae4-46d5-b19c-13e9c3258f69",
+  "versionId": "3edae2a2-30a6-4403-ae39-65282c5eefa9",
   "triggerCount": 1,
   "tags": [
     {
