@@ -107,6 +107,9 @@ CAJAS (x64, usuario "farmacia americana"; SynapseAdmin oculto y solo SSH)
 | Nombre `dario-desktop` resuelve a IP muerta pese a hosts | MagicDNS/NRPT de Tailscale | **usar IPs** (`10.200.8.110`), nunca nombres, en configs de impresión |
 | App colgada sin SQL activo ni cola | escritura bloqueada a LPT físico muerto | recrear el redirect / conexión; no esperar el timeout |
 | Caja guindada + "no imprime" tras reinicio nocturno | redirect no restaurado (red tardía) | tarea al logon con loop de reintentos (60 × 10 s) |
+| **"La configuración para obtener acceso a la impresora 'X' no es válida"** con la conexión visible (`Get-Printer` la lista, hive OK) | **driver envenenado client-side**: los archivos locales del driver son MÁS NUEVOS que el paquete del servidor → Point&Print rechaza silenciosamente el "downgrade" al conectar → cola viva pero sin DEVMODE (víctimas: XP-80C en 004, POS-80C en 003, ambos del 17-20/8) | cura en 5 pasos (ver §8.2): purgar conexión **en la sesión del usuario** → `Remove-PrinterDriver` → reconectar `printui /in` (re-baja Point&Print) → probar → predeterminar |
+| "Windows no se pudo conectar a la impresora" al reconectar tras caída | cola del SERVIDOR tapada con job retenido `[Error, Printing, Retained]` (p. ej. página de prueba del 28/08 en ADM-3) | purgar cola + reiniciar spooler **en el host que comparte**; sin eso, todo cliente recibe el error genérico |
+| Tarea por-usuario no arranca desde SSH (`0xFFFD0000`, sin log) | script en `C:\Windows\Temp` (los usuarios estándar no pueden leer/ejecutar de ahí) o LogonType mal registrado por cmdlet | script y log en `C:\Users\Public`; registrar con **XML UTF-16** (`LogonType InteractiveToken` en XML siempre funciona; el cmdlet `-LogonType` varía por versión); lanzar con `schtasks /run /tn` |
 
 ### Instrumentación usada (reutilizable)
 - **XE event_file** `XE_ALL_CAJAS` (rpc/batch_completed + attention por hostname LIKE '%CAJA%').
@@ -160,3 +163,73 @@ Secretos: **siempre** en `source/N8N/synapse.credentials` (nunca en este documen
 | 18-19/8 | Redirect LPT por sesión del cajero; cuenta `Impresora` creada; permisos Everyone |
 | 20/8 | **Descubrimiento LAN**: cajas y Darío en el mismo switch (10.200.8.0/24, 0 ms). Conexión por IP pura, driver x64 trasplantado, MagicDNS neutralizado usando solo IPs |
 | 20/8 (final) | **Parque completo**: 4 cajas con conexión única `\\10.200.8.110\XP-80C (copy 1)`, predeterminada, driver local — "todas listas" ✅ |
+| 28/8 | Página de prueba queda retenida `[Error]` en la cola de POS-80C (ADM-3) — queda tapando en silencio |
+| 1/9 | DHCP muda DARIO-DESKTOP a .119 → flota entera "sin tickera". Usuario fija **IP estática .110** (ARP verificado, sin conflicto) |
+| 1/9 | Cura del **driver envenenado** (§8.2): 004 y 003 re-bajan XP-80C/POS-80C por Point&Print. Flota 100% operativa: 001/002/003/004 ✅ (devolución real impresa en 003 como validación de negocio) |
+
+---
+
+## 8. Sesión 2026-09-01 — rematerialización de la flota y cura del driver envenenado
+
+### 8.1 Qué pasó
+Tras el flapping de DHCP (DARIO-DESKTOP .110→.119→.110 estático) toda caja perdió la
+tickera. Al reconectar apareció un error NUEVO que no respondía a los remedios del
+cookbook: la conexión existía y se enumeraba (`Get-Printer` la listaba como
+`Connection`, hive con la entrada `,,10.200.8.110,XP-80C (copy 1)`), pero **cualquier
+impresión fallaba** con `InvalidPrinterException` ("La configuración para obtener acceso
+a la impresora no es válida"). El DEVMODE no se podía abrir.
+
+**Causa raíz:** los archivos del driver en la caja eran más nuevos (`.BUD` del 17/8, de
+nuestros transplantes) que el paquete que ofrece DARIO-DESKTOP (14/8). Point&Print
+rechaza actualizar un driver a una versión *menor* (evento PrintService id=232 demuestra
+el mecanismo de rechazo) y deja la cola conectada con el driver en estado no utilizable.
+
+Hallazgos accesorios de la sesión:
+- La cola fiscal de **ADM-3** (`\\10.200.8.145\POS-80C`) seguía tapada desde el 28/8 con
+  una página de prueba `[Error, Printing, Retained]` + 2 "Report": eso producía el
+  "Windows no se pudo conectar" genérico en cualquier cliente. Purga + reinicio → Normal.
+- `C:\Windows\Temp` **no es legible/ejecutable** por usuarios estándar: las tareas
+  por-usuario deben apuntar a scripts en `C:\Users\Public` (y loguear ahí mismo).
+- `Register-ScheduledTask -LogonType InteractiveToken` falla en algunas versiones de PS
+  (enum `Interactive`); el valor **en el XML** (`<LogonType>InteractiveToken</LogonType>`)
+  funciona siempre. Clonar el XML de una tarea que sí funciona es la vía rápida.
+- `Start-ScheduledTask` a veces no arranca (0xFFFD0000); `schtasks /run /tn <tarea>` sí.
+- En 002 la tarea de logón apuntaba a otro usuario → la conexión no se recreaba al
+  re-loguear la cajera. Recrearla con el **SID del usuario real de consola**.
+
+### 8.2 La cura del driver envenenado (5 pasos, probada en 004 y 003)
+1. **Purgar la conexión EN la sesión del usuario afectado** (tarea por-usuario con su SID):
+   `(New-Object -ComObject WScript.Network).RemovePrinterConnection('\\10.200.8.110\XP-80C (copy 1)')`
+2. `Remove-PrinterDriver -Name 'XP-80C'` (SSH como admin). Si dice "está siendo usado":
+   revisar conexiones residuales en otras sesiones; el reinicio de spooler NO siempre la
+   libera (quedó pendiente en 003 para XP-80C, que al final no hizo falta tocar).
+3. Reconectar con re-descarga: tarea por-usuario con
+   `rundll32 printui.dll,PrintUIEntry /in /n"\\10.200.8.110\XP-80"` (2–4 min: baja el
+   driver limpio del servidor).
+4. Probar en su sesión: `"prueba" | Out-Printer -Name '\\10.200.8.110\XP-80C (copy 1)'`
+   → `OK` = imprimió físicamente en la tickera de Darío.
+5. `(New-Object -ComObject WScript.Network).SetDefaultPrinter(...)` + registrar tarea de
+   **logón** (XML con SID del usuario de consola) para que sobreviva re-logueos.
+
+### 8.3 Estado final de la flota (validado 1/9 por la tarde)
+
+| Caja | Usuario consola | Tickera | Validación |
+| :--- | :--- | :--- | :--- |
+| CAJA001 | `Caja03` | ✅ | impresión real confirmada por el usuario (va por LPT2→SMB, su arquitectura propia) |
+| CAJA002 | `Caja02` | ✅ | `PRINT OK` técnico + predeterminada; tarea de logón recreada con su SID |
+| CAJA003 | `Dario` | ✅ | **devolución real impresa** + `PRINT OK` técnico; predeterminada fijada |
+| CAJA004 | `farmacia americana` | ✅ | `PRINT OK` técnico tras cura de driver + facturación real del usuario |
+
+### 8.4 Pendientes surgidos en esta sesión
+1. **Fiscal en 003** (`\\10.200.8.145\POS-80C`): la conexión quedó purgada y el driver
+   POS-80C eliminado; ADM-3 accesible (ping/SMB OK). Al próximo inicio de sesión de la
+   cajera la tarea `ConectarFiscalADM3` (ya probada, 0x0) lo reconecta. Falta además que
+   **Willy asigne el canal fiscal en el Configurador de Saint** de la 003 hacia esa cola.
+   *(El síntoma histórico "la fiscal imprime en la tickera" era esto: sin destino fiscal
+   vivo, Saint cae al predeterminado.)*
+2. **SSH a DARIO-DESKTOP**: ambas claves rechazadas (el usuario cambió credenciales en
+   esa máquina). Reinstalar clave pública cuando haya ventana.
+3. **CAJA001**: mapeo viejo `LPT1: → \\10.147.18.63\XP-80` (servidor muerto) marcado
+   "No disponible". No estorba, pero conviene `net use LPT1 /delete` en la próxima visita.
+4. **ADM-3**: trabajos "Report" cada ~20 min hacia POS-80C — identificar el origen (¿algún
+   reporte programado de Saint?) para que no vuelvan a tapar la cola fiscal.
