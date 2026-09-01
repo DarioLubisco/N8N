@@ -127,7 +127,7 @@ CAJAS (x64, usuario "farmacia americana"; SynapseAdmin oculto y solo SSH)
 | :--- | :--- |
 | SVR-SAINT-AMC (10.147.18.192) | `ssh -i ~/.ssh/farmacia_admin Administrator@10.147.18.192` · SQL: `sa` (creds en archivo) |
 | Cajas (10.147.18.69/.99/.123/.170) | `ssh -i ~/.ssh/farmacia_admin SynapseAdmin@<ip>` (clave `Twinc3pt.0` documentada) |
-| DARIO-DESKTOP | ZeroTier: `ssh -i ~/.ssh/synapse_windows_ed25519 SynapseAdmin@10.147.18.63` · LAN: `10.200.8.110` · Tailscale intermitente `100.126.220.118` |
+| DARIO-DESKTOP | ZeroTier: `ssh -i ~/.ssh/farmacia_admin "dario lubisco@10.147.18.63"` (**usuario con espacio**, token admin pleno por SSH) · LAN: `10.200.8.110` (puerto 22 cerrado ahí) |
 | Cuenta de servicio tickera | `DARIO-DESKTOP\Impresora` (ver `synapse.credentials`) |
 | Usuario visible en cajas | `farmacia americana` (SynapseAdmin oculto via `SpecialAccounts\UserList`) |
 
@@ -227,9 +227,16 @@ Hallazgos accesorios de la sesión:
    **Willy asigne el canal fiscal en el Configurador de Saint** de la 003 hacia esa cola.
    *(El síntoma histórico "la fiscal imprime en la tickera" era esto: sin destino fiscal
    vivo, Saint cae al predeterminado.)*
-2. **SSH a DARIO-DESKTOP**: ambas claves rechazadas (el usuario cambió credenciales en
-   esa máquina). Reinstalar clave pública cuando haya ventana.
+2. ~~**SSH a DARIO-DESKTOP**: ambas claves rechazadas~~ **RESUELTO 1/9**: el usuario
+   correcto es `dario lubisco` (con espacio, ver `synapse.credentials`) y la sesión SSH
+   tiene token admin pleno (netsh funciona sin elevación). Puerto 22 solo accesible por
+   ZeroTier (10.147.18.63), no por LAN.
 3. **CAJA001**: mapeo viejo `LPT1: → \\10.147.18.63\XP-80` (servidor muerto) marcado
    "No disponible". No estorba, pero conviene `net use LPT1 /delete` en la próxima visita.
 4. **ADM-3**: trabajos "Report" cada ~20 min hacia POS-80C — identificar el origen (¿algún
    reporte programado de Saint?) para que no vuelvan a tapar la cola fiscal.
+5. **DNS de DARIO-DESKTOP (resuelto 1/9)**: al fijar la IP estática con `netsh set address`
+   NO se asignaron servidores DNS → Windows usaba placeholders `fec0:0:0:ffff::` → sin
+   navegación (ping IP OK, resolución timeout). Fix: `netsh interface ip set dns
+   name="Ethernet" static 8.8.8.8 primary` + 1.1.1.1/8.8.4.4. **Lección: cuando se fija
+   IP estática a mano, fijar SIEMPRE también `set dnsservers`.**
