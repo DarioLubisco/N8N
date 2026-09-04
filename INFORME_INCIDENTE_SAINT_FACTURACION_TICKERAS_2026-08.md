@@ -110,6 +110,10 @@ CAJAS (x64, usuario "farmacia americana"; SynapseAdmin oculto y solo SSH)
 | **"La configuración para obtener acceso a la impresora 'X' no es válida"** con la conexión visible (`Get-Printer` la lista, hive OK) | **driver envenenado client-side**: los archivos locales del driver son MÁS NUEVOS que el paquete del servidor → Point&Print rechaza silenciosamente el "downgrade" al conectar → cola viva pero sin DEVMODE (víctimas: XP-80C en 004, POS-80C en 003, ambos del 17-20/8) | cura en 5 pasos (ver §8.2): purgar conexión **en la sesión del usuario** → `Remove-PrinterDriver` → reconectar `printui /in` (re-baja Point&Print) → probar → predeterminar |
 | "Windows no se pudo conectar a la impresora" al reconectar tras caída | cola del SERVIDOR tapada con job retenido `[Error, Printing, Retained]` (p. ej. página de prueba del 28/08 en ADM-3) | purgar cola + reiniciar spooler **en el host que comparte**; sin eso, todo cliente recibe el error genérico |
 | Tarea por-usuario no arranca desde SSH (`0xFFFD0000`, sin log) | script en `C:\Windows\Temp` (los usuarios estándar no pueden leer/ejecutar de ahí) o LogonType mal registrado por cmdlet | script y log en `C:\Users\Public`; registrar con **XML UTF-16** (`LogonType InteractiveToken` en XML siempre funciona; el cmdlet `-LogonType` varía por versión); lanzar con `schtasks /run /tn` |
+| **Todas las cajas pierden tickera de golpe sin cambio aparente** | **reinicio del adaptador Ethernet de DARIO-DESKTOP** (fix de DAD): el adaptador bajó y subió → todas las sesiones SMB a `\\10.200.8.110\XP-80` se rompieron silenciosamente. Las tareas de logón ya habían corrido antes del cambio y no se re-ejecutaron | reconexión remota vía tarea por-usuario + `schtasks /run`; **lección: SIEMPRE reiniciar las tareas de logón después de tocar el adaptador de red del servidor de tickera** |
+| IP estática sin DNS | `netsh set address` solo fija la IP, NO los DNS | **SIEMPRE** `netsh interface ip set dnsservers` después de `set address` |
+| DAD false positive al reasignar IP estática | la tabla ARP del switch/router tiene entrada vieja de la IP anterior (DHCP) | `netsh interface ipv4 set interface Ethernet dadtransmits=0` + reiniciar adaptador; **mejor usar DHCP binding en el router** |
+| **DHCP binding en router vs IP estática** | IP estática: manual, se pierde al reimagear, DAD, DNS manual | **reservar en el router** (DHCP Binding): IP fija + DNS/GW automáticos, sin DAD, sobrevive reimageados |
 
 ### Instrumentación usada (reutilizable)
 - **XE event_file** `XE_ALL_CAJAS` (rpc/batch_completed + attention por hostname LIKE '%CAJA%').
@@ -166,6 +170,8 @@ Secretos: **siempre** en `source/N8N/synapse.credentials` (nunca en este documen
 | 28/8 | Página de prueba queda retenida `[Error]` en la cola de POS-80C (ADM-3) — queda tapando en silencio |
 | 1/9 | DHCP muda DARIO-DESKTOP a .119 → flota entera "sin tickera". Usuario fija **IP estática .110** (ARP verificado, sin conflicto) |
 | 1/9 | Cura del **driver envenenado** (§8.2): 004 y 003 re-bajan XP-80C/POS-80C por Point&Print. Flota 100% operativa: 001/002/003/004 ✅ (devolución real impresa en 003 como validación de negocio) |
+| 1/9 (tarde) | **DNS + DAD** en DARIO-DESKTOP: fix DNS (8.8.8.8) + DAD false positive (dadtransmits=0). DHCP binding en router ACLF625: MAC D4:3D:7E:21:29:DF → .110 |
+| 1/9 (tarde) | **Flota despuée del reinicio del adaptador Ethernet**: todas las conexiones SMB se rompieron silenciosamente (el adaptador bajó y subió → sesiones SMB muertas). Reconexión remota de las 4 cajas |
 
 ---
 
@@ -244,3 +250,16 @@ Hallazgos accesorios de la sesión:
    ipv4 set interface Ethernet dadtransmits=0` + reinicio del adaptador (sin tocar la
    configuración estática). **Lección: cuando se fija IP estática a mano con `netsh`,**
    **fijar SIEMPRE también `set dnsservers` Y desactivar DAD si es necesario.**
+7. **Flota rota post-fix de DAD (resuelto 1/9)**: el reinicio del adaptador Ethernet de
+   DARIO-DESKTOP (necesario para el fix de DAD) bajó la interfaz por unos segundos →
+   todas las sesiones SMB de las 4 cajas se rompieron silenciosamente. Las tareas de
+   logón ya habían corrido antes del cambio y no se re-ejecutaron. Las 4 cajas quedaron
+   "vivas pero sin tickera". Fix: reconexión remota vía `schtasks /run` de la tarea
+   `ReconNow` (creada dinámicamente con el SID del usuario de consola de cada caja).
+   **Lección crítica: SIEMPRE reiniciar las tareas de logón de impresora después de
+   tocar el adaptador de red del servidor de tickera (DARIO-DESKTOP).**
+8. **Router Huawei ACLF625 (configurado 1/9)**: DHCP Binding en el router con MAC
+   `D4:3D:7E-21:29:DF` → IP `10.200.8.110`. Login: admin/admin. Ruta: Network → LAN →
+   DHCP Configuration → DHCP Binding. **Dario ahora recibe `.110` por DHCP** — sin IP
+   estática, sin DAD, sin DNS manual. La IP estática fue revertida a DHCP tras la
+   configuración del binding. Credenciales del router documentadas en `synapse.credentials`.
