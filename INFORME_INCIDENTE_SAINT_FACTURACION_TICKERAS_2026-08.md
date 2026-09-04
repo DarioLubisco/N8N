@@ -137,6 +137,12 @@ CAJAS (x64, usuario "farmacia americana"; SynapseAdmin oculto y solo SSH)
 
 Secretos: **siempre** en `source/N8N/synapse.credentials` (nunca en este documento).
 
+### Canales de reporte (cuando haya inconvenientes)
+- **Telegram (automático):** bot `TELEGRAM_AMC_NOTIFICACION_BOT` → chat `ERROR_CHAT_ID` (alertas del sistema)
+- **Telegram (admin):** bot `TELEGRAM_AMC_ADMIN_BOT` → chat `AMC_ADMINISTRATIVO_CHAT_ID` (pedidos/bandeja)
+- **WhatsApp Dario (admin):** 0412-0430029
+- **Llamada directa:** Dario (admin) / Willy (técnico)
+
 ---
 
 ## 6. Pendientes de mantenimiento
