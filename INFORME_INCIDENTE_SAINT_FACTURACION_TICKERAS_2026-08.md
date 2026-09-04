@@ -238,5 +238,9 @@ Hallazgos accesorios de la sesión:
 5. **DNS de DARIO-DESKTOP (resuelto 1/9)**: al fijar la IP estática con `netsh set address`
    NO se asignaron servidores DNS → Windows usaba placeholders `fec0:0:0:ffff::` → sin
    navegación (ping IP OK, resolución timeout). Fix: `netsh interface ip set dns
-   name="Ethernet" static 8.8.8.8 primary` + 1.1.1.1/8.8.4.4. **Lección: cuando se fija
-   IP estática a mano, fijar SIEMPRE también `set dnsservers`.**
+   name="Ethernet" static 8.8.8.8 primary` + 1.1.1.1/8.8.4.4.
+6. **DAD false positive en DARIO-DESKTOP (resuelto 1/9)**: tras el fix DNS, Windows
+   detectó la IP `.110` como "Duplicate" (DAD) y la marcó APIPA. Fix: `netsh interface
+   ipv4 set interface Ethernet dadtransmits=0` + reinicio del adaptador (sin tocar la
+   configuración estática). **Lección: cuando se fija IP estática a mano con `netsh`,**
+   **fijar SIEMPRE también `set dnsservers` Y desactivar DAD si es necesario.**
